@@ -24,14 +24,15 @@
 + linux: POC CLI client with add/show
     + basic cmake
     + include static library
-    + argument parsing
-        - option: include external library
+    + static compilation with sqlite (v1.8)
     + functions:
         - add book
         - show books
         - add note to book
         - show list of notes from book
         - show note from book
+    + argument parsing
+        - option: include external library
     + note showing options
         - print to console
         - open in editor
@@ -41,3 +42,6 @@
 + lib: add webdav sync for files
 + linux: sync to CLI client
 + android: POC app to sync and show books
+
+## for simplicity in POC
++ store all book notes in book object (without limited caching or LRU)

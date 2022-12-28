@@ -3,16 +3,26 @@
 #include <list>
 
 #include "book.hpp"
+#include "database.hpp"
+#include "note.hpp"
 
 namespace uebernotes {
 
 class Storage {
 public:
-    const std::list<NormalBook>& getNormalBooks() const;
-    void addNormalBook(NormalBook&& book);
+    Storage();
+    Storage(const Storage&) = delete; // is it really needed?
+    // TODO: restrict copying (and moving?)
+
+    const BooksInfoCollection& getBooksInfo() const;
+
+    BookID createBook(BookInfo&& book);
+    Book getBook(BookID bookID);
+    void removeBook(BookID bookID);
 
 private:
-    std::list<NormalBook> _normalBooks;
+    Database _db;
+    BooksInfoCollection _booksInfo;
 };
 
 } // namespace uebernotes

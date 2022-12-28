@@ -1,19 +1,34 @@
 #pragma once
 
 #include <cstdint>
+#include <list>
 #include <string>
+
+#include "common_types.hpp"
 
 namespace uebernotes {
 
-using NoteID = uint64_t;
+struct NoteInfo {
+    NoteID id;
+    BookID bookID;
+    std::string name;
+    std::string content;
+
+    explicit NoteInfo(std::string name = "", std::string content = "");            // for manual creation
+    NoteInfo(NoteID id, BookID bookID, std::string&& name, std::string&& content); // for database
+};
+
+using NotesInfoCollection = std::list<NoteInfo>;
 
 class Note {
 public:
-    Note(const NoteID& noteID, const std::string& initial_data);
+    Note(NoteInfo note, Database& db);
+
+    void updateContent(std::string&& newContent);
 
 private:
-    NoteID _id;
-    std::string _data;
+    NoteInfo _note;
+    Database& _db;
 };
 
 } // namespace uebernotes

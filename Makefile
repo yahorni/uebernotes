@@ -1,4 +1,4 @@
-.PHONY: core linux
+.PHONY: core linux run
 
 core:
 	cmake -S . -B core/build/ -DBUILD_SHARED_LIBS=1
@@ -9,6 +9,9 @@ linux:
 	cmake -S . -B linux/build
 	cmake --build linux/build -- -j
 	cmake --install linux/build
+
+run:
+	@pkg/uebernotes-cli
 
 clean-core:
 	rm -rf core/build

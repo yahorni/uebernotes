@@ -1,42 +1,41 @@
 #pragma once
 
-#include <string>
 #include <list>
+#include <string>
+#include <string_view>
 
+#include "common_types.hpp"
 #include "note.hpp"
 
 namespace uebernotes {
 
-using BookID = uint64_t;
-using NoteCollection = std::list<Note>;
+struct BookInfo {
+    BookID id;
+    std::string name;
 
-class BaseBook {
-public:
-    BaseBook(const BookID& bookID, const std::string& name);
-    virtual ~BaseBook() = default;
-
-    const BookID& getID() const;
-    const std::string& getName() const;
-
-    virtual const NoteCollection& getNotes() const = 0;
-
-
-protected:
-    const BookID _id;
-    std::string _name;
+    explicit BookInfo(std::string&& name = ""); // for manual creation
+    BookInfo(BookID id, std::string&& name);    // for database
 };
 
-class NormalBook : public BaseBook {
+class Book {
 public:
-    using BaseBook::BaseBook;
+    Book(BookInfo book, Database& db);
 
-    const NoteCollection& getNotes() const override;
+    const BookInfo& getBookInfo() const;
+    const NotesInfoCollection& getNotesInfo() const;
 
-    void addNote(const Note& note);
-    void addNote(Note&& note);
+    void loadNotes();
+
+    // void createNote(const NoteInfo& note);
+    NoteID createNote(NoteInfo&& note);
+    Note getNote(NoteID noteID) const;
 
 private:
-    NoteCollection _notes;
+    BookInfo _book;
+    Database& _db;
+    NotesInfoCollection _notes;
 };
+
+using BooksInfoCollection = std::list<BookInfo>;
 
 }; // namespace uebernotes

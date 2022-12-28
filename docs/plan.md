@@ -21,6 +21,8 @@
 + sync mechanism:
     - CRDT sync (https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
     - diff sync mechanism
++ note storage:
+    - SQLite ORM: https://github.com/fnc12/sqlite_orm
 + search
     - in opened note
     - in all notes
@@ -34,9 +36,16 @@
         + fast and simple one-button creation (with date)
         + option: key-value list
     - inbox book (created by default), deck type
+    - add creation/last_update timestamp to book
 + note types
     - unsorted inbox (default book?)
     - cover all the *places* above
+    - add creation/last_update timestamp to note
+    - deck note (do as CSV?):
+        + prefix
+        + content
+        + explanation
+        + link
 + conversion mechanism between deck and normal
     - option: deck-book to normal-book-note
     - option: choose from several prepared formats
@@ -93,6 +102,7 @@
 + C++ TUI lib: https://github.com/ArthurSonzogni/FTXUI
 + Kotlin + NDK: https://proandroiddev.com/android-ndk-interaction-of-kotlin-and-c-c-5e19e35bac74
 + cmake shared lib: https://stackoverflow.com/questions/17511496/how-to-create-a-shared-library-with-cmake
++ sqlite_orm examples: https://github.com/fnc12/sqlite_orm/tree/master/examples
 
 ## long term
 + in long term: telegram-bot for inbox book to be accessed from machine without app

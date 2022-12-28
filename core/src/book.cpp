@@ -1,25 +1,41 @@
 #include "book.hpp"
 
+#include "database.hpp"
+
 namespace uebernotes {
 
-// BaseBook
-BaseBook::BaseBook(const BookID& bookID, const std::string& name)
-    : _id(bookID)
-    , _name(name)
-{}
+// BookInfo
+BookInfo::BookInfo(std::string&& name)
+    : BookInfo(0, std::move(name)) {}
 
-const BookID& BaseBook::getID() const { return _id; }
-const std::string& BaseBook::getName() const { return _name; }
+BookInfo::BookInfo(BookID id, std::string&& name)
+    : id(id),
+      name(std::move(name)) {}
 
-// NormalBook
-const NoteCollection& NormalBook::getNotes() const { return _notes; }
+// Book
+Book::Book(BookInfo book, Database& db)
+    : _book(std::move(book)),
+      _db(db) {}
 
-void NormalBook::addNote(const Note& note) {
-    _notes.push_back(note);
+const BookInfo& Book::getBookInfo() const { return _book; }
+const NotesInfoCollection& Book::getNotesInfo() const { return _notes; }
+
+void Book::loadNotes() {
+    _notes = _db.getNotesByBookID(_book.id);
 }
 
-void NormalBook::addNote(Note&& note) {
-    _notes.push_back(std::move(note));
+// void Book::createNote(const NoteInfo& note) { _notes.push_back(note); }
+NoteID Book::createNote(NoteInfo&& note) {
+    note.bookID = _book.id;
+    NoteID id = _db.storeNote(note);                 // 1st DB call
+    NoteInfo insertedNote = _db.getNoteInfoByID(id); // 2nd DB call
+    _notes.emplace_back(std::move(insertedNote));
+    return id;
+}
+
+Note Book::getNote(NoteID noteID) const {
+    auto noteInfo = _db.getNoteInfoByID(noteID);
+    return Note(noteInfo, _db);
 }
 
 } // namespace uebernotes
