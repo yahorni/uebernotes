@@ -1,5 +1,5 @@
 #pragma once
 
-#include "note.hpp"
-#include "book.hpp"
-#include "storage.hpp"
+#include "core/note.hpp"
+#include "core/book.hpp"
+#include "core/storage.hpp"

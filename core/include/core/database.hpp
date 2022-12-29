@@ -6,8 +6,8 @@
 #include <sqlite_orm/sqlite_orm.h>
 // https://github.com/fnc12/sqlite_orm/blob/master/examples/private_class_members.cpp
 
-#include "book.hpp"
-#include "note.hpp"
+#include "core/book.hpp"
+#include "core/note.hpp"
 
 namespace uebernotes {
 

@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.25.1)
 
-set(LINUX_NAME ${PROJECT_NAME}-cli)
+set(LINUX_CLIENT ${PROJECT_NAME}-cli)
 
 file(GLOB_RECURSE LINUX_SOURCES "src/*.cpp")
 set(LINUX_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_executable(${LINUX_NAME} main.cpp ${LINUX_SOURCES})
-target_include_directories(${LINUX_NAME} PRIVATE ${LINUX_DIRS} ../core/include/)
-target_link_directories(${LINUX_NAME} PRIVATE pkg)
-target_link_libraries(${LINUX_NAME} PRIVATE uebernotes-core)
-install(TARGETS ${LINUX_NAME} RUNTIME DESTINATION pkg)
+add_executable(${LINUX_CLIENT} main.cpp ${LINUX_SOURCES})
+# TODO: change to ${CORE_DIRS}
+target_include_directories(${LINUX_CLIENT} PRIVATE ${LINUX_DIRS} ../core/include)
+target_link_directories(${LINUX_CLIENT} PRIVATE ${PROJECT_ROOT}/pkg)
+# TODO: change to ${CORE_LIB}
+target_link_libraries(${LINUX_CLIENT} PRIVATE uebernotes-core)
+set_target_properties(${LINUX_CLIENT} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_ROOT}/pkg)

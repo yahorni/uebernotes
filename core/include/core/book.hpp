@@ -4,8 +4,8 @@
 #include <string>
 #include <string_view>
 
-#include "common_types.hpp"
-#include "note.hpp"
+#include "core/common_types.hpp"
+#include "core/note.hpp"
 
 namespace uebernotes {
 

@@ -1,4 +1,4 @@
-#include "note.hpp"
+#include "core/note.hpp"
 
 namespace uebernotes {
 
@@ -17,6 +17,10 @@ Note::Note(NoteInfo note, Database& db)
     : _note(std::move(note)),
       _db(db) {}
 
+const std::string& Note::getName() const { return _note.name; }
+const std::string& Note::getContent() const { return _note.content; }
+
+void Note::updateName(std::string&&) { printf("TODO: implement Note::updateName()\n"); }
 void Note::updateContent(std::string&&) { printf("TODO: implement Note::updateContent()\n"); }
 
 } // namespace uebernotes

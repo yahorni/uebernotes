@@ -2,9 +2,9 @@
 
 #include <list>
 
-#include "book.hpp"
-#include "database.hpp"
-#include "note.hpp"
+#include "core/book.hpp"
+#include "core/database.hpp"
+#include "core/note.hpp"
 
 namespace uebernotes {
 

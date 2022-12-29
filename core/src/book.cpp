@@ -1,6 +1,6 @@
-#include "book.hpp"
+#include "core/book.hpp"
 
-#include "database.hpp"
+#include "core/database.hpp"
 
 namespace uebernotes {
 

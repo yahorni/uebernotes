@@ -7,11 +7,23 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Catch2 ----------------------------------------------------------------------
+add_library(Catch2::Catch2 STATIC IMPORTED)
+set_property(TARGET Catch2::Catch2 PROPERTY
+  IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/catch2/lib/libCatch2.a)
+
+add_library(Catch2::Catch2WithMain STATIC IMPORTED)
+set_property(TARGET Catch2::Catch2WithMain PROPERTY
+  IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/catch2/lib/libCatch2Main.a)
+target_link_libraries(Catch2::Catch2WithMain INTERFACE Catch2::Catch2)
+# -----------------------------------------------------------------------------
 
 add_subdirectory(core)
 

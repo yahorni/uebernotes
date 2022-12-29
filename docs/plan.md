@@ -58,10 +58,12 @@
 + logging with different modules
 + import/export - think about it...
 + tests...
-    - unittests
+    - unittests (catch2)
     - integration tests
         + with local WebDAV server mock
         + script with CLI
++ other TODOs:
+    - put sqlite to thirdparty/
 
 ## linux client:
 + C++ lang
@@ -103,6 +105,7 @@
 + Kotlin + NDK: https://proandroiddev.com/android-ndk-interaction-of-kotlin-and-c-c-5e19e35bac74
 + cmake shared lib: https://stackoverflow.com/questions/17511496/how-to-create-a-shared-library-with-cmake
 + sqlite_orm examples: https://github.com/fnc12/sqlite_orm/tree/master/examples
++ catch2: https://github.com/catchorg/Catch2/blob/devel/docs/
 
 ## long term
 + in long term: telegram-bot for inbox book to be accessed from machine without app

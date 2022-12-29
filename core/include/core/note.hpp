@@ -4,7 +4,7 @@
 #include <list>
 #include <string>
 
-#include "common_types.hpp"
+#include "core/common_types.hpp"
 
 namespace uebernotes {
 
@@ -24,6 +24,10 @@ class Note {
 public:
     Note(NoteInfo note, Database& db);
 
+    const std::string& getName() const;
+    const std::string& getContent() const;
+
+    void updateName(std::string&& newName);
     void updateContent(std::string&& newContent);
 
 private:
