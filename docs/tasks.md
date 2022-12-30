@@ -24,24 +24,30 @@
 + linux: POC CLI client with add/show
     + basic cmake
     + include static library
-    + static compilation with sqlite (v1.8)
-    + functions:
+    + ~static~ compilation with sqlite (v1.8)
+    + static compilation with catch2
+    + static compilation with cxxopts
+    + implement functions below through CLI:
         - add book
         - show books
         - add note to book
+            + read content from CLI argument
+            + read content from STDIN
         - show list of notes from book
-        - show note from book
-    + argument parsing
-        - option: include external library
-    + note showing options
-        - print to console
-        - open in editor
-        - open in pager
+        - show note from book (at first - by ID, then - by name, maybe with note name prefix)
+            + print to console
+            + open in editor
+            + open in pager
+    + implement same functions as above with TUI
 + common:
     + project level cmake to build lib and linux client
++ testing: create simple testing server
 + lib: add webdav sync for files
 + linux: sync to CLI client
 + android: POC app to sync and show books
 
 ## for simplicity in POC
 + store all book notes in book object (without limited caching or LRU)
++ non-static compilation with sqlite made for now
++ skip sqlite unicode support enabling
++ skip cxxopts unicode support enabling (https://github.com/jarro2783/cxxopts/wiki/Unicode-support)

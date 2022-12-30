@@ -2,6 +2,7 @@
 
 namespace uebernotes {
 
+// TODO: move hardcoded name to configuration
 const char Database::_defaultDatabaseName[]{"db.sqlite3"};
 
 Database::Database()
@@ -17,11 +18,16 @@ BookID Database::storeBook(const BookInfo& book) { return _dbStorage.insert(book
 
 NoteID Database::storeNote(const NoteInfo& note) { return _dbStorage.insert(note); }
 
-BookInfo Database::getBookInfoByID(BookID bookID) { return _dbStorage.get<BookInfo>(bookID); }
+BookInfo Database::loadBookByID(BookID bookID) { return _dbStorage.get<BookInfo>(bookID); }
 
-NoteInfo Database::getNoteInfoByID(NoteID noteID) { return _dbStorage.get<NoteInfo>(noteID); }
+NoteInfo Database::loadNoteByID(NoteID noteID) { return _dbStorage.get<NoteInfo>(noteID); }
 
-NotesInfoCollection Database::getNotesByBookID(BookID bookID) {
+BooksInfoCollection Database::loadBooks() {
+    auto books = _dbStorage.get_all<BookInfo>();
+    return {books.begin(), books.end()};
+}
+
+NotesInfoCollection Database::loadNotesByBookID(BookID bookID) {
     auto notes = _dbStorage.get_all<NoteInfo>(sql::where(sql::is_equal(&NoteInfo::bookID, bookID)));
     return {notes.begin(), notes.end()};
 }

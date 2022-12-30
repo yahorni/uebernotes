@@ -1,49 +1,44 @@
 #include <iostream>
 
+#include "linux/argparser.hpp"
 #include "linux/client.hpp"
 
-int main() {
-    linux::Client client;
-    auto& storage = client.getStorage();
+auto parseArguments(int argc, char* argv[]) {
+    try {
+        linux::Argparser argparser;
+        auto cli_args = argparser.parse(argc, argv);
+        if (cli_args.count("help")) {
+            std::cout << argparser.getHelp() << std::endl;
+            exit(0);
+        }
+        return cli_args;
+    } catch (const linux::ArgparserError& ex) {
+        // TODO: print it properly, no need to log
+        std::cout << ex.what() << std::endl;
+        // TODO: check standard error codes
+        exit(1);
+    }
+}
 
-    // filling book name
-    uebernotes::BookInfo bookInfo{"book1"};
-    //
-    auto bookID = storage.createBook(std::move(bookInfo));
-    auto book = storage.getBook(bookID);
-    // opening editor and filling content for noteInfo
-    uebernotes::NoteInfo noteInfo1{"note1", "content1"};
-    uebernotes::NoteInfo noteInfo2{"note2", "content2"};
-    //
-    book.createNote(std::move(noteInfo1));
-    book.createNote(std::move(noteInfo2));
-    // show notes in book
-    const auto& notes = book.getNotesInfo();
-    std::cout << "Notes amount: " << notes.size() << std::endl;
-    // ---
-    // get books to display
-    // BookInfo has BookID
-    const auto& books = storage.getBooksInfo();
-    // displaying all books
-    std::cout << "Loaded books amount: " << books.size() << std::endl;
-    //
-    // choosing one book by bookID
-    // get book notes to display
-    // NoteInfo has NoteID
-    auto loadedBook = storage.getBook(bookID);
-    loadedBook.loadNotes();
-    const auto& loadedNotes = loadedBook.getNotesInfo();
-    // displaying all notes
-    std::cout << "Loaded notes amount: " << loadedNotes.size() << std::endl;
-    //
-    // choosing one note by noteID
-    uebernotes::NoteID noteID = 1;
-    //
-    auto note = book.getNote(noteID);
-    // opening editor and modifying content
-    std::string newNoteContent = "new_content";
-    //
-    note.updateContent(std::move(newNoteContent));
+int main(int argc, char* argv[]) {
+    auto cli_args = parseArguments(argc, argv);
+
+    if (cli_args.arguments().size() > 0)
+        std::cout << "CLI mode" << std::endl;
+    else
+        std::cout << "TUI mode" << std::endl;
+
+    linux::Client client;
+    // auto& storage = client.getStorage();
+
+    if (cli_args.count("list-books")) {
+        client.listBooks();
+    } else if (cli_args.count("print-book")) {
+    } else if (cli_args.count("print-note")) {
+    } else if (cli_args.count("create-book")) {
+        client.createBook(cli_args["create-book"].as<std::string>());
+    } else if (cli_args.count("create-note")) {
+    }
 
     return 0;
 }

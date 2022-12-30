@@ -63,7 +63,9 @@
         + with local WebDAV server mock
         + script with CLI
 + other TODOs:
-    - put sqlite to thirdparty/
+    - enable unicode for sqlite(_orm), cxxopts
+    - make cxxopts as precompiled header
+
 
 ## linux client:
 + C++ lang

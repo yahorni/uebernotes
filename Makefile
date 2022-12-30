@@ -1,5 +1,9 @@
 .PHONY: core linux run
 
+init-deps:
+	git submodule update --init
+	cd third_party/cxxopts/ && git checkout tags/v3.0.0
+
 core:
 	cmake -S . -B core/build -DBUILD_SHARED_LIBS=1
 	cd core/build && make -j uebernotes-core
@@ -21,6 +25,9 @@ linux:
 
 run: pkg/uebernotes-cli
 	@pkg/uebernotes-cli
+
+run-help: pkg/uebernotes-cli
+	@pkg/uebernotes-cli --help
 
 run-tests: pkg/uebernotes-core-tests
 	@pkg/uebernotes-core-tests

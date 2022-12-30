@@ -6,8 +6,11 @@ file(GLOB_RECURSE LINUX_SOURCES "src/*.cpp")
 set(LINUX_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(${LINUX_CLIENT} main.cpp ${LINUX_SOURCES})
-# TODO: change to ${CORE_DIRS}
-target_include_directories(${LINUX_CLIENT} PRIVATE ${LINUX_DIRS} ../core/include)
+# TODO: change core/include to ${CORE_DIRS} and make variable for cxxopts
+target_include_directories(${LINUX_CLIENT} PRIVATE
+  ${LINUX_DIRS}
+  ${PROJECT_ROOT}/core/include
+  ${PROJECT_ROOT}/third_party/cxxopts/include)
 target_link_directories(${LINUX_CLIENT} PRIVATE ${PROJECT_ROOT}/pkg)
 # TODO: change to ${CORE_LIB}
 target_link_libraries(${LINUX_CLIENT} PRIVATE uebernotes-core)

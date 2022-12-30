@@ -37,10 +37,11 @@ public:
     BookID storeBook(const BookInfo& book);
     NoteID storeNote(const NoteInfo& note);
 
-    BookInfo getBookInfoByID(BookID bookID);
-    NoteInfo getNoteInfoByID(NoteID noteID);
+    BookInfo loadBookByID(BookID bookID);
+    NoteInfo loadNoteByID(NoteID noteID);
 
-    NotesInfoCollection getNotesByBookID(BookID bookID);
+    BooksInfoCollection loadBooks();
+    NotesInfoCollection loadNotesByBookID(BookID bookID);
 
 private:
     using DatabaseStorage = decltype(initStorage(""));
