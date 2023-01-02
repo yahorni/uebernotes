@@ -9,7 +9,7 @@
 #include "core/book.hpp"
 #include "core/note.hpp"
 
-namespace uebernotes {
+namespace core {
 
 namespace sql = sqlite_orm;
 
@@ -29,10 +29,11 @@ inline auto initStorage(std::string_view _dbName) {
 
 class Database {
 public:
-    Database();
     explicit Database(std::string_view dbName);
+
+    // should I really restrict it explicitly (what about moving?)
     Database(const Database&) = delete;
-    // TODO: restrict copying (and moving?)
+    Database& operator=(const Database&) = delete;
 
     BookID storeBook(const BookInfo& book);
     NoteID storeNote(const NoteInfo& note);
@@ -48,8 +49,6 @@ private:
 
     const std::string _dbName;
     DatabaseStorage _dbStorage;
-
-    static const char _defaultDatabaseName[];
 };
 
-} // namespace uebernotes
+} // namespace core

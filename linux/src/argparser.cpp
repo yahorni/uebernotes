@@ -4,60 +4,67 @@
 
 namespace linux {
 
-// TODO: add unittests for Argparser
-// TODO: log all ArgparserError
+// TODO: add unittests for CmdLineArgs
+// TODO: log all CmdLineError
 
-Argparser::Argparser() {
+CmdLineArgs::CmdLineArgs() {
     try {
         _options.add_options()                //
             ("h,help", "Print help and exit") //
-                                              // NOTE: database ignored till configuration not implemented
             ("d,database", "Database file path", cxxopts::value<std::string>(), "<path>");
-        _options.add_options("Operation")                                                                  //
-            ("l,list-books", "List all books")                                                             //
-            ("print-book", "Print all notes from book", cxxopts::value<uebernotes::BookID>(), "<book_id>") //
-            ("print-note", "Print note", cxxopts::value<uebernotes::NoteID>(), "<note_id>")                //
-            ("b,create-book", "Create new book", cxxopts::value<std::string>(), "<name>")                  //
+        _options.add_options("Operation")                                                            //
+            ("l,list-books", "List all books")                                                       //
+            ("print-book", "Print all notes from book", cxxopts::value<core::BookID>(), "<book_id>") //
+            ("print-note", "Print note", cxxopts::value<core::NoteID>(), "<note_id>")                //
+            ("b,create-book", "Create new book", cxxopts::value<std::string>(), "<name>")            //
             ("n,create-note", "Create new note", cxxopts::value<std::string>(), "<name>");
-        _options.add_options("Note creation")                                                          //
-            ("book-id", "Set book ID for new note", cxxopts::value<uebernotes::BookID>(), "<book_id>") //
+        _options.add_options("Note creation")                                                    //
+            ("book-id", "Set book ID for new note", cxxopts::value<core::BookID>(), "<book_id>") //
             ("content", "Set content for new note", cxxopts::value<std::string>(), "<string>");
     } catch (const cxxopts::OptionSpecException& ex) {
-        throw ArgparserError(ex.what());
+        throw CmdLineError(ex.what());
     }
 }
 
-cxxopts::ParseResult Argparser::parse(int argc, char* argv[]) {
-    auto result = _parse(argc, argv);
-    _validate(result);
-    return result;
+void CmdLineArgs::parse(int argc, char* argv[]) {
+    _parse(argc, argv);
+    // TODO: separate validation if/when exclusive group will be implemented
+    _validate();
 }
 
-cxxopts::ParseResult Argparser::_parse(int argc, char* argv[]) {
+bool CmdLineArgs::has(const std::string& arg) const { return _parseResult.count(arg) > 0; }
+
+size_t CmdLineArgs::size() const { return _parseResult.arguments().size(); }
+
+std::string CmdLineArgs::getString(const std::string& arg) const { return _parseResult[arg].as<std::string>(); }
+
+uint64_t CmdLineArgs::getUInt64(const std::string& arg) const { return _parseResult[arg].as<uint64_t>(); }
+
+void CmdLineArgs::_parse(int argc, char* argv[]) {
     try {
-        return _options.parse(argc, argv);
+        _parseResult = _options.parse(argc, argv);
     } catch (const cxxopts::OptionParseException& ex) {
-        throw ArgparserError(ex.what());
+        throw CmdLineError(ex.what());
     }
 }
 
-void Argparser::_validate(const cxxopts::ParseResult& result) {
-    // TODO: make common dictionary to use in ctor and here
-    if ((result.count("list-books") > 0) +      //
-            (result.count("print-book") > 0) +  //
-            (result.count("print-note") > 0) +  //
-            (result.count("create-book") > 0) + //
-            (result.count("create-note") > 0) >
+void CmdLineArgs::_validate() {
+    // TODO: make common dictionary/exclusive group subclass to use in ctor and here
+    if (has("list-books") +      //
+            has("print-book") +  //
+            has("print-note") +  //
+            has("create-book") + //
+            has("create-note") >
         1) {
         // TODO: print what operations are given
-        throw ArgparserError("Several operations given");
+        throw CmdLineError("Several operations given");
     }
 
-    if ((result.count("book-id") || result.count("content")) && !result.count("create-note")) {
-        throw ArgparserError("Usage of note creation arguments without note name");
+    if ((has("book-id") || has("content")) && !has("create-note")) {
+        throw CmdLineError("Usage of note creation arguments without note name");
     }
 }
 
-std::string Argparser::getHelp() const { return _options.help(); }
+std::string CmdLineArgs::help() const { return _options.help(); }
 
 } // namespace linux

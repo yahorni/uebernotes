@@ -2,7 +2,7 @@
 
 #include "core/database.hpp"
 
-namespace uebernotes {
+namespace core {
 
 // BookInfo
 BookInfo::BookInfo(std::string&& name)
@@ -36,4 +36,4 @@ Note Book::getNote(NoteID noteID) const {
     return Note(noteInfo, _db);
 }
 
-} // namespace uebernotes
+} // namespace core

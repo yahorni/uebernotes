@@ -15,6 +15,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Catch2 ----------------------------------------------------------------------
+# TODO include only if building tests
 add_library(Catch2::Catch2 STATIC IMPORTED)
 set_property(TARGET Catch2::Catch2 PROPERTY
   IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/catch2/lib/libCatch2.a)
@@ -28,5 +29,19 @@ target_link_libraries(Catch2::Catch2WithMain INTERFACE Catch2::Catch2)
 add_subdirectory(core)
 
 if(NOT DEFINED BUILD_SHARED_LIBS)
+  # FTXUI --------------------------------------------------------------------
+  add_library(ftxui::dom STATIC IMPORTED)
+  set_property(TARGET ftxui::dom PROPERTY
+    IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/ftxui/lib/libftxui-dom.a)
+
+  add_library(ftxui::screen STATIC IMPORTED)
+  set_property(TARGET ftxui::screen PROPERTY
+    IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/ftxui/lib/libftxui-screen.a)
+
+  add_library(ftxui::component STATIC IMPORTED)
+  set_property(TARGET ftxui::component PROPERTY
+    IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/ftxui/lib/libftxui-component.a)
+  # -----------------------------------------------------------------------------
+
   add_subdirectory(linux)
 endif()

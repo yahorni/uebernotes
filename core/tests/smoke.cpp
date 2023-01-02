@@ -7,15 +7,15 @@
 #include "core/storage.hpp"
 
 TEST_CASE("smoke", "[core]") {
-    uebernotes::Storage storage{};
+    core::Storage storage{core::Config{"testdb.sqlite3"}};
     // filling book name
-    uebernotes::BookInfo bookInfo{"book1"};
+    core::BookInfo bookInfo{"book1"};
     //
     auto bookID = storage.createBook(std::move(bookInfo));
     auto book = storage.getBook(bookID);
     // opening editor and filling content for noteInfo
-    uebernotes::NoteInfo noteInfo1{"note1", "content1"};
-    uebernotes::NoteInfo noteInfo2{"note2", "content2"};
+    core::NoteInfo noteInfo1{"note1", "content1"};
+    core::NoteInfo noteInfo2{"note2", "content2"};
     //
     book.createNote(std::move(noteInfo1));
     book.createNote(std::move(noteInfo2));
@@ -42,7 +42,7 @@ TEST_CASE("smoke", "[core]") {
     REQUIRE(loadedNotes.size() == 2);
     //
     // choosing one note by noteID
-    uebernotes::NoteID noteID = 1;
+    core::NoteID noteID = 1;
     //
     auto note = book.getNote(noteID);
     // opening editor and modifying content

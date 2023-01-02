@@ -1,18 +1,20 @@
 #pragma once
 
-#include "core/types.hpp"
+#include "core/config.hpp"
+#include "core/storage.hpp"
 
 namespace linux {
 
 class Client {
 public:
-    uebernotes::Storage& getStorage();
+    explicit Client(const core::Config& cfg);
+    core::Storage& getStorage();
 
     void listBooks();
     void createBook(std::string_view book_name);
 
 private:
-    uebernotes::Storage _storage;
+    core::Storage _storage;
 };
 
 } // namespace linux

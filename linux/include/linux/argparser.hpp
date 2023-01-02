@@ -4,22 +4,28 @@
 
 namespace linux {
 
-class ArgparserError : public std::runtime_error {
+class CmdLineError : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
-class Argparser {
+class CmdLineArgs {
 public:
-    Argparser();
-    cxxopts::ParseResult parse(int argc, char* argv[]);
-    std::string getHelp() const;
+    CmdLineArgs();
+    void parse(int argc, char* argv[]);
+
+    std::string help() const;
+    bool has(const std::string& arg) const;
+    size_t size() const;
+
+    std::string getString(const std::string& arg) const;
+    uint64_t getUInt64(const std::string& arg) const;
 
 private:
-    cxxopts::ParseResult _parse(int argc, char* argv[]);
-    void _validate(const cxxopts::ParseResult& result);
-
+    void _parse(int argc, char* argv[]);
+    void _validate();
 
     cxxopts::Options _options{"uebernotes-cli", "Note-taking app for specific purposes"};
+    cxxopts::ParseResult _parseResult;
 };
 
 } // namespace linux

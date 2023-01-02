@@ -6,7 +6,7 @@
 
 #include "core/common_types.hpp"
 
-namespace uebernotes {
+namespace core {
 
 struct NoteInfo {
     NoteID id;
@@ -35,4 +35,4 @@ private:
     Database& _db;
 };
 
-} // namespace uebernotes
+} // namespace core

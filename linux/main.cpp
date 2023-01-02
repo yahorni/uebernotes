@@ -1,18 +1,21 @@
 #include <iostream>
 
+#include "core/config.hpp"
+
 #include "linux/argparser.hpp"
 #include "linux/client.hpp"
+#include "linux/tui.hpp"
 
 auto parseArguments(int argc, char* argv[]) {
     try {
-        linux::Argparser argparser;
-        auto cli_args = argparser.parse(argc, argv);
-        if (cli_args.count("help")) {
-            std::cout << argparser.getHelp() << std::endl;
+        linux::CmdLineArgs clArgs;
+        clArgs.parse(argc, argv);
+        if (clArgs.has("help")) {
+            std::cout << clArgs.help() << std::endl;
             exit(0);
         }
-        return cli_args;
-    } catch (const linux::ArgparserError& ex) {
+        return clArgs;
+    } catch (const linux::CmdLineError& ex) {
         // TODO: print it properly, no need to log
         std::cout << ex.what() << std::endl;
         // TODO: check standard error codes
@@ -21,23 +24,29 @@ auto parseArguments(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-    auto cli_args = parseArguments(argc, argv);
+    auto clArgs = parseArguments(argc, argv);
 
-    if (cli_args.arguments().size() > 0)
+    if (clArgs.size() > 0) {
         std::cout << "CLI mode" << std::endl;
-    else
+    } else {
         std::cout << "TUI mode" << std::endl;
+        linux::TUI tui;
+        exit(0);
+    }
 
-    linux::Client client;
-    // auto& storage = client.getStorage();
+    core::Config cfg;
+    if (clArgs.has("database")) cfg.database = clArgs.getString("database");
 
-    if (cli_args.count("list-books")) {
+    linux::Client client(cfg);
+
+    // TODO: add operation enum
+    if (clArgs.has("list-books")) {
         client.listBooks();
-    } else if (cli_args.count("print-book")) {
-    } else if (cli_args.count("print-note")) {
-    } else if (cli_args.count("create-book")) {
-        client.createBook(cli_args["create-book"].as<std::string>());
-    } else if (cli_args.count("create-note")) {
+    } else if (clArgs.has("print-book")) {
+    } else if (clArgs.has("print-note")) {
+    } else if (clArgs.has("create-book")) {
+        client.createBook(clArgs.getString("create-book"));
+    } else if (clArgs.has("create-note")) {
     }
 
     return 0;

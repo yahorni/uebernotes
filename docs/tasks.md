@@ -17,24 +17,24 @@
 + local WebDAV server for testing
 
 ## development
-+ lib: POC normal note and book prototype
-    + basic cmake for library
-    + compilation as shared lib
-    + compilation as static lib
-+ linux: POC CLI client with add/show
-    + basic cmake
-    + include static library
++ lib: POC normal note and book prototype [ok]
+    + basic cmake for library [ok]
+    + compilation as shared lib [ok]
+    + compilation as static lib [ok]
++ linux: POC CLI client with add/show [..]
+    + basic cmake [ok]
+    + include static library [ok]
     + ~static~ compilation with sqlite (v1.8)
-    + static compilation with catch2
-    + static compilation with cxxopts
+    + static compilation with catch2 [ok]
+    + static compilation with cxxopts [ok]
     + implement functions below through CLI:
-        - add book
-        - show books
+        - add book [ok]
+        - show books [ok]
         - add note to book
             + read content from CLI argument
-            + read content from STDIN
+            + read content from STDIN [TODO later]
         - show list of notes from book
-        - show note from book (at first - by ID, then - by name, maybe with note name prefix)
+        - show note from book (at first - by ID, later - by name, maybe with note name prefix)
             + print to console
             + open in editor
             + open in pager
@@ -51,3 +51,4 @@
 + non-static compilation with sqlite made for now
 + skip sqlite unicode support enabling
 + skip cxxopts unicode support enabling (https://github.com/jarro2783/cxxopts/wiki/Unicode-support)
++ define proper public API for core later

@@ -7,7 +7,7 @@
 #include "core/common_types.hpp"
 #include "core/note.hpp"
 
-namespace uebernotes {
+namespace core {
 
 struct BookInfo {
     BookID id;
@@ -38,4 +38,4 @@ private:
 
 using BooksInfoCollection = std::list<BookInfo>;
 
-}; // namespace uebernotes
+}; // namespace core

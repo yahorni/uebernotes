@@ -4,11 +4,11 @@
 
 #include <cstdint>
 
-namespace uebernotes {
+namespace core {
 
 using NoteID = uint64_t;
 using BookID = uint64_t;
 
 class Database;
 
-} // namespace uebernotes
+} // namespace core

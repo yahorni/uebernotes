@@ -1,9 +1,9 @@
 #include "core/storage.hpp"
 
-namespace uebernotes {
+namespace core {
 
-Storage::Storage()
-    : _db() {
+Storage::Storage(const Config& cfg)
+    : _db(cfg.database) {
     _booksInfo = _db.loadBooks();
 }
 
@@ -24,4 +24,4 @@ Book Storage::getBook(BookID bookID) {
 
 void Storage::removeBook(BookID) { printf("TODO: implement Storage::removeBook()\n"); }
 
-} // namespace uebernotes
+} // namespace core

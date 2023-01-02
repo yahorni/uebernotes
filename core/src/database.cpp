@@ -1,12 +1,6 @@
 #include "core/database.hpp"
 
-namespace uebernotes {
-
-// TODO: move hardcoded name to configuration
-const char Database::_defaultDatabaseName[]{"db.sqlite3"};
-
-Database::Database()
-    : Database(_defaultDatabaseName) {}
+namespace core {
 
 Database::Database(std::string_view dbName)
     : _dbName(dbName),
@@ -32,4 +26,4 @@ NotesInfoCollection Database::loadNotesByBookID(BookID bookID) {
     return {notes.begin(), notes.end()};
 }
 
-} // namespace uebernotes
+} // namespace core

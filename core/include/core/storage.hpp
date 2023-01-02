@@ -3,16 +3,19 @@
 #include <list>
 
 #include "core/book.hpp"
+#include "core/config.hpp"
 #include "core/database.hpp"
 #include "core/note.hpp"
 
-namespace uebernotes {
+namespace core {
 
 class Storage {
 public:
-    Storage();
-    Storage(const Storage&) = delete; // is it really needed?
-    // TODO: restrict copying (and moving?)
+    explicit Storage(const Config& cfg);
+
+    // should I really restrict it explicitly (what about moving?)
+    Storage(const Storage&) = delete;
+    Storage& operator=(const Storage&) = delete;
 
     const BooksInfoCollection& getBooksInfo() const;
 
@@ -25,4 +28,4 @@ private:
     BooksInfoCollection _booksInfo;
 };
 
-} // namespace uebernotes
+} // namespace core
