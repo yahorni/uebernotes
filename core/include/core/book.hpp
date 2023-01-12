@@ -13,8 +13,8 @@ struct BookInfo {
     BookID id;
     std::string name;
 
-    explicit BookInfo(std::string&& name = ""); // for manual creation
-    BookInfo(BookID id, std::string&& name);    // for database
+    explicit BookInfo(std::string&& name = "");  // for manual creation
+    BookInfo(BookID id, std::string&& name);     // for database
 };
 
 class Book {
@@ -38,4 +38,4 @@ private:
 
 using BooksInfoCollection = std::list<BookInfo>;
 
-}; // namespace core
+};  // namespace core

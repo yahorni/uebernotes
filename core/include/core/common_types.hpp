@@ -11,4 +11,4 @@ using BookID = uint64_t;
 
 class Database;
 
-} // namespace core
+}  // namespace core

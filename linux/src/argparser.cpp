@@ -9,17 +9,17 @@ namespace linux {
 
 CmdLineArgs::CmdLineArgs() {
     try {
-        _options.add_options()                //
-            ("h,help", "Print help and exit") //
+        _options.add_options()                 //
+            ("h,help", "Print help and exit")  //
             ("d,database", "Database file path", cxxopts::value<std::string>(), "<path>");
-        _options.add_options("Operation")                                                            //
-            ("l,list-books", "List all books")                                                       //
-            ("print-book", "Print all notes from book", cxxopts::value<core::BookID>(), "<book_id>") //
-            ("print-note", "Print note", cxxopts::value<core::NoteID>(), "<note_id>")                //
-            ("b,create-book", "Create new book", cxxopts::value<std::string>(), "<name>")            //
+        _options.add_options("Operation")                                                             //
+            ("l,list-books", "List all books")                                                        //
+            ("print-book", "Print all notes from book", cxxopts::value<core::BookID>(), "<book_id>")  //
+            ("print-note", "Print note", cxxopts::value<core::NoteID>(), "<note_id>")                 //
+            ("b,create-book", "Create new book", cxxopts::value<std::string>(), "<name>")             //
             ("n,create-note", "Create new note", cxxopts::value<std::string>(), "<name>");
-        _options.add_options("Note creation")                                                    //
-            ("book-id", "Set book ID for new note", cxxopts::value<core::BookID>(), "<book_id>") //
+        _options.add_options("Note creation")                                                     //
+            ("book-id", "Set book ID for new note", cxxopts::value<core::BookID>(), "<book_id>")  //
             ("content", "Set content for new note", cxxopts::value<std::string>(), "<string>");
     } catch (const cxxopts::OptionSpecException& ex) {
         throw CmdLineError(ex.what());
@@ -50,10 +50,10 @@ void CmdLineArgs::_parse(int argc, char* argv[]) {
 
 void CmdLineArgs::_validate() {
     // TODO: make common dictionary/exclusive group subclass to use in ctor and here
-    if (has("list-books") +      //
-            has("print-book") +  //
-            has("print-note") +  //
-            has("create-book") + //
+    if (has("list-books") +       //
+            has("print-book") +   //
+            has("print-note") +   //
+            has("create-book") +  //
             has("create-note") >
         1) {
         // TODO: print what operations are given
@@ -67,4 +67,4 @@ void CmdLineArgs::_validate() {
 
 std::string CmdLineArgs::help() const { return _options.help(); }
 
-} // namespace linux
+}  // namespace linux

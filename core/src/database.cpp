@@ -26,4 +26,4 @@ NotesInfoCollection Database::loadNotesByBookID(BookID bookID) {
     return {notes.begin(), notes.end()};
 }
 
-} // namespace core
+}  // namespace core

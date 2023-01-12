@@ -20,7 +20,7 @@ TUI::TUI() {
         return window(text(L" Summary "), content);
     };
 
-    auto document = //
+    auto document =  //
         vbox({
             hbox({
                 summary(),
@@ -40,4 +40,4 @@ TUI::TUI() {
     std::cout << screen.ToString() << '\0' << std::endl;
 }
 
-} // namespace linux
+}  // namespace linux

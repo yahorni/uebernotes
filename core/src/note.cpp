@@ -23,4 +23,4 @@ const std::string& Note::getContent() const { return _note.content; }
 void Note::updateName(std::string&&) { printf("TODO: implement Note::updateName()\n"); }
 void Note::updateContent(std::string&&) { printf("TODO: implement Note::updateContent()\n"); }
 
-} // namespace core
+}  // namespace core

@@ -25,8 +25,8 @@ void Book::loadNotes() { _notes = _db.loadNotesByBookID(_book.id); }
 // void Book::createNote(const NoteInfo& note) { _notes.push_back(note); }
 NoteID Book::createNote(NoteInfo&& note) {
     note.bookID = _book.id;
-    NoteID id = _db.storeNote(note);              // 1st DB call
-    NoteInfo insertedNote = _db.loadNoteByID(id); // 2nd DB call
+    NoteID id = _db.storeNote(note);               // 1st DB call
+    NoteInfo insertedNote = _db.loadNoteByID(id);  // 2nd DB call
     _notes.emplace_back(std::move(insertedNote));
     return id;
 }
@@ -36,4 +36,4 @@ Note Book::getNote(NoteID noteID) const {
     return Note(noteInfo, _db);
 }
 
-} // namespace core
+}  // namespace core

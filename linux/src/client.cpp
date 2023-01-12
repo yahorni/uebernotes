@@ -23,4 +23,4 @@ void Client::createBook(std::string_view book_name) {
     std::cout << "New book ID: " << bookID << std::endl;
 }
 
-} // namespace linux
+}  // namespace linux

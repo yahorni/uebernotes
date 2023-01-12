@@ -17,4 +17,4 @@ private:
     core::Storage _storage;
 };
 
-} // namespace linux
+}  // namespace linux

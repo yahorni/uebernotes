@@ -7,4 +7,4 @@ public:
     TUI();
 };
 
-} // namespace linux
+}  // namespace linux

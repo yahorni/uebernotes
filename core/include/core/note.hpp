@@ -14,8 +14,8 @@ struct NoteInfo {
     std::string name;
     std::string content;
 
-    explicit NoteInfo(std::string name = "", std::string content = "");            // for manual creation
-    NoteInfo(NoteID id, BookID bookID, std::string&& name, std::string&& content); // for database
+    explicit NoteInfo(std::string name = "", std::string content = "");             // for manual creation
+    NoteInfo(NoteID id, BookID bookID, std::string&& name, std::string&& content);  // for database
 };
 
 using NotesInfoCollection = std::list<NoteInfo>;
@@ -35,4 +35,4 @@ private:
     Database& _db;
 };
 
-} // namespace core
+}  // namespace core

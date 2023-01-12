@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <string_view>
 
 #include <sqlite_orm/sqlite_orm.h>
@@ -14,16 +15,16 @@ namespace core {
 namespace sql = sqlite_orm;
 
 inline auto initStorage(std::string_view _dbName) {
-    return sql::make_storage(                                                                      //
-        std::string(_dbName),                                                                      //
-        sql::make_table("normal_books",                                                            //
-                        sql::make_column("id", &BookInfo::id, sql::primary_key().autoincrement()), //
-                        sql::make_column("name", &BookInfo::name)),                                //
-        sql::make_table("normal_notes",                                                            //
-                        sql::make_column("id", &NoteInfo::id, sql::primary_key().autoincrement()), //
-                        sql::make_column("book_id", &NoteInfo::bookID),                            //
-                        sql::make_column("name", &NoteInfo::name),                                 //
-                        sql::make_column("content", &NoteInfo::content),                           //
+    return sql::make_storage(                                                                       //
+        std::string(_dbName),                                                                       //
+        sql::make_table("normal_books",                                                             //
+                        sql::make_column("id", &BookInfo::id, sql::primary_key().autoincrement()),  //
+                        sql::make_column("name", &BookInfo::name)),                                 //
+        sql::make_table("normal_notes",                                                             //
+                        sql::make_column("id", &NoteInfo::id, sql::primary_key().autoincrement()),  //
+                        sql::make_column("book_id", &NoteInfo::bookID),                             //
+                        sql::make_column("name", &NoteInfo::name),                                  //
+                        sql::make_column("content", &NoteInfo::content),                            //
                         sql::foreign_key(&NoteInfo::bookID).references(&BookInfo::id)));
 }
 
@@ -51,4 +52,4 @@ private:
     DatabaseStorage _dbStorage;
 };
 
-} // namespace core
+}  // namespace core

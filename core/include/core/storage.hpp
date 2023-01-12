@@ -28,4 +28,4 @@ private:
     BooksInfoCollection _booksInfo;
 };
 
-} // namespace core
+}  // namespace core
