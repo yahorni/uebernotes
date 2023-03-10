@@ -1,10 +1,14 @@
 #pragma once
 
+#include "linux/argparser.hpp"
+
 namespace linux {
 
 class TUI {
 public:
-    TUI();
+    explicit TUI(const CmdLineArgs& args);
+
+    bool run();
 };
 
 }  // namespace linux

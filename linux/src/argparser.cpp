@@ -1,5 +1,7 @@
 #include "linux/argparser.hpp"
 
+#include <map>
+
 #include "core/common_types.hpp"
 
 namespace linux {
@@ -7,20 +9,28 @@ namespace linux {
 // TODO: add unittests for CmdLineArgs
 // TODO: log all CmdLineError
 
+enum class Op { list_books, print_book, print_note, create_book, create_note };
+
+static const std::map<Op, std::string> operations{{Op::list_books, "list-books"},
+                                                  {Op::print_book, "print-book"},
+                                                  {Op::print_note, "print-note"},
+                                                  {Op::create_book, "create-book"},
+                                                  {Op::create_note, "create-note"}};
+
 CmdLineArgs::CmdLineArgs() {
     try {
-        _options.add_options()                 //
-            ("h,help", "Print help and exit")  //
+        _options.add_options()                                                         //
+            ("h,help", "Print help and exit")                                          //
             ("d,database", "Database file path", cxxopts::value<std::string>(), "<path>");
-        _options.add_options("Operation")                                                             //
-            ("l,list-books", "List all books")                                                        //
-            ("print-book", "Print all notes from book", cxxopts::value<core::BookID>(), "<book_id>")  //
-            ("print-note", "Print note", cxxopts::value<core::NoteID>(), "<note_id>")                 //
-            ("b,create-book", "Create new book", cxxopts::value<std::string>(), "<name>")             //
-            ("n,create-note", "Create new note", cxxopts::value<std::string>(), "<name>");
+        _options.add_options("Operation")                                                                          //
+            (operations.at(Op::list_books), "List all books")                                                      //
+            (operations.at(Op::print_book), "Print notes from book", cxxopts::value<core::BookID>(), "<book_id>")  //
+            (operations.at(Op::print_note), "Print note", cxxopts::value<core::NoteID>(), "<note_id>")             //
+            (operations.at(Op::create_book), "Create new book", cxxopts::value<std::string>(), "<name>")           //
+            (operations.at(Op::create_note), "Create new note", cxxopts::value<std::string>(), "<name>");
         _options.add_options("Note creation")                                                     //
-            ("book-id", "Set book ID for new note", cxxopts::value<core::BookID>(), "<book_id>")  //
-            ("content", "Set content for new note", cxxopts::value<std::string>(), "<string>");
+            ("b,book-id", "Set book ID for new note", cxxopts::value<core::BookID>(), "<book_id>")  //
+            ("c,content", "Set content for new note", cxxopts::value<std::string>(), "<string>");
     } catch (const cxxopts::OptionSpecException& ex) {
         throw CmdLineError(ex.what());
     }
@@ -40,6 +50,13 @@ std::string CmdLineArgs::getString(const std::string& arg) const { return _parse
 
 uint64_t CmdLineArgs::getUInt64(const std::string& arg) const { return _parseResult[arg].as<uint64_t>(); }
 
+bool CmdLineArgs::hasOperation() const {
+    for (const auto& [_, op] : operations) {
+        if (has(op)) return true;
+    }
+    return false;
+}
+
 void CmdLineArgs::_parse(int argc, char* argv[]) {
     try {
         _parseResult = _options.parse(argc, argv);
@@ -50,12 +67,12 @@ void CmdLineArgs::_parse(int argc, char* argv[]) {
 
 void CmdLineArgs::_validate() {
     // TODO: make common dictionary/exclusive group subclass to use in ctor and here
-    if (has("list-books") +       //
-            has("print-book") +   //
-            has("print-note") +   //
-            has("create-book") +  //
-            has("create-note") >
-        1) {
+    uint8_t ops_amount = 0;
+    for (const auto& [_, op] : operations) {
+        if (has(op)) ops_amount++;
+    }
+
+    if (ops_amount > 1) {
         // TODO: print what operations are given
         throw CmdLineError("Several operations given");
     }
@@ -65,6 +82,6 @@ void CmdLineArgs::_validate() {
     }
 }
 
-std::string CmdLineArgs::help() const { return _options.help(); }
+std::string CmdLineArgs::help() const { return _options.help({"", "Operation", "Note creation"}); }
 
 }  // namespace linux

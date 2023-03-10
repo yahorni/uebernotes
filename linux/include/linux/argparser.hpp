@@ -17,6 +17,8 @@ public:
     bool has(const std::string& arg) const;
     size_t size() const;
 
+    bool hasOperation() const;
+
     std::string getString(const std::string& arg) const;
     uint64_t getUInt64(const std::string& arg) const;
 

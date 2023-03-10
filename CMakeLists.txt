@@ -30,17 +30,19 @@ add_subdirectory(core)
 
 if(NOT DEFINED BUILD_SHARED_LIBS)
   # FTXUI --------------------------------------------------------------------
-  add_library(ftxui::dom STATIC IMPORTED)
-  set_property(TARGET ftxui::dom PROPERTY
-    IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/ftxui/lib/libftxui-dom.a)
-
   add_library(ftxui::screen STATIC IMPORTED)
   set_property(TARGET ftxui::screen PROPERTY
     IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/ftxui/lib/libftxui-screen.a)
 
+  add_library(ftxui::dom STATIC IMPORTED)
+  set_property(TARGET ftxui::dom PROPERTY
+    IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/ftxui/lib/libftxui-dom.a)
+  target_link_libraries(ftxui::dom INTERFACE ftxui::screen)
+
   add_library(ftxui::component STATIC IMPORTED)
   set_property(TARGET ftxui::component PROPERTY
     IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/ftxui/lib/libftxui-component.a)
+  target_link_libraries(ftxui::component INTERFACE ftxui::dom)
   # -----------------------------------------------------------------------------
 
   add_subdirectory(linux)

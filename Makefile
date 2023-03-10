@@ -36,7 +36,7 @@ linux: build-ftxui
 run: pkg/uebernotes-cli
 	@pkg/uebernotes-cli
 
-run-help: pkg/uebernotes-cli
+help: pkg/uebernotes-cli
 	@pkg/uebernotes-cli --help
 
 run-tests: pkg/uebernotes-core-tests

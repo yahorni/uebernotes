@@ -12,9 +12,11 @@
 | computer | chromium bookmarks          | import/export notes to compatible HTML bookmarks                                                           |
 | computer | knife.media links directory | import/export + directory sync                                                                             |
 | computer | newsboat links              | automated script with cli on computer to add note executed from newsboat                                   |
+| computer | ~/.local/share/bin/user/    | notes with code snippets support                                                                           |
 | phone    | notally app                 | android app (which is such as fast and convenient)                                                         |
 | phone    | habar app                   | sharing to android app                                                                                     |
 | phone    | via bookmarks               | sharing to android app                                                                                     |
+| phone    | instagram bookmarks         | sharing to android app                                                                                     |
 
 ## library:
 + external server WebDAV protocol sync
@@ -26,6 +28,8 @@
 + search
     - in opened note
     - in all notes
+    - ignoring diacritics
+    - ignoring case
 + implementation on C++
     - build as static lib for linux client
     - build as shared lib for android app
@@ -81,6 +85,7 @@
     - editor: `$EDITOR` env var, `xdg-open` or custom executable name (e.g. "vim")
 + some kind of local directory following and syncing mechanism
 + backup system (tied on import/export system)
++ csv in deckbook (delimiter '\,' - ?)
 
 ## android client:
 + Kotlin lang
@@ -88,6 +93,7 @@
 + fast opening (not like `joplin`, but like `notally`)
 + implementation on Kotlin, C++, Go or Rust (need research)
 + markdown preview
++ fast access screen
 
 ## web client:
 + try HUGO static page generator

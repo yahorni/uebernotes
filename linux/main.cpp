@@ -1,10 +1,8 @@
 #include <iostream>
 
-#include "core/config.hpp"
-
 #include "linux/argparser.hpp"
-#include "linux/client.hpp"
 #include "linux/tui.hpp"
+#include "linux/cli.hpp"
 
 auto parseArguments(int argc, char* argv[]) {
     try {
@@ -26,27 +24,13 @@ auto parseArguments(int argc, char* argv[]) {
 int main(int argc, char* argv[]) {
     auto clArgs = parseArguments(argc, argv);
 
-    if (clArgs.size() > 0) {
+    if (clArgs.hasOperation() || clArgs.has("help")) {
         std::cout << "CLI mode" << std::endl;
+        linux::CLI cli{clArgs};
     } else {
         std::cout << "TUI mode" << std::endl;
-        linux::TUI tui;
-        exit(0);
-    }
-
-    core::Config cfg;
-    if (clArgs.has("database")) cfg.database = clArgs.getString("database");
-
-    linux::Client client(cfg);
-
-    // TODO: add operation enum
-    if (clArgs.has("list-books")) {
-        client.listBooks();
-    } else if (clArgs.has("print-book")) {
-    } else if (clArgs.has("print-note")) {
-    } else if (clArgs.has("create-book")) {
-        client.createBook(clArgs.getString("create-book"));
-    } else if (clArgs.has("create-note")) {
+        linux::TUI tui{clArgs};
+        tui.run();
     }
 
     return 0;
