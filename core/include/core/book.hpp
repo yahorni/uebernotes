@@ -1,11 +1,12 @@
 #pragma once
 
+#include "core/types.hpp"
+#include "core/note.hpp"
+
 #include <list>
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include "core/common_types.hpp"
-#include "core/note.hpp"
 
 namespace core {
 
@@ -26,9 +27,8 @@ public:
 
     void loadNotes();
 
-    // void createNote(const NoteInfo& note);
-    NoteID createNote(NoteInfo&& note);
-    Note getNote(NoteID noteID) const;
+    std::optional<NoteID> createNote(NoteInfo&& note);
+    std::optional<Note> getNote(NoteID noteID) const;
 
 private:
     BookInfo _book;

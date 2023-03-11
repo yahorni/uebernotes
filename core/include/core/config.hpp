@@ -5,7 +5,7 @@
 namespace core {
 
 struct Config {
-    std::string database = "db.sqlite3";
+    std::string database;
 };
 
 }  // namespace core

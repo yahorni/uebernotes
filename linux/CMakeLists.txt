@@ -28,3 +28,27 @@ target_include_directories(${LINUX_CLIENT} PRIVATE ${PROJECT_ROOT}/third_party/c
 target_include_directories(${LINUX_CLIENT} PRIVATE ${PROJECT_ROOT}/pkg/ftxui/include)
 target_link_libraries(${LINUX_CLIENT} PRIVATE ftxui::screen ftxui::dom ftxui::component)
 # -----------------------------------------------------------------------------
+
+# tests
+# TODO include only if building tests
+set (LINUX_TESTS ${PROJECT_NAME}-cli-tests)
+file(GLOB_RECURSE LINUX_SOURCES_TESTS "tests/*.cpp")
+
+add_executable(${LINUX_TESTS} ${LINUX_SOURCES_TESTS} ${LINUX_SOURCES})
+target_include_directories(${LINUX_TESTS} PRIVATE ${LINUX_DIRS})
+target_compile_options(${LINUX_TESTS} PRIVATE -ggdb)
+set_target_properties(${LINUX_TESTS} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_ROOT}/pkg)
+
+# tests deps -- TODO: redo includes -------------------------------------------
+# core
+target_include_directories(${LINUX_TESTS} PRIVATE ${PROJECT_ROOT}/core/include)
+target_link_libraries(${LINUX_TESTS} PRIVATE uebernotes-core)
+# cxxopts
+target_include_directories(${LINUX_TESTS} PRIVATE ${PROJECT_ROOT}/third_party/cxxopts/include)
+# Catch2
+target_include_directories(${LINUX_TESTS} PRIVATE ../pkg/catch2/include)
+target_link_libraries(${LINUX_TESTS} PRIVATE Catch2::Catch2WithMain)
+# FTXUI
+target_include_directories(${LINUX_TESTS} PRIVATE ${PROJECT_ROOT}/pkg/ftxui/include)
+target_link_libraries(${LINUX_TESTS} PRIVATE ftxui::screen ftxui::dom ftxui::component)
+# -----------------------------------------------------------------------------

@@ -17,10 +17,19 @@ void Client::listBooks() {
     }
 }
 
-void Client::createBook(std::string_view book_name) {
-    core::BookInfo info{std::string(book_name)};
+void Client::createBook(std::string_view bookName) {
+    core::BookInfo info{std::string(bookName)};  // TODO: optimize string passing
     auto bookID = _storage.createBook(std::move(info));
-    std::cout << "New book ID: " << bookID << std::endl;
+    std::cout << "New book ID: " << bookID.value() << std::endl;
+}
+
+void Client::createNote(core::BookID bookID, std::string_view noteName, std::string_view content) {
+    core::NoteInfo info{std::string(noteName), std::string(content)};  // TODO: optimize string passing
+    auto book = _storage.getBook(bookID);
+    if (book.has_value()) {
+        auto noteID = book->createNote(std::move(info));
+        std::cout << "New note ID: " << noteID.value() << std::endl;
+    }
 }
 
 }  // namespace linux

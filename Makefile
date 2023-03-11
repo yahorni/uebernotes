@@ -33,14 +33,21 @@ linux: build-ftxui
 	cmake -S . -B linux/build
 	cd linux/build && make -j uebernotes-cli
 
+# TODO: remove ftxui?
+linux-tests: build-catch2 build-ftxui
+	cmake -S . -B linux/build
+	cd linux/build && make -j uebernotes-cli-tests
+
 run: pkg/uebernotes-cli
 	@pkg/uebernotes-cli
 
-help: pkg/uebernotes-cli
-	@pkg/uebernotes-cli --help
-
-run-tests: pkg/uebernotes-core-tests
+run-core-tests: pkg/uebernotes-core-tests
 	@pkg/uebernotes-core-tests
+
+run-linux-tests: pkg/uebernotes-cli-tests
+	@pkg/uebernotes-cli-tests
+
+tests: core-tests linux-tests run-core-tests run-linux-tests
 
 clean-catch2:
 	rm -rf third_party/catch2/build

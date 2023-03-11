@@ -1,10 +1,10 @@
 #pragma once
 
+#include "core/types.hpp"
+
 #include <cstdint>
 #include <list>
 #include <string>
-
-#include "core/common_types.hpp"
 
 namespace core {
 

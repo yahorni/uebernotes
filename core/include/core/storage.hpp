@@ -1,11 +1,12 @@
 #pragma once
 
-#include <list>
-
 #include "core/book.hpp"
 #include "core/config.hpp"
 #include "core/database.hpp"
 #include "core/note.hpp"
+
+#include <list>
+#include <optional>
 
 namespace core {
 
@@ -13,14 +14,14 @@ class Storage {
 public:
     explicit Storage(const Config& cfg);
 
-    // should I really restrict it explicitly (what about moving?)
+    // TODO: should I really restrict it explicitly (what about moving?) -- yes
     Storage(const Storage&) = delete;
     Storage& operator=(const Storage&) = delete;
 
     const BooksInfoCollection& getBooksInfo() const;
 
-    BookID createBook(BookInfo&& book);
-    Book getBook(BookID bookID);
+    std::optional<BookID> createBook(BookInfo&& book);
+    std::optional<Book> getBook(BookID bookID);
     void removeBook(BookID bookID);
 
 private:

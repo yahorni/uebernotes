@@ -22,18 +22,23 @@ const NotesInfoCollection& Book::getNotesInfo() const { return _notes; }
 
 void Book::loadNotes() { _notes = _db.loadNotesByBookID(_book.id); }
 
-// void Book::createNote(const NoteInfo& note) { _notes.push_back(note); }
-NoteID Book::createNote(NoteInfo&& note) {
+std::optional<NoteID> Book::createNote(NoteInfo&& note) {
     note.bookID = _book.id;
-    NoteID id = _db.storeNote(note);               // 1st DB call
-    NoteInfo insertedNote = _db.loadNoteByID(id);  // 2nd DB call
-    _notes.emplace_back(std::move(insertedNote));
-    return id;
+    NoteID id = _db.storeNote(note);                              // 1st DB call
+    std::optional<NoteInfo> insertedNote = _db.loadNoteByID(id);  // 2nd DB call
+    if (insertedNote.has_value()) {
+        _notes.emplace_back(std::move(insertedNote.value()));
+        return id;
+    }
+    return std::nullopt;
 }
 
-Note Book::getNote(NoteID noteID) const {
-    auto noteInfo = _db.loadNoteByID(noteID);
-    return Note(noteInfo, _db);
+std::optional<Note> Book::getNote(NoteID noteID) const {
+    std::optional<NoteInfo> loadedNote = _db.loadNoteByID(noteID);
+    if (loadedNote.has_value()) {
+        return Note(std::move(loadedNote.value()), _db);
+    }
+    return std::nullopt;
 }
 
 }  // namespace core

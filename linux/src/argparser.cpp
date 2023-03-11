@@ -1,8 +1,8 @@
 #include "linux/argparser.hpp"
 
-#include <map>
+#include "core/types.hpp"
 
-#include "core/common_types.hpp"
+#include <map>
 
 namespace linux {
 
@@ -19,16 +19,16 @@ static const std::map<Op, std::string> operations{{Op::list_books, "list-books"}
 
 CmdLineArgs::CmdLineArgs() {
     try {
-        _options.add_options()                                                         //
-            ("h,help", "Print help and exit")                                          //
-            ("d,database", "Database file path", cxxopts::value<std::string>(), "<path>");
+        _options.add_options()                 //
+            ("h,help", "Print help and exit")  //
+            ("d,database", "Database file path", cxxopts::value<std::string>()->default_value("db.sqlite3"), "<path>");
         _options.add_options("Operation")                                                                          //
             (operations.at(Op::list_books), "List all books")                                                      //
             (operations.at(Op::print_book), "Print notes from book", cxxopts::value<core::BookID>(), "<book_id>")  //
             (operations.at(Op::print_note), "Print note", cxxopts::value<core::NoteID>(), "<note_id>")             //
             (operations.at(Op::create_book), "Create new book", cxxopts::value<std::string>(), "<name>")           //
             (operations.at(Op::create_note), "Create new note", cxxopts::value<std::string>(), "<name>");
-        _options.add_options("Note creation")                                                     //
+        _options.add_options("Note creation")                                                       //
             ("b,book-id", "Set book ID for new note", cxxopts::value<core::BookID>(), "<book_id>")  //
             ("c,content", "Set content for new note", cxxopts::value<std::string>(), "<string>");
     } catch (const cxxopts::OptionSpecException& ex) {
@@ -36,7 +36,7 @@ CmdLineArgs::CmdLineArgs() {
     }
 }
 
-void CmdLineArgs::parse(int argc, char* argv[]) {
+void CmdLineArgs::parse(int argc, const char* const* argv) {
     _parse(argc, argv);
     // TODO: separate validation if/when exclusive group will be implemented
     _validate();
@@ -57,7 +57,7 @@ bool CmdLineArgs::hasOperation() const {
     return false;
 }
 
-void CmdLineArgs::_parse(int argc, char* argv[]) {
+void CmdLineArgs::_parse(int argc, const char* const* argv) {
     try {
         _parseResult = _options.parse(argc, argv);
     } catch (const cxxopts::OptionParseException& ex) {
@@ -67,17 +67,17 @@ void CmdLineArgs::_parse(int argc, char* argv[]) {
 
 void CmdLineArgs::_validate() {
     // TODO: make common dictionary/exclusive group subclass to use in ctor and here
-    uint8_t ops_amount = 0;
+    uint8_t opsAmount = 0;
     for (const auto& [_, op] : operations) {
-        if (has(op)) ops_amount++;
+        if (has(op)) opsAmount++;
     }
 
-    if (ops_amount > 1) {
+    if (opsAmount > 1) {
         // TODO: print what operations are given
         throw CmdLineError("Several operations given");
     }
 
-    if ((has("book-id") || has("content")) && !has("create-note")) {
+    if ((has("book-id") || has("content")) && !has(operations.at(Op::create_note))) {
         throw CmdLineError("Usage of note creation arguments without note name");
     }
 }

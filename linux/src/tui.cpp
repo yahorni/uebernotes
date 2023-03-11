@@ -1,7 +1,5 @@
 #include "linux/tui.hpp"
 
-#include <iostream>
-
 #include "ftxui/dom/elements.hpp"
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/screen/string.hpp"
@@ -11,7 +9,7 @@
 
 namespace linux {
 
-TUI::TUI(const CmdLineArgs&) {}
+TUI::TUI(const core::Config&) {}
 
 bool TUI::run() {
     using namespace ftxui;

@@ -1,14 +1,14 @@
 #pragma once
 
+#include "core/book.hpp"
+#include "core/note.hpp"
+
 #include <memory>
 #include <string>
 #include <string_view>
 
 #include <sqlite_orm/sqlite_orm.h>
 // https://github.com/fnc12/sqlite_orm/blob/master/examples/private_class_members.cpp
-
-#include "core/book.hpp"
-#include "core/note.hpp"
 
 namespace core {
 
@@ -32,15 +32,15 @@ class Database {
 public:
     explicit Database(std::string_view dbName);
 
-    // should I really restrict it explicitly (what about moving?)
+    // TODO: should I really restrict it explicitly (what about moving?) -- yes
     Database(const Database&) = delete;
     Database& operator=(const Database&) = delete;
 
     BookID storeBook(const BookInfo& book);
     NoteID storeNote(const NoteInfo& note);
 
-    BookInfo loadBookByID(BookID bookID);
-    NoteInfo loadNoteByID(NoteID noteID);
+    std::optional<BookInfo> loadBookByID(BookID bookID);
+    std::optional<NoteInfo> loadNoteByID(NoteID noteID);
 
     BooksInfoCollection loadBooks();
     NotesInfoCollection loadNotesByBookID(BookID bookID);

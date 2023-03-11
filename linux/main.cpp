@@ -1,8 +1,9 @@
 #include <iostream>
 
 #include "linux/argparser.hpp"
-#include "linux/tui.hpp"
+#include "core/config.hpp"
 #include "linux/cli.hpp"
+#include "linux/tui.hpp"
 
 auto parseArguments(int argc, char* argv[]) {
     try {
@@ -22,14 +23,16 @@ auto parseArguments(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-    auto clArgs = parseArguments(argc, argv);
+    auto cliArgs = parseArguments(argc, argv);
+    core::Config config{cliArgs.getString("database")};
 
-    if (clArgs.hasOperation() || clArgs.has("help")) {
+    if (cliArgs.hasOperation() || cliArgs.has("help")) {
         std::cout << "CLI mode" << std::endl;
-        linux::CLI cli{clArgs};
+        linux::CLI cli{config};
+        cli.run(cliArgs);
     } else {
         std::cout << "TUI mode" << std::endl;
-        linux::TUI tui{clArgs};
+        linux::TUI tui{config};
         tui.run();
     }
 

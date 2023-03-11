@@ -1,5 +1,7 @@
 #include "core/database.hpp"
 
+#include <iostream>
+
 namespace core {
 
 Database::Database(std::string_view dbName)
@@ -12,9 +14,27 @@ BookID Database::storeBook(const BookInfo& book) { return _dbStorage.insert(book
 
 NoteID Database::storeNote(const NoteInfo& note) { return _dbStorage.insert(note); }
 
-BookInfo Database::loadBookByID(BookID bookID) { return _dbStorage.get<BookInfo>(bookID); }
+std::optional<BookInfo> Database::loadBookByID(BookID bookID) {
+    try {
+        return _dbStorage.get<BookInfo>(bookID);
+    } catch (std::system_error& ex) {
+        // TODO: log error
+        std::cout << "Failed to get book: bookID = " << bookID << ", code = " << ex.code()
+                  << ", message = " << ex.what() << std::endl;
+    }
+    return std::nullopt;
+}
 
-NoteInfo Database::loadNoteByID(NoteID noteID) { return _dbStorage.get<NoteInfo>(noteID); }
+std::optional<NoteInfo> Database::loadNoteByID(NoteID noteID) {
+    try {
+        return _dbStorage.get<NoteInfo>(noteID);
+    } catch (std::system_error& ex) {
+        // TODO: log error
+        std::cout << "Failed to get note: noteID = " << noteID << ", code = " << ex.code()
+                  << ", message = " << ex.what() << std::endl;
+    }
+    return std::nullopt;
+}
 
 BooksInfoCollection Database::loadBooks() {
     auto books = _dbStorage.get_all<BookInfo>();

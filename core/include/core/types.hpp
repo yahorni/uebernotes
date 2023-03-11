@@ -1,8 +1,12 @@
 #pragma once
 
-// TODO: remove this file
+#include <cstdint>
 
-#include "core/book.hpp"
-#include "core/config.hpp"
-#include "core/note.hpp"
-#include "core/storage.hpp"
+namespace core {
+
+using NoteID = uint64_t;
+using BookID = uint64_t;
+
+class Database;
+
+}  // namespace core
