@@ -20,7 +20,7 @@ Note::Note(NoteInfo note, Database& db)
 const std::string& Note::getName() const { return _note.name; }
 const std::string& Note::getContent() const { return _note.content; }
 
-void Note::updateName(std::string&&) { printf("TODO: implement Note::updateName()\n"); }
-void Note::updateContent(std::string&&) { printf("TODO: implement Note::updateContent()\n"); }
+void Note::updateName(std::string&& newName) { _note.name = std::move(newName); }
+void Note::updateContent(std::string&& newContent) { _note.content = std::move(newContent); }
 
 }  // namespace core

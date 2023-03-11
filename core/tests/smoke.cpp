@@ -53,8 +53,11 @@ TEST_CASE("smoke", "[core]") {
     //
     auto note = book->getNote(noteID);
     // opening editor and modifying content
-    std::string newNoteContent = "new_content";
+    std::string newNoteName = "new_name";
+    note->updateName(std::string(newNoteName));
+    REQUIRE(note->getName() == newNoteName);
     //
-    note->updateContent(std::move(newNoteContent));
-    // REQUIRE(note->getContent() == newNoteContent);
+    std::string newNoteContent = "new_content";
+    note->updateContent(std::string(newNoteContent));
+    REQUIRE(note->getContent() == newNoteContent);
 }
