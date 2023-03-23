@@ -31,13 +31,19 @@
         - add book [ok]
         - show books [ok]
         - add note to book
-            + read content from CLI argument
+            + read content from CLI argument [ok]
             + read content from STDIN [TODO later]
-        - show list of notes from book
+        - show list of notes from book [ok]
+        - update note name
+        - update note content
+            + read content from CLI argument [ok]
+            + read content from STDIN [TODO later]
         - show note from book (at first - by ID, later - by name, maybe with note name prefix)
-            + print to console
+            + print to console [ok]
             + open in editor
             + open in pager
+        - remove book
+        - remove note
     + implement same functions as above with TUI
 + common:
     + project level cmake to build lib and linux client
@@ -45,6 +51,7 @@
 + lib: add webdav sync for files
 + linux: sync to CLI client
 + android: POC app to sync and show books
++ linux unit tests
 
 ## for simplicity in POC
 + store all book notes in book object (without limited caching or LRU)

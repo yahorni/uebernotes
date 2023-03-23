@@ -41,9 +41,22 @@ BooksInfoCollection Database::loadBooks() {
     return {books.begin(), books.end()};
 }
 
+template <class T> static NotesInfoCollection convertDBNotesToCollection(T&& dbNotes) {
+    NotesInfoCollection notes;
+    for (auto& note : dbNotes) {
+        notes.emplace_back(std::make_shared<NoteInfo>(std::move(note)));  // TODO: ensure it's moved
+    }
+    return notes;
+}
+
+NotesInfoCollection Database::loadNotes() {
+    auto notes = _dbStorage.get_all<NoteInfo>();
+    return convertDBNotesToCollection<decltype(notes)>(std::move(notes));
+}
+
 NotesInfoCollection Database::loadNotesByBookID(BookID bookID) {
     auto notes = _dbStorage.get_all<NoteInfo>(sql::where(sql::is_equal(&NoteInfo::bookID, bookID)));
-    return {notes.begin(), notes.end()};
+    return convertDBNotesToCollection<decltype(notes)>(std::move(notes));
 }
 
 }  // namespace core

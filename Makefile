@@ -29,6 +29,7 @@ core-tests: build-catch2
 	cmake -S . -B core/build
 	cd core/build && make -j uebernotes-core-tests
 
+# TODO: get rid of reinstalling ftxui?
 linux: build-ftxui
 	cmake -S . -B linux/build
 	cd linux/build && make -j uebernotes-cli

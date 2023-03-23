@@ -7,6 +7,9 @@
 | argument            | pascalCase              |
 | private class field | underscore + pascalCase |
 
+one-line `if` and `for` should be used with brackets
+in cpp file header is put on the first line, then one blank line followed by other includes
+
 ## notes
 + move private headers to src/, public to include/
 + [add to clang-format] order of headers:

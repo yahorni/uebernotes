@@ -2,21 +2,23 @@
 
 ## places to cover
 
-| WHERE    | WHAT                        | HOW TO COVER                                                                                               |
-| ---      | ---                         | ---                                                                                                        |
-| common   | joplin                      | joplin-like normal books                                                                                   |
-| common   | telegram saved messages     | inbox deck book with fast insert on mobile                                                                 |
-| computer | home dir text files         | fast inserting to deck inbox book in client / dmenu-like script to auto insert (like bookmarks.sh)         |
-| computer | dox/TODO.md file            | deck book + conversion between deck/normal                                                                 |
-| computer | bookmarks.sh script         | import/export notes to compatible b-marks file + automated script to update local b-marks (directory sync) |
-| computer | chromium bookmarks          | import/export notes to compatible HTML bookmarks                                                           |
-| computer | knife.media links directory | import/export + directory sync                                                                             |
-| computer | newsboat links              | automated script with cli on computer to add note executed from newsboat                                   |
-| computer | ~/.local/share/bin/user/    | notes with code snippets support                                                                           |
-| phone    | notally app                 | android app (which is such as fast and convenient)                                                         |
-| phone    | habar app                   | sharing to android app                                                                                     |
-| phone    | via bookmarks               | sharing to android app                                                                                     |
-| phone    | instagram bookmarks         | sharing to android app                                                                                     |
+| WHAT                        | WHERE    | HOW TO COVER                                                             |
+| ---                         | ---      | ---                                                                      |
+| joplin                      | common   | joplin-like normal books                                                 |
+| telegram saved messages     | common   | inbox deck book with fast insert on mobile                               |
+| home dir text files         | computer | 1. fast inserting to deck inbox book in client                           |
+|                             |          | 2. dmenu-like script to auto insert (like bookmarks.sh)                  |
+| dox/TODO.md file            | computer | deck book + conversion between deck/normal                               |
+| bookmarks.sh script         | computer | 1. import/export notes to compatible b-marks file                        |
+|                             |          | 2. automated script to update local b-marks (directory sync)             |
+| chromium bookmarks          | computer | import/export notes to compatible HTML bookmarks                         |
+| knife.media links directory | computer | import/export + directory sync                                           |
+| newsboat links              | computer | automated script with cli on computer to add note executed from newsboat |
+| ~/.local/share/bin/user/    | computer | notes with code snippets support                                         |
+| notally app                 | phone    | android app (which is such as fast and convenient)                       |
+| habar app                   | phone    | sharing to android app                                                   |
+| via bookmarks               | phone    | sharing to android app                                                   |
+| instagram bookmarks         | phone    | sharing to android app                                                   |
 
 ## library:
 + external server WebDAV protocol sync
@@ -114,6 +116,7 @@
 + cmake shared lib: https://stackoverflow.com/questions/17511496/how-to-create-a-shared-library-with-cmake
 + sqlite_orm examples: https://github.com/fnc12/sqlite_orm/tree/master/examples
 + catch2: https://github.com/catchorg/Catch2/blob/devel/docs/
++ android screening: https://github.com/Genymobile/scrcpy
 
 ## long term
 + in long term: telegram-bot for inbox book to be accessed from machine without app

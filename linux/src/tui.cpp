@@ -9,7 +9,8 @@
 
 namespace linux {
 
-TUI::TUI(const core::Config&) {}
+TUI::TUI(const core::AppContext& context)
+    : _client(context) {}
 
 bool TUI::run() {
     using namespace ftxui;

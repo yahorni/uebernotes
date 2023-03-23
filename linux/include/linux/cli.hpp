@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/config.hpp"
+#include "core/appcontext.hpp"
 #include "linux/argparser.hpp"
 #include "linux/client.hpp"
 
@@ -10,7 +10,7 @@ namespace linux {
 
 class CLI {
 public:
-    explicit CLI(const core::Config& config);
+    explicit CLI(const core::AppContext& config);
     void run(const CmdLineArgs& args);
 
 private:

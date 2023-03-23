@@ -1,9 +1,9 @@
-#include <iostream>
-
+#include "core/appcontext.hpp"
 #include "linux/argparser.hpp"
-#include "core/config.hpp"
 #include "linux/cli.hpp"
 #include "linux/tui.hpp"
+
+#include <iostream>
 
 auto parseArguments(int argc, char* argv[]) {
     try {
@@ -24,15 +24,15 @@ auto parseArguments(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
     auto cliArgs = parseArguments(argc, argv);
-    core::Config config{cliArgs.getString("database")};
+    const core::AppContext context{cliArgs.getString("database"), cliArgs.hasOperation()};
 
-    if (cliArgs.hasOperation() || cliArgs.has("help")) {
+    if (context.hasInitialOperation || cliArgs.has("help")) {
         std::cout << "CLI mode" << std::endl;
-        linux::CLI cli{config};
+        linux::CLI cli{context};
         cli.run(cliArgs);
     } else {
         std::cout << "TUI mode" << std::endl;
-        linux::TUI tui{config};
+        linux::TUI tui{context};
         tui.run();
     }
 

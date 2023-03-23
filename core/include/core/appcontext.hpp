@@ -4,8 +4,9 @@
 
 namespace core {
 
-struct Config {
+struct AppContext {
     std::string database;
+    bool hasInitialOperation;
 };
 
 }  // namespace core

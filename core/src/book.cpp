@@ -1,6 +1,6 @@
 #include "core/book.hpp"
 
-#include "core/database.hpp"
+#include "core/storage.hpp"
 
 namespace core {
 
@@ -13,32 +13,16 @@ BookInfo::BookInfo(BookID id, std::string&& name)
       name(std::move(name)) {}
 
 // Book
-Book::Book(BookInfo book, Database& db)
+Book::Book(BookInfo book, Storage& storage)
     : _book(std::move(book)),
-      _db(db) {}
+      _storage(storage),
+      _notes(_storage.getNotesInfoByBookID(_book.id)) {}
 
 const BookInfo& Book::getBookInfo() const { return _book; }
 const NotesInfoCollection& Book::getNotesInfo() const { return _notes; }
 
-void Book::loadNotes() { _notes = _db.loadNotesByBookID(_book.id); }
+std::optional<NoteID> Book::createNote(NoteInfo&& note) { return _storage.createNote(_book, std::move(note)); }
 
-std::optional<NoteID> Book::createNote(NoteInfo&& note) {
-    note.bookID = _book.id;
-    NoteID id = _db.storeNote(note);                              // 1st DB call
-    std::optional<NoteInfo> insertedNote = _db.loadNoteByID(id);  // 2nd DB call
-    if (insertedNote.has_value()) {
-        _notes.emplace_back(std::move(insertedNote.value()));
-        return id;
-    }
-    return std::nullopt;
-}
-
-std::optional<Note> Book::getNote(NoteID noteID) const {
-    std::optional<NoteInfo> loadedNote = _db.loadNoteByID(noteID);
-    if (loadedNote.has_value()) {
-        return Note(std::move(loadedNote.value()), _db);
-    }
-    return std::nullopt;
-}
+std::optional<Note> Book::getNote(NoteID noteID) const { return _storage.getNote(noteID); }
 
 }  // namespace core

@@ -2,8 +2,8 @@
 
 #include "core/book.hpp"
 #include "core/note.hpp"
+#include "core/types.hpp"
 
-#include <memory>
 #include <string>
 #include <string_view>
 
@@ -43,6 +43,7 @@ public:
     std::optional<NoteInfo> loadNoteByID(NoteID noteID);
 
     BooksInfoCollection loadBooks();
+    NotesInfoCollection loadNotes();
     NotesInfoCollection loadNotesByBookID(BookID bookID);
 
 private:

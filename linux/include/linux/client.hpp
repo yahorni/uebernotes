@@ -1,16 +1,18 @@
 #pragma once
 
-#include "core/config.hpp"
+#include "core/appcontext.hpp"
 #include "core/storage.hpp"
 
 namespace linux {
 
 class Client {
 public:
-    explicit Client(const core::Config& cfg);
+    explicit Client(const core::AppContext& context);
     core::Storage& getStorage();
 
     void listBooks();
+    void printBook(core::BookID bookID);
+    void printNote(core::NoteID noteID);
     void createBook(std::string_view bookName);
     void createNote(core::BookID bookID, std::string_view noteName, std::string_view content);
 

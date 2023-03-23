@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/types.hpp"
 #include "core/note.hpp"
+#include "core/types.hpp"
 
 #include <list>
 #include <optional>
@@ -9,6 +9,8 @@
 #include <string_view>
 
 namespace core {
+
+class Storage;
 
 struct BookInfo {
     BookID id;
@@ -20,19 +22,17 @@ struct BookInfo {
 
 class Book {
 public:
-    Book(BookInfo book, Database& db);
+    Book(BookInfo book, Storage& storage);
 
     const BookInfo& getBookInfo() const;
     const NotesInfoCollection& getNotesInfo() const;
-
-    void loadNotes();
 
     std::optional<NoteID> createNote(NoteInfo&& note);
     std::optional<Note> getNote(NoteID noteID) const;
 
 private:
     BookInfo _book;
-    Database& _db;
+    Storage& _storage;
     NotesInfoCollection _notes;
 };
 
