@@ -1,7 +1,7 @@
 [submodule "third_party/sqlite_orm"]
 	path = third_party/sqlite_orm
 	url = https://github.com/fnc12/sqlite_orm
-    branch = 4861e407eb94740e12ea7fd496945ed5702c3f4c   # tags/v1.8
+	branch = ff7c878af872f7987b62d825284fb25d6043af10   # tags/v1.8.2
 [submodule "third_party/cxxopts"]
 	path = third_party/cxxopts
 	url = https://github.com/jarro2783/cxxopts

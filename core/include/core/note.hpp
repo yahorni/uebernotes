@@ -14,11 +14,10 @@ class Storage;
 struct NoteInfo {
     NoteID id;
     BookID bookID;
-    std::string name;
     std::string content;
 
-    explicit NoteInfo(std::string name = "", std::string content = "");             // for manual creation
-    NoteInfo(NoteID id, BookID bookID, std::string&& name, std::string&& content);  // for database
+    explicit NoteInfo(std::string content = "");             // for manual creation
+    NoteInfo(NoteID id, BookID bookID, std::string&& content);  // for database
     NoteInfo(const NoteInfo&) = delete;
     NoteInfo(NoteInfo&&);
 };
@@ -27,10 +26,7 @@ class Note {
 public:
     Note(NoteInfo note, Storage& storage);
 
-    const std::string& getName() const;
     const std::string& getContent() const;
-
-    void updateName(std::string&& newName);
     void updateContent(std::string&& newContent);
 
 private:

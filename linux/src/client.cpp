@@ -15,7 +15,8 @@ void Client::listBooks() {
     const auto& books = _storage.getBooksInfo();
     std::cout << "Amount of books: " << books.size() << std::endl;
     for (const auto& book : books) {
-        std::cout << "ID: " << book.id << " | Name: " << book.name << std::endl;
+        std::cout << "ID: " << book.id  //
+                  << " | Name: " << book.name << std::endl;
     }
 }
 
@@ -26,17 +27,17 @@ void Client::printBook(core::BookID bookID) {
         for (const auto& note : notes) {
             auto truncated_content = std::string_view(note->content).substr(0, 50);
 
-            std::cout << "ID: " << note->id << " | Book ID: " << note->bookID << " | Name: " << note->name
-                      << " | Content: " << truncated_content << " |" << std::endl;
+            std::cout << "ID: " << note->id                   //
+                      << " | Book ID: " << note->bookID       //
+                      << " | Content: " << truncated_content  //
+                      << " |" << std::endl;
         }
     }
 }
 
 void Client::printNote(core::NoteID noteID) {
     if (const auto note = _storage.getNote(noteID); note.has_value()) {
-        std::cout << "Name: " << note->getName() << std::endl
-                  << "Content: " << std::endl
-                  << note->getContent() << std::endl;
+        std::cout << "Content: " << std::endl << note->getContent() << std::endl;
     }
 }
 
@@ -46,8 +47,8 @@ void Client::createBook(std::string_view bookName) {
     std::cout << "New book ID: " << bookID.value() << std::endl;
 }
 
-void Client::createNote(core::BookID bookID, std::string_view noteName, std::string_view content) {
-    core::NoteInfo info{std::string(noteName), std::string(content)};  // TODO: optimize string passing
+void Client::createNote(core::BookID bookID, std::string_view content) {
+    core::NoteInfo info{std::string(content)};  // TODO: optimize string passing
     if (auto book = _storage.getBook(bookID); book.has_value()) {
         auto noteID = book->createNote(std::move(info));
         std::cout << "New note ID: " << noteID.value() << std::endl;

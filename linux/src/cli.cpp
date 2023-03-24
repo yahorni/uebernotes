@@ -18,7 +18,7 @@ void CLI::run(const CmdLineArgs& args) {
     } else if (args.has("create-book")) {
         _client.createBook(args.getString("create-book"));
     } else if (args.has("create-note")) {
-        _client.createNote(args.getUInt64("book-id"), args.getString("create-note"), args.getString("content"));
+        _client.createNote(args.getUInt64("create-note"), args.getString("content"));
     }
 }
 

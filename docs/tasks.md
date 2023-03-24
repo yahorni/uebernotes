@@ -34,7 +34,7 @@
             + read content from CLI argument [ok]
             + read content from STDIN [TODO later]
         - show list of notes from book [ok]
-        - update note name
+        - update book name
         - update note content
             + read content from CLI argument [ok]
             + read content from STDIN [TODO later]

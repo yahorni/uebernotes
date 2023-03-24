@@ -23,7 +23,6 @@ inline auto initStorage(std::string_view _dbName) {
         sql::make_table("normal_notes",                                                             //
                         sql::make_column("id", &NoteInfo::id, sql::primary_key().autoincrement()),  //
                         sql::make_column("book_id", &NoteInfo::bookID),                             //
-                        sql::make_column("name", &NoteInfo::name),                                  //
                         sql::make_column("content", &NoteInfo::content),                            //
                         sql::foreign_key(&NoteInfo::bookID).references(&BookInfo::id)));
 }

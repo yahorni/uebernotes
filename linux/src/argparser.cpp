@@ -27,9 +27,8 @@ CmdLineArgs::CmdLineArgs() {
             (operations.at(Op::print_book), "Print notes from book", cxxopts::value<core::BookID>(), "<book_id>")  //
             (operations.at(Op::print_note), "Print note", cxxopts::value<core::NoteID>(), "<note_id>")             //
             (operations.at(Op::create_book), "Create new book", cxxopts::value<std::string>(), "<name>")           //
-            (operations.at(Op::create_note), "Create new note", cxxopts::value<std::string>(), "<name>");
-        _options.add_options("Note creation")                                                       //
-            ("b,book-id", "Set book ID for new note", cxxopts::value<core::BookID>(), "<book_id>")  //
+            (operations.at(Op::create_note), "Create new note", cxxopts::value<core::BookID>(), "<book_id>");      //
+        _options.add_options("Note creation")                                                                      //
             ("c,content", "Set content for new note", cxxopts::value<std::string>(), "<string>");
     } catch (const cxxopts::OptionSpecException& ex) {
         throw CmdLineError(ex.what());
