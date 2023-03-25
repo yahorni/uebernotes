@@ -38,6 +38,7 @@
         - update note content
             + read content from CLI argument [ok]
             + read content from STDIN [TODO later]
+        - add caching of loaded items
         - show note from book (at first - by ID, later - by name, maybe with note name prefix)
             + print to console [ok]
             + open in editor
@@ -59,3 +60,4 @@
 + skip sqlite unicode support enabling
 + skip cxxopts unicode support enabling (https://github.com/jarro2783/cxxopts/wiki/Unicode-support)
 + define proper public API for core later
++ linux: only one app instance assumed running

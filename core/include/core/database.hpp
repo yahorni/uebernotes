@@ -31,19 +31,22 @@ class Database {
 public:
     explicit Database(std::string_view dbName);
 
-    // TODO: should I really restrict it explicitly (what about moving?) -- yes
     Database(const Database&) = delete;
     Database& operator=(const Database&) = delete;
+    Database(Database&&) = delete;
+    Database& operator=(Database&&) = delete;
 
-    BookID storeBook(const BookInfo& book);
-    NoteID storeNote(const NoteInfo& note);
+    std::optional<BookID> insertBook(const BookInfo& book);
+    std::optional<NoteID> insertNote(const NoteInfo& note);
 
-    std::optional<BookInfo> loadBookByID(BookID bookID);
-    std::optional<NoteInfo> loadNoteByID(NoteID noteID);
+    std::shared_ptr<BookInfo> loadBookByID(BookID bookID);
+    std::shared_ptr<NoteInfo> loadNoteByID(NoteID noteID);
+    BooksCache loadBooks();
+    NotesCache loadAllNotes();
+    NotesCache loadNotesByBookID(BookID bookID);
 
-    BooksInfoCollection loadBooks();
-    NotesInfoCollection loadNotes();
-    NotesInfoCollection loadNotesByBookID(BookID bookID);
+    bool updateBook(BookID bookID, const std::string& name);
+    bool updateNote(NoteID noteID, const std::string& content);
 
 private:
     using DatabaseStorage = decltype(initStorage(""));

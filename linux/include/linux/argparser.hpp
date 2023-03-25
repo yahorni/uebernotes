@@ -2,8 +2,8 @@
 
 #include "linux/metadata.hpp"
 
-#include <string>
 #include <cxxopts.hpp>
+#include <string>
 
 namespace linux {
 

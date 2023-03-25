@@ -10,51 +10,94 @@ Database::Database(std::string_view dbName)
     _dbStorage.sync_schema();
 }
 
-BookID Database::storeBook(const BookInfo& book) { return _dbStorage.insert(book); }
-
-NoteID Database::storeNote(const NoteInfo& note) { return _dbStorage.insert(note); }
-
-std::optional<BookInfo> Database::loadBookByID(BookID bookID) {
+std::optional<BookID> Database::insertBook(const BookInfo& book) {
     try {
-        return _dbStorage.get<BookInfo>(bookID);
+        return _dbStorage.insert(book);
+    } catch (const std::system_error& ex) {
+        std::cout << "Failed to insert book: bookID = " << book.id << ", code = " << ex.code()
+                  << ", message = " << ex.what() << std::endl;
+    }
+    return std::nullopt;
+}
+
+std::optional<NoteID> Database::insertNote(const NoteInfo& note) {
+    try {
+        return _dbStorage.insert(note);
+    } catch (const std::system_error& ex) {
+        std::cout << "Failed to insert note: noteID = " << note.id << ", code = " << ex.code()
+                  << ", message = " << ex.what() << std::endl;
+    }
+    return std::nullopt;
+}
+
+std::shared_ptr<BookInfo> Database::loadBookByID(BookID bookID) {
+    try {
+        // TODO: use get_pointer with std::unique_ptr to get rid of exception
+        return std::make_shared<BookInfo>(_dbStorage.get<BookInfo>(bookID));
     } catch (std::system_error& ex) {
         // TODO: log error
         std::cout << "Failed to get book: bookID = " << bookID << ", code = " << ex.code()
                   << ", message = " << ex.what() << std::endl;
     }
-    return std::nullopt;
+    return nullptr;
 }
 
-std::optional<NoteInfo> Database::loadNoteByID(NoteID noteID) {
+std::shared_ptr<NoteInfo> Database::loadNoteByID(NoteID noteID) {
     try {
-        return _dbStorage.get<NoteInfo>(noteID);
+        // TODO: use get_pointer with std::unique_ptr to get rid of exception
+        return std::make_shared<NoteInfo>(_dbStorage.get<NoteInfo>(noteID));
     } catch (std::system_error& ex) {
         // TODO: log error
         std::cout << "Failed to get note: noteID = " << noteID << ", code = " << ex.code()
                   << ", message = " << ex.what() << std::endl;
     }
-    return std::nullopt;
+    return nullptr;
 }
 
-BooksInfoCollection Database::loadBooks() {
-    auto books = _dbStorage.get_all<BookInfo>();
-    return {books.begin(), books.end()};
+bool Database::updateBook(BookID bookID, const std::string& name) {
+    if (!_dbStorage.count<BookInfo>(sql::where(sql::is_equal(&BookInfo::id, bookID)))) {
+        return false;
+    }
+
+    _dbStorage.update_all(sql::set(sql::c(&BookInfo::name) = name),  //
+                          sql::where(sql::is_equal(&BookInfo::id, bookID)));
+    return true;
 }
 
-template <class T> static NotesInfoCollection convertDBNotesToCollection(T&& dbNotes) {
-    NotesInfoCollection notes;
+bool Database::updateNote(NoteID noteID, const std::string& content) {
+    if (!_dbStorage.count<NoteInfo>(sql::where(sql::is_equal(&NoteInfo::id, noteID)))) {
+        return false;
+    }
+
+    _dbStorage.update_all(sql::set(sql::c(&NoteInfo::content) = content),
+                          sql::where(sql::is_equal(&NoteInfo::id, noteID)));
+    return true;
+}
+
+BooksCache Database::loadBooks() {
+    auto dbBooks = _dbStorage.get_all<BookInfo>();
+    BooksCache books;
+    for (auto& book : dbBooks) {
+        books.emplace(std::make_shared<BookInfo>(std::move(book)));
+    }
+    return books;
+}
+
+template <class T>
+static NotesCache convertDBNotesToCollection(T&& dbNotes) {
+    NotesCache notes;
     for (auto& note : dbNotes) {
-        notes.emplace_back(std::make_shared<NoteInfo>(std::move(note)));  // TODO: ensure it's moved
+        notes.emplace(std::make_shared<NoteInfo>(std::move(note)));
     }
     return notes;
 }
 
-NotesInfoCollection Database::loadNotes() {
+NotesCache Database::loadAllNotes() {
     auto notes = _dbStorage.get_all<NoteInfo>();
     return convertDBNotesToCollection<decltype(notes)>(std::move(notes));
 }
 
-NotesInfoCollection Database::loadNotesByBookID(BookID bookID) {
+NotesCache Database::loadNotesByBookID(BookID bookID) {
     auto notes = _dbStorage.get_all<NoteInfo>(sql::where(sql::is_equal(&NoteInfo::bookID, bookID)));
     return convertDBNotesToCollection<decltype(notes)>(std::move(notes));
 }

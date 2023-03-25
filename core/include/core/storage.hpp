@@ -8,40 +8,64 @@
 
 #include <memory>
 #include <optional>
+#include <set>
+#include <string>
 #include <unordered_set>
 
 namespace core {
 
-using NotesCache = std::unordered_set<std::shared_ptr<NoteInfo>>;
+class StorageCache {
+public:
+    explicit StorageCache(bool isActive);
+
+    void initialize(BooksCache&& books, NotesCache&& notes);
+
+    void addBook(BookInfo&& book);
+    void addNote(NoteInfo&& note);
+    void addNotes(const NotesCache& notes);
+
+    const BooksCache& getBooks() const;
+    NotesCache getNotesByBookID(BookID bookID) const;
+
+    std::shared_ptr<BookInfo> getBook(BookID bookID) const;
+    std::shared_ptr<NoteInfo> getNote(NoteID noteID) const;
+
+    const bool isActive;
+
+private:
+    BooksCache _booksCache;
+    NotesCache _notesCache;
+};
 
 class Storage {
 public:
     explicit Storage(const AppContext& context);
 
-    // TODO: should I really restrict it explicitly (what about moving?) -- yes
     Storage(const Storage&) = delete;
     Storage& operator=(const Storage&) = delete;
+    Storage(Storage&&) = delete;
+    Storage& operator=(Storage&&) = delete;
 
-    const BooksInfoCollection& getBooksInfo() const;
-    NotesInfoCollection getNotesInfoByBookID(BookID bookID);
+    BooksCache getBooksInfo() const;
+    NotesCache getNotesInfoByBookID(BookID bookID) const;
 
     std::optional<BookID> createBook(BookInfo&& book);
     std::optional<Book> getBook(BookID bookID);
+    void updateBook(BookID bookID, std::string&& name);
     void removeBook(BookID bookID);
 
-    std::optional<NoteID> createNote(const BookInfo& book, NoteInfo&& note);
-    std::optional<Note> getNote(NoteID noteID);
+    std::optional<NoteID> createNote(NoteInfo&& note);
+    std::optional<Note> getNote(NoteID noteID) const;
+    void updateNote(NoteID noteID, std::string&& content);
     void removeNote(NoteID noteID);
 
 private:
-    void initializeCache();
-    void moveNotesToCache(NotesInfoCollection&& notes);
+    std::shared_ptr<BookInfo> loadBookInfo(BookID bookID) const;
+    std::shared_ptr<NoteInfo> loadNoteInfo(NoteID noteID) const;
 
-    Database _db;
+    mutable Database _db;
 
-    BooksInfoCollection _booksInfo;
-    std::unordered_set<BookID> _booksWithCachedNotes;
-    NotesCache _notesInfo;
+    StorageCache _cache;
 };
 
 }  // namespace core

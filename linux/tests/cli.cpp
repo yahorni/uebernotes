@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include "core/appcontext.hpp"
 #include "linux/argparser.hpp"
 #include "linux/cli.hpp"
 #include "linux/metadata.hpp"
@@ -7,10 +8,9 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
-#include <vector>
 
-core::BookID createBook(core::Storage& storage, std::string bookName) {
-    core::BookInfo bookInfo{std::move(bookName)};
+core::BookID createBook(core::Storage& storage, std::string name) {
+    core::BookInfo bookInfo{std::move(name)};
     auto bookID = storage.createBook(std::move(bookInfo));
     REQUIRE(bookID.has_value());
     return bookID.value();
@@ -23,7 +23,8 @@ TEST_CASE("cli", "[linux]") {
     // remove old database
     if (fs::exists(database)) REQUIRE(fs::remove(database));
 
-    core::Storage storage{core::Config{database}};
+    core::AppContext context{database, false};
+    core::Storage storage{context};
 
     SECTION("note creation") {
         // prepare book in db
@@ -31,32 +32,29 @@ TEST_CASE("cli", "[linux]") {
         auto bookIDStr = std::to_string(bookID);
 
         // prepare note in cli
-        const auto noteName = "note1";
         const auto noteContent = "some large string with note 1 content to run the test";
 
         // prepare env args
-        int argc = 9;
+        int argc = 7;
         const char* const argv[]{linux::program_name,                     //
-                                 "--create-note",     noteName,           //
-                                 "--book-id",         bookIDStr.c_str(),  //
-                                 "--content",         noteContent,        //
+                                 "--create-note",     bookIDStr.c_str(),  //
+                                 "--note-content",    noteContent,        //
                                  "--database",        database};
+
+        std::cout << argc << argv << std::endl;
 
         // run client
         linux::CmdLineArgs cliArgs;
         cliArgs.parse(argc, argv);
-        core::Config config{database};
-        auto cli = linux::CLI{config};
+        auto cli = linux::CLI{context};
         cli.run(cliArgs);
 
-        // check db state
+        // // check db state
         auto loadedBook = storage.getBook(bookID);
-        loadedBook->loadNotes();
         auto loadedNotes = loadedBook->getNotesInfo();
         REQUIRE(loadedNotes.size() == 1);
-        auto loadedNote = loadedNotes.front();
-        REQUIRE(loadedNote.name == noteName);
-        REQUIRE(loadedNote.content == noteContent);
+        auto loadedNote = *loadedNotes.begin();
+        REQUIRE(loadedNote->content == noteContent);
     }
 
     SECTION("list_books") {
@@ -75,8 +73,7 @@ TEST_CASE("cli", "[linux]") {
         // run client
         linux::CmdLineArgs cliArgs;
         cliArgs.parse(argc, argv);
-        core::Config config{database};
-        auto cli = linux::CLI{config};
+        auto cli = linux::CLI{context};
         cli.run(cliArgs);
 
         // check db state

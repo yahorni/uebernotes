@@ -3,6 +3,8 @@
 #include "core/appcontext.hpp"
 #include "core/storage.hpp"
 
+#include <string>
+
 namespace linux {
 
 class Client {
@@ -13,8 +15,10 @@ public:
     void listBooks();
     void printBook(core::BookID bookID);
     void printNote(core::NoteID noteID);
-    void createBook(std::string_view bookName);
-    void createNote(core::BookID bookID, std::string_view content);
+    void createBook(std::string&& name);
+    void createNote(core::BookID bookID, std::string&& content);
+    void updateBook(core::BookID bookID, std::string&& name);
+    void updateNote(core::NoteID noteID, std::string&& content);
 
 private:
     core::Storage _storage;

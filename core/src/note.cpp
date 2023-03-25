@@ -17,13 +17,11 @@ NoteInfo::NoteInfo(NoteInfo&& other)
     : NoteInfo(other.id, other.bookID, std::move(other.content)) {}
 
 // Note
-Note::Note(NoteInfo note, Storage& storage)
-    : _note(std::move(note)),
-      _storage(storage) {}
+Note::Note(std::shared_ptr<NoteInfo> note)
+    : _note(std::move(note)) {}
 
-const std::string& Note::getContent() const { return _note.content; }
+const std::string& Note::getContent() const { return _note->content; }
 
-// TODO: update data in db
-void Note::updateContent(std::string&& newContent) { _note.content = std::move(newContent); }
+void Note::updateContent(std::string&& newContent) { _note->content = std::move(newContent); }
 
 }  // namespace core

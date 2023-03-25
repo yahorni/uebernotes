@@ -9,31 +9,37 @@ namespace linux {
 // TODO: add unittests for CmdLineArgs
 // TODO: log all CmdLineError
 
-enum class Op { list_books, print_book, print_note, create_book, create_note };
+enum GroupIdx { standard = 0, operation = 1, create_update = 2 };
+static const std::vector<std::string> groups{"", "Operation", "Create/update"};
 
-static const std::map<Op, std::string> operations{{Op::list_books, "list-books"},
-                                                  {Op::print_book, "print-book"},
-                                                  {Op::print_note, "print-note"},
-                                                  {Op::create_book, "create-book"},
-                                                  {Op::create_note, "create-note"}};
+enum class Op { list_books, print_book, print_note, create_book, create_note, update_book, update_note };
+static const std::map<Op, std::string> operations{{Op::list_books, "list-books"},   {Op::print_book, "print-book"},
+                                                  {Op::print_note, "print-note"},   {Op::create_book, "create-book"},
+                                                  {Op::create_note, "create-note"}, {Op::update_book, "update-book"},
+                                                  {Op::update_note, "update-note"}};
 
 CmdLineArgs::CmdLineArgs() {
     try {
         _options.add_options()                 //
             ("h,help", "Print help and exit")  //
             ("d,database", "Database file path", cxxopts::value<std::string>()->default_value("db.sqlite3"), "<path>");
-        _options.add_options("Operation")                                                                          //
+        _options.add_options(groups.at(GroupIdx::operation))                                                          //
             (operations.at(Op::list_books), "List all books")                                                      //
             (operations.at(Op::print_book), "Print notes from book", cxxopts::value<core::BookID>(), "<book_id>")  //
             (operations.at(Op::print_note), "Print note", cxxopts::value<core::NoteID>(), "<note_id>")             //
             (operations.at(Op::create_book), "Create new book", cxxopts::value<std::string>(), "<name>")           //
-            (operations.at(Op::create_note), "Create new note", cxxopts::value<core::BookID>(), "<book_id>");      //
-        _options.add_options("Note creation")                                                                      //
-            ("c,content", "Set content for new note", cxxopts::value<std::string>(), "<string>");
+            (operations.at(Op::create_note), "Create new note", cxxopts::value<core::BookID>(), "<book_id>")       //
+            (operations.at(Op::update_book), "Update book", cxxopts::value<core::BookID>(), "<book_id>")           //
+            (operations.at(Op::update_note), "Update note", cxxopts::value<core::BookID>(), "<note_id>");
+        _options.add_options(groups.at(GroupIdx::create_update))                          //
+            ("n,book-name", "Set book name", cxxopts::value<std::string>(), "<name>")  //
+            ("c,note-content", "Set note content", cxxopts::value<std::string>(), "<string>");
     } catch (const cxxopts::OptionSpecException& ex) {
         throw CmdLineError(ex.what());
     }
 }
+
+std::string CmdLineArgs::help() const { return _options.help(groups); }
 
 void CmdLineArgs::parse(int argc, const char* const* argv) {
     _parse(argc, argv);
@@ -75,12 +81,6 @@ void CmdLineArgs::_validate() {
         // TODO: print what operations are given
         throw CmdLineError("Several operations given");
     }
-
-    if ((has("book-id") || has("content")) && !has(operations.at(Op::create_note))) {
-        throw CmdLineError("Usage of note creation arguments without note name");
-    }
 }
-
-std::string CmdLineArgs::help() const { return _options.help({"", "Operation", "Note creation"}); }
 
 }  // namespace linux

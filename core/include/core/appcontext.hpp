@@ -6,7 +6,7 @@ namespace core {
 
 struct AppContext {
     std::string database;
-    bool hasInitialOperation;
+    bool useCaching;
 };
 
 }  // namespace core

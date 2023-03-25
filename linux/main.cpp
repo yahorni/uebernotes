@@ -24,9 +24,9 @@ auto parseArguments(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
     auto cliArgs = parseArguments(argc, argv);
-    const core::AppContext context{cliArgs.getString("database"), cliArgs.hasOperation()};
+    const core::AppContext context{cliArgs.getString("database"), !cliArgs.hasOperation()};
 
-    if (context.hasInitialOperation || cliArgs.has("help")) {
+    if (cliArgs.hasOperation() || cliArgs.has("help")) {
         std::cout << "CLI mode" << std::endl;
         linux::CLI cli{context};
         cli.run(cliArgs);
