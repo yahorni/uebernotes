@@ -6,7 +6,6 @@
 #include "linux/metadata.hpp"
 
 #include <filesystem>
-#include <iostream>
 #include <string>
 
 core::BookID createBook(core::Storage& storage, std::string name) {
@@ -41,17 +40,14 @@ TEST_CASE("cli", "[linux]") {
                                  "--note-content",    noteContent,        //
                                  "--database",        database};
 
-        std::cout << argc << argv << std::endl;
-
         // run client
         linux::CmdLineArgs cliArgs;
         cliArgs.parse(argc, argv);
         auto cli = linux::CLI{context};
         cli.run(cliArgs);
 
-        // // check db state
-        auto loadedBook = storage.getBook(bookID);
-        auto loadedNotes = loadedBook->getNotesInfo();
+        // check db state
+        auto loadedNotes = storage.getNotesInfoByBookID(bookID);
         REQUIRE(loadedNotes.size() == 1);
         auto loadedNote = *loadedNotes.begin();
         REQUIRE(loadedNote->content == noteContent);

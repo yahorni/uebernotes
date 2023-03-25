@@ -18,18 +18,18 @@ struct NoteInfo {
     BookID bookID;
     std::string content;
 
-    explicit NoteInfo(std::string content = "");                // for manual creation
-    NoteInfo(NoteID id, BookID bookID, std::string&& content);  // for database
+    explicit NoteInfo(BookID bookID = 0, std::string&& content = "");
+    NoteInfo(NoteID id, BookID bookID, std::string&& content);
     NoteInfo(const NoteInfo&) = delete;
     NoteInfo(NoteInfo&&);
 };
 
 class Note {
 public:
-    Note(std::shared_ptr<NoteInfo> note);
+    explicit Note(std::shared_ptr<NoteInfo> note);
 
+    BookID getBookID() const;
     const std::string& getContent() const;
-    void updateContent(std::string&& newContent);
 
 private:
     std::shared_ptr<NoteInfo> _note;

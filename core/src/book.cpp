@@ -13,21 +13,9 @@ BookInfo::BookInfo(BookID id, std::string&& name)
       name(std::move(name)) {}
 
 // Book
-Book::Book(std::shared_ptr<BookInfo> book, Storage& storage)
-    : _book(std::move(book)),
-      _storage(storage) {}
+Book::Book(std::shared_ptr<BookInfo> book)
+    : _book(std::move(book)) {}
 
-const BookInfo& Book::getBookInfo() const { return *_book; }
-NotesCache Book::getNotesInfo() const { return _storage.getNotesInfoByBookID(_book->id); }
-
-std::optional<NoteID> Book::createNote(NoteInfo&& note) {
-    note.bookID = _book->id;
-    if (auto id = _storage.createNote(std::move(note)); id.has_value()) {
-        return *id;
-    }
-    return std::nullopt;
-}
-
-std::optional<Note> Book::getNote(NoteID noteID) const { return _storage.getNote(noteID); }
+const std::string& Book::getName() const { return _book->name; }
 
 }  // namespace core

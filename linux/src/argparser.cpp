@@ -12,26 +12,38 @@ namespace linux {
 enum GroupIdx { standard = 0, operation = 1, create_update = 2 };
 static const std::vector<std::string> groups{"", "Operation", "Create/update"};
 
-enum class Op { list_books, print_book, print_note, create_book, create_note, update_book, update_note };
-static const std::map<Op, std::string> operations{{Op::list_books, "list-books"},   {Op::print_book, "print-book"},
-                                                  {Op::print_note, "print-note"},   {Op::create_book, "create-book"},
-                                                  {Op::create_note, "create-note"}, {Op::update_book, "update-book"},
-                                                  {Op::update_note, "update-note"}};
+enum class Op {
+    list_books,
+    print_book,
+    print_note,
+    create_book,
+    create_note,
+    update_book,
+    update_note,
+    remove_book,
+    remove_note
+};
+static const std::map<Op, std::string> operations{
+    {Op::list_books, "list-books"},   {Op::print_book, "print-book"},   {Op::print_note, "print-note"},
+    {Op::create_book, "create-book"}, {Op::create_note, "create-note"}, {Op::update_book, "update-book"},
+    {Op::update_note, "update-note"}, {Op::remove_book, "remove-book"}, {Op::remove_note, "remove-note"}};
 
 CmdLineArgs::CmdLineArgs() {
     try {
         _options.add_options()                 //
             ("h,help", "Print help and exit")  //
             ("d,database", "Database file path", cxxopts::value<std::string>()->default_value("db.sqlite3"), "<path>");
-        _options.add_options(groups.at(GroupIdx::operation))                                                          //
+        _options.add_options(groups.at(GroupIdx::operation))                                                       //
             (operations.at(Op::list_books), "List all books")                                                      //
             (operations.at(Op::print_book), "Print notes from book", cxxopts::value<core::BookID>(), "<book_id>")  //
             (operations.at(Op::print_note), "Print note", cxxopts::value<core::NoteID>(), "<note_id>")             //
             (operations.at(Op::create_book), "Create new book", cxxopts::value<std::string>(), "<name>")           //
             (operations.at(Op::create_note), "Create new note", cxxopts::value<core::BookID>(), "<book_id>")       //
             (operations.at(Op::update_book), "Update book", cxxopts::value<core::BookID>(), "<book_id>")           //
-            (operations.at(Op::update_note), "Update note", cxxopts::value<core::BookID>(), "<note_id>");
-        _options.add_options(groups.at(GroupIdx::create_update))                          //
+            (operations.at(Op::update_note), "Update note", cxxopts::value<core::BookID>(), "<note_id>")           //
+            (operations.at(Op::remove_book), "Remove book", cxxopts::value<core::BookID>(), "<book_id>")           //
+            (operations.at(Op::remove_note), "Remove note", cxxopts::value<core::BookID>(), "<note_id>");
+        _options.add_options(groups.at(GroupIdx::create_update))                       //
             ("n,book-name", "Set book name", cxxopts::value<std::string>(), "<name>")  //
             ("c,note-content", "Set note content", cxxopts::value<std::string>(), "<string>");
     } catch (const cxxopts::OptionSpecException& ex) {

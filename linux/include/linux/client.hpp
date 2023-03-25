@@ -10,15 +10,18 @@ namespace linux {
 class Client {
 public:
     explicit Client(const core::AppContext& context);
-    core::Storage& getStorage();
 
     void listBooks();
+
     void printBook(core::BookID bookID);
-    void printNote(core::NoteID noteID);
     void createBook(std::string&& name);
-    void createNote(core::BookID bookID, std::string&& content);
     void updateBook(core::BookID bookID, std::string&& name);
+    void removeBook(core::BookID bookID);
+
+    void printNote(core::NoteID noteID);
+    void createNote(core::BookID bookID, std::string&& content);
     void updateNote(core::NoteID noteID, std::string&& content);
+    void removeNote(core::NoteID noteID);
 
 private:
     core::Storage _storage;

@@ -21,28 +21,28 @@
     + basic cmake for library [ok]
     + compilation as shared lib [ok]
     + compilation as static lib [ok]
-+ linux: POC CLI client with add/show [..]
++ linux: POC CLI client with add/show [...]
     + basic cmake [ok]
     + include static library [ok]
     + ~static~ compilation with sqlite (v1.8)
     + static compilation with catch2 [ok]
     + static compilation with cxxopts [ok]
-    + implement functions below through CLI:
+    + implement functions below through CLI [...]
         - add book [ok]
         - show books [ok]
-        - add note to book
+        - add note to book [...]
             + read content from CLI argument [ok]
             + read content from STDIN [TODO later]
         - show list of notes from book [ok]
-        - update book name
-        - update note content
+        - update book name [ok]
+        - update note content [...]
             + read content from CLI argument [ok]
             + read content from STDIN [TODO later]
-        - add caching of loaded items
-        - show note from book (at first - by ID, later - by name, maybe with note name prefix)
+        - add caching of loaded items [ok]
+        - show note by ID [...]
             + print to console [ok]
-            + open in editor
-            + open in pager
+            + open in editor [TODO later]
+            + open in pager [TODO later]
         - remove book
         - remove note
     + implement same functions as above with TUI

@@ -23,6 +23,10 @@ void CLI::run(const CmdLineArgs& args) {
         _client.updateBook(args.getUInt64("update-book"), args.getString("book-name"));
     } else if (args.has("update-note")) {
         _client.updateNote(args.getUInt64("update-note"), args.getString("note-content"));
+    } else if (args.has("remove-book")) {
+        _client.removeBook(args.getUInt64("update-book"));
+    } else if (args.has("remove-note")) {
+        _client.removeNote(args.getUInt64("update-note"));
     }
 }
 

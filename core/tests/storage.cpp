@@ -10,14 +10,13 @@
 #include <string>
 
 core::BookID createBook(core::Storage& storage, std::string name) {
-    core::BookInfo bookInfo{std::move(name)};
-    auto bookID = storage.createBook(std::move(bookInfo));
+    auto bookID = storage.createBook(core::BookInfo{std::move(name)});
     REQUIRE(bookID.has_value());
     return bookID.value();
 }
 
-core::NoteID createNote(core::Book& book, std::string&& content) {
-    auto noteID = book.createNote(core::NoteInfo{content});
+core::NoteID createNote(core::Storage& storage, core::BookID bookID, std::string&& content) {
+    auto noteID = storage.createNote(core::NoteInfo{bookID, std::move(content)});
     REQUIRE(noteID.has_value());
     return noteID.value();
 }
@@ -34,14 +33,13 @@ TEST_CASE("books", "[core.storage.cache]") {
 
     SECTION("book with notes creation") {
         auto bookID = createBook(storage, "book1");
-        auto book = storage.getBook(bookID);
 
         // creating notes
-        createNote(*book, "content1");
-        createNote(*book, "content2");
+        createNote(storage, bookID, "content1");
+        createNote(storage, bookID, "content2");
 
         // show notes in book
-        const auto& notes = book->getNotesInfo();
+        const auto& notes = storage.getNotesInfoByBookID(bookID);
         REQUIRE(notes.size() == 2);
 
         // get books to display
@@ -57,9 +55,9 @@ TEST_CASE("books", "[core.storage.cache]") {
         auto bookID = createBook(storage, oldName);
         auto book = storage.getBook(bookID);
 
-        REQUIRE(book->getBookInfo().name == oldName);
+        REQUIRE(book->getName() == oldName);
         storage.updateBook(bookID, std::string(newName));
-        REQUIRE(book->getBookInfo().name == newName);
+        REQUIRE(book->getName() == newName);
     }
 
     SECTION("several books creation") {
@@ -67,10 +65,8 @@ TEST_CASE("books", "[core.storage.cache]") {
         size_t booksAmount = 5;
         for (size_t i = 0; i < booksAmount; i++) {
             auto bookID = createBook(storage, "book" + std::to_string(i + 1));
-            auto book = storage.getBook(bookID);
-
             for (size_t j = 0; j < i + 1; j++) {
-                createNote(*book, "note" + std::to_string(j));
+                createNote(storage, bookID, "note" + std::to_string(j));
             }
         }
 
@@ -79,37 +75,29 @@ TEST_CASE("books", "[core.storage.cache]") {
         size_t notesAmount = 0;
         for (const auto& bookInfo : bookInfos) {
             notesAmount++;
-            auto book = storage.getBook(bookInfo->id);
-            const auto& notes = book->getNotesInfo();
+            const auto& notes = storage.getNotesInfoByBookID(bookInfo->id);
             REQUIRE(notes.size() == notesAmount);
         }
     }
 
     SECTION("note update") {
         auto bookID = createBook(storage, "book1");
-        auto book = storage.getBook(bookID);
 
         // creating notes
-        auto noteID1 = createNote(*book, "content1");
-        createNote(*book, "content2");
+        auto noteID1 = createNote(storage, bookID, "old_content1");
+        createNote(storage, bookID, "old_content2");
 
-        // choosing one book by bookID
-        // get book notes to display
-        auto loadedBook = storage.getBook(bookID);
-        const auto& loadedNotes = loadedBook->getNotesInfo();
-
-        // displaying all notes
+        // checking notes
+        const auto& loadedNotes = storage.getNotesInfoByBookID(bookID);
         REQUIRE(loadedNotes.size() == 2);
 
         // choosing one note by noteID
-        auto note1 = book->getNote(noteID1);
-        // opening editor and modifying content
+        auto note1 = storage.getNote(noteID1);
+
+        // modifying content
         std::string newNoteContent = "new_content";
-        note1->updateContent(std::string(newNoteContent));
+        storage.updateNote(noteID1, std::string(newNoteContent));
         REQUIRE(note1->getContent() == newNoteContent);
-        // check data integrity in storage
-        auto note1Storage = storage.getNote(noteID1);
-        REQUIRE(note1Storage->getContent() == newNoteContent);
     }
 
     SECTION("get nonexistant book") {

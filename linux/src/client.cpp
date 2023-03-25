@@ -9,8 +9,6 @@ namespace linux {
 Client::Client(const core::AppContext& context)
     : _storage(context) {}
 
-core::Storage& Client::getStorage() { return _storage; }
-
 void Client::listBooks() {
     const auto& books = _storage.getBooksInfo();
     std::cout << "Amount of books: " << books.size() << std::endl;
@@ -22,7 +20,7 @@ void Client::listBooks() {
 
 void Client::printBook(core::BookID bookID) {
     if (auto book = _storage.getBook(bookID); book.has_value()) {
-        const auto& notes = book->getNotesInfo();
+        const auto& notes = _storage.getNotesInfoByBookID(bookID);
         std::cout << "Amount of notes: " << notes.size() << std::endl;
         for (const auto& note : notes) {
             auto truncated_content = std::string_view(note->content).substr(0, 50);
@@ -48,9 +46,9 @@ void Client::createBook(std::string&& name) {
 }
 
 void Client::createNote(core::BookID bookID, std::string&& content) {
-    core::NoteInfo info{std::move(content)};
+    core::NoteInfo info{bookID, std::move(content)};
     if (auto book = _storage.getBook(bookID); book.has_value()) {
-        auto noteID = book->createNote(std::move(info));
+        auto noteID = _storage.createNote(std::move(info));
         std::cout << "New note ID: " << noteID.value() << std::endl;
     }
 }
@@ -58,5 +56,9 @@ void Client::createNote(core::BookID bookID, std::string&& content) {
 void Client::updateBook(core::BookID bookID, std::string&& name) { _storage.updateBook(bookID, std::move(name)); }
 
 void Client::updateNote(core::NoteID noteID, std::string&& content) { _storage.updateNote(noteID, std::move(content)); }
+
+void Client::removeBook(core::BookID bookID) { _storage.removeBook(bookID); }
+
+void Client::removeNote(core::NoteID noteID) { _storage.removeNote(noteID); }
 
 }  // namespace linux

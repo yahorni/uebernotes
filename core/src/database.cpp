@@ -30,6 +30,16 @@ std::optional<NoteID> Database::insertNote(const NoteInfo& note) {
     return std::nullopt;
 }
 
+bool Database::hasBook(BookID bookID) {
+    // TODO: handle db exceptions
+    return _dbStorage.count<BookInfo>(sql::where(sql::is_equal(&BookInfo::id, bookID)));
+}
+
+bool Database::hasNote(NoteID noteID) {
+    // TODO: handle db exceptions
+    return _dbStorage.count<NoteInfo>(sql::where(sql::is_equal(&NoteInfo::id, noteID)));
+}
+
 std::shared_ptr<BookInfo> Database::loadBookByID(BookID bookID) {
     try {
         // TODO: use get_pointer with std::unique_ptr to get rid of exception
@@ -55,7 +65,7 @@ std::shared_ptr<NoteInfo> Database::loadNoteByID(NoteID noteID) {
 }
 
 bool Database::updateBook(BookID bookID, const std::string& name) {
-    if (!_dbStorage.count<BookInfo>(sql::where(sql::is_equal(&BookInfo::id, bookID)))) {
+    if (!hasBook(bookID)) {
         return false;
     }
 
@@ -65,13 +75,37 @@ bool Database::updateBook(BookID bookID, const std::string& name) {
 }
 
 bool Database::updateNote(NoteID noteID, const std::string& content) {
-    if (!_dbStorage.count<NoteInfo>(sql::where(sql::is_equal(&NoteInfo::id, noteID)))) {
+    if (!hasNote(noteID)) {
         return false;
     }
 
     _dbStorage.update_all(sql::set(sql::c(&NoteInfo::content) = content),
                           sql::where(sql::is_equal(&NoteInfo::id, noteID)));
     return true;
+}
+
+bool Database::removeBook(BookID bookID) {
+    try {
+        _dbStorage.remove<BookInfo>(bookID);
+        return true;
+    } catch (std::system_error& ex) {
+        // TODO: log error
+        std::cout << "Failed to remove book: bookID = " << bookID << ", code = " << ex.code()
+                  << ", message = " << ex.what() << std::endl;
+    }
+    return false;
+}
+
+bool Database::removeNote(NoteID noteID) {
+    try {
+        _dbStorage.remove<NoteInfo>(noteID);
+        return true;
+    } catch (std::system_error& ex) {
+        // TODO: log error
+        std::cout << "Failed to remove note: noteID = " << noteID << ", code = " << ex.code()
+                  << ", message = " << ex.what() << std::endl;
+    }
+    return false;
 }
 
 BooksCache Database::loadBooks() {

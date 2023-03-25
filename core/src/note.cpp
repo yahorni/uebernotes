@@ -5,8 +5,8 @@
 namespace core {
 
 // NoteInfo
-NoteInfo::NoteInfo(std::string content)
-    : NoteInfo(0, 0, std::move(content)) {}
+NoteInfo::NoteInfo(BookID bookID, std::string&& content)
+    : NoteInfo(0, bookID, std::move(content)) {}
 
 NoteInfo::NoteInfo(NoteID id, BookID bookID, std::string&& content)
     : id(id),
@@ -20,8 +20,8 @@ NoteInfo::NoteInfo(NoteInfo&& other)
 Note::Note(std::shared_ptr<NoteInfo> note)
     : _note(std::move(note)) {}
 
-const std::string& Note::getContent() const { return _note->content; }
+BookID Note::getBookID() const { return _note->bookID; }
 
-void Note::updateContent(std::string&& newContent) { _note->content = std::move(newContent); }
+const std::string& Note::getContent() const { return _note->content; }
 
 }  // namespace core

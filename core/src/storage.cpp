@@ -1,5 +1,7 @@
 #include "core/storage.hpp"
 
+#include <algorithm>
+
 namespace core {
 
 /*** cache ***/
@@ -34,16 +36,40 @@ NotesCache StorageCache::getNotesByBookID(BookID bookID) const {
     return notes;
 }
 
+static inline auto findBookInCache(const BooksCache& booksCache, BookID bookID) {
+    return std::find_if(booksCache.begin(), booksCache.end(),  //
+                        [bookID](const auto& book) { return book->id == bookID; });
+}
+
+static inline auto findNoteInCache(const NotesCache& notesCache, NoteID noteID) {
+    return std::find_if(notesCache.begin(), notesCache.end(),
+                        [noteID](const auto& note) { return note->id == noteID; });
+}
+
 std::shared_ptr<BookInfo> StorageCache::getBook(BookID bookID) const {
-    auto bookIter = std::find_if(_booksCache.begin(), _booksCache.end(),  //
-                                 [bookID](const auto& book) { return book->id == bookID; });
+    auto bookIter = findBookInCache(_booksCache, bookID);
     return bookIter != _booksCache.end() ? *bookIter : nullptr;
 }
 
 std::shared_ptr<NoteInfo> StorageCache::getNote(NoteID noteID) const {
-    auto noteIter = std::find_if(_notesCache.begin(), _notesCache.end(),  //
-                                 [noteID](const auto& note) { return note->id == noteID; });
+    auto noteIter = findNoteInCache(_notesCache, noteID);
     return noteIter != _notesCache.end() ? *noteIter : nullptr;
+}
+
+void StorageCache::removeBook(BookID bookID) {
+    for (auto note : _notesCache) {
+        if (note->bookID == bookID) {
+            _notesCache.erase(note);
+        }
+    }
+
+    auto bookIter = findBookInCache(_booksCache, bookID);
+    _booksCache.erase(bookIter);
+}
+
+void StorageCache::removeNote(NoteID noteID) {
+    auto noteIter = findNoteInCache(_notesCache, noteID);
+    _notesCache.erase(noteIter);
 }
 
 /*** storage ***/
@@ -120,7 +146,7 @@ std::shared_ptr<NoteInfo> Storage::loadNoteInfo(NoteID noteID) const {
 
 std::optional<Book> Storage::getBook(BookID bookID) {
     auto bookPtr = loadBookInfo(bookID);
-    return bookPtr ? std::make_optional(Book(bookPtr, *this)) : std::nullopt;
+    return bookPtr ? std::make_optional(Book(bookPtr)) : std::nullopt;
 }
 
 std::optional<Note> Storage::getNote(NoteID noteID) const {
@@ -128,20 +154,40 @@ std::optional<Note> Storage::getNote(NoteID noteID) const {
     return notePtr ? std::make_optional(Note(notePtr)) : std::nullopt;
 }
 
-void Storage::updateBook(BookID bookID, std::string&& name) {
+bool Storage::updateBook(BookID bookID, std::string&& name) {
     if (auto bookPtr = loadBookInfo(bookID); bookPtr && _db.updateBook(bookID, name)) {
         bookPtr->name = std::move(name);
+        return true;
     }
+    return false;
 }
 
-void Storage::updateNote(NoteID noteID, std::string&& content) {
+bool Storage::updateNote(NoteID noteID, std::string&& content) {
     if (auto notePtr = loadNoteInfo(noteID); notePtr && _db.updateNote(noteID, content)) {
         notePtr->content = std::move(content);
+        return true;
     }
+    return false;
 }
 
-void Storage::removeBook(BookID) { printf("TODO: implement Storage::removeBook()\n"); }
+bool Storage::removeBook(BookID bookID) {
+    if (!_db.removeBook(bookID)) {
+        return false;
+    }
+    if (_cache.isActive) {
+        _cache.removeBook(bookID);
+    }
+    return true;
+}
 
-void Storage::removeNote(NoteID) { printf("TODO: implement Storage::removeNote()\n"); }
+bool Storage::removeNote(NoteID noteID) {
+    if (!_db.removeNote(noteID)) {
+        return false;
+    }
+    if (_cache.isActive) {
+        _cache.removeNote(noteID);
+    }
+    return true;
+}
 
 }  // namespace core

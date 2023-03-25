@@ -18,23 +18,18 @@ struct BookInfo {
     BookID id;
     std::string name;
 
-    explicit BookInfo(std::string&& name = "");  // for manual creation
-    BookInfo(BookID id, std::string&& name);     // for database
+    explicit BookInfo(std::string&& name = "");
+    BookInfo(BookID id, std::string&& name);
 };
 
 class Book {
 public:
-    Book(std::shared_ptr<BookInfo> book, Storage& storage);
+    explicit Book(std::shared_ptr<BookInfo> book);
 
-    const BookInfo& getBookInfo() const;
-    NotesCache getNotesInfo() const;
-
-    std::optional<NoteID> createNote(NoteInfo&& note);
-    std::optional<Note> getNote(NoteID noteID) const;
+    const std::string& getName() const;
 
 private:
     std::shared_ptr<BookInfo> _book;
-    Storage& _storage;
 };
 
 using BooksCache = std::set<std::shared_ptr<BookInfo>, SharedPtrWithID::Compare>;

@@ -4,6 +4,7 @@
 #include "core/note.hpp"
 #include "core/types.hpp"
 
+#include <memory>
 #include <string>
 #include <string_view>
 
@@ -37,21 +38,26 @@ public:
     Database& operator=(Database&&) = delete;
 
     std::optional<BookID> insertBook(const BookInfo& book);
-    std::optional<NoteID> insertNote(const NoteInfo& note);
-
     std::shared_ptr<BookInfo> loadBookByID(BookID bookID);
+    bool updateBook(BookID bookID, const std::string& name);
+    bool removeBook(BookID bookID);
+
+    std::optional<NoteID> insertNote(const NoteInfo& note);
     std::shared_ptr<NoteInfo> loadNoteByID(NoteID noteID);
+    bool updateNote(NoteID noteID, const std::string& content);
+    bool removeNote(NoteID noteID);
+
     BooksCache loadBooks();
     NotesCache loadAllNotes();
     NotesCache loadNotesByBookID(BookID bookID);
 
-    bool updateBook(BookID bookID, const std::string& name);
-    bool updateNote(NoteID noteID, const std::string& content);
-
 private:
-    using DatabaseStorage = decltype(initStorage(""));
+    bool hasBook(BookID bookID);
+    bool hasNote(NoteID NoteID);
 
     const std::string _dbName;
+
+    using DatabaseStorage = decltype(initStorage(""));
     DatabaseStorage _dbStorage;
 };
 

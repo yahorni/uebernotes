@@ -20,9 +20,7 @@ make tests
 
 # lib tests
 make core-tests
-make run-core-tests
 
 # client tests
 make linux-tests
-make run-linux-tests
 ```

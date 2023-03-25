@@ -30,9 +30,13 @@ public:
     std::shared_ptr<BookInfo> getBook(BookID bookID) const;
     std::shared_ptr<NoteInfo> getNote(NoteID noteID) const;
 
+    void removeBook(BookID bookID);
+    void removeNote(NoteID noteID);
+
     const bool isActive;
 
 private:
+    // TODO: optimize cache data structure (maybe use map instead of set)
     BooksCache _booksCache;
     NotesCache _notesCache;
 };
@@ -51,13 +55,13 @@ public:
 
     std::optional<BookID> createBook(BookInfo&& book);
     std::optional<Book> getBook(BookID bookID);
-    void updateBook(BookID bookID, std::string&& name);
-    void removeBook(BookID bookID);
+    bool updateBook(BookID bookID, std::string&& name);
+    bool removeBook(BookID bookID);
 
     std::optional<NoteID> createNote(NoteInfo&& note);
     std::optional<Note> getNote(NoteID noteID) const;
-    void updateNote(NoteID noteID, std::string&& content);
-    void removeNote(NoteID noteID);
+    bool updateNote(NoteID noteID, std::string&& content);
+    bool removeNote(NoteID noteID);
 
 private:
     std::shared_ptr<BookInfo> loadBookInfo(BookID bookID) const;
