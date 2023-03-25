@@ -11,17 +11,17 @@ class Client {
 public:
     explicit Client(const core::AppContext& context);
 
-    void listBooks();
+    bool listBooks();
 
-    void printBook(core::BookID bookID);
-    void createBook(std::string&& name);
-    void updateBook(core::BookID bookID, std::string&& name);
-    void removeBook(core::BookID bookID);
+    bool printBook(core::BookID bookID);
+    bool createBook(std::string&& name);
+    bool updateBook(core::BookID bookID, std::string&& name);
+    bool removeBook(core::BookID bookID);
 
-    void printNote(core::NoteID noteID);
-    void createNote(core::BookID bookID, std::string&& content);
-    void updateNote(core::NoteID noteID, std::string&& content);
-    void removeNote(core::NoteID noteID);
+    bool printNote(core::NoteID noteID);
+    bool createNote(core::BookID bookID, std::string&& content);
+    bool updateNote(core::NoteID noteID, std::string&& content);
+    bool removeNote(core::NoteID noteID);
 
 private:
     core::Storage _storage;

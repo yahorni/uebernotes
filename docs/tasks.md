@@ -43,8 +43,8 @@
             + print to console [ok]
             + open in editor [TODO later]
             + open in pager [TODO later]
-        - remove book
-        - remove note
+        - remove book [ok]
+        - remove note [ok]
     + implement same functions as above with TUI
 + common:
     + project level cmake to build lib and linux client
@@ -55,7 +55,8 @@
 + linux unit tests
 
 ## for simplicity in POC
-+ store all book notes in book object (without limited caching or LRU)
++ add proper return codes in client (instead of booleans) later
++ make error print from client, not from database wrapper later
 + non-static compilation with sqlite made for now
 + skip sqlite unicode support enabling
 + skip cxxopts unicode support enabling (https://github.com/jarro2783/cxxopts/wiki/Unicode-support)

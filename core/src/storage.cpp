@@ -171,7 +171,8 @@ bool Storage::updateNote(NoteID noteID, std::string&& content) {
 }
 
 bool Storage::removeBook(BookID bookID) {
-    if (!_db.removeBook(bookID)) {
+    // DB removal don't throw error on non-existant entity
+    if (auto bookPtr = loadBookInfo(bookID); !bookPtr || !_db.removeBook(bookID)) {
         return false;
     }
     if (_cache.isActive) {
@@ -181,7 +182,8 @@ bool Storage::removeBook(BookID bookID) {
 }
 
 bool Storage::removeNote(NoteID noteID) {
-    if (!_db.removeNote(noteID)) {
+    // DB removal don't throw error on non-existant entity
+    if (auto notePtr = loadNoteInfo(noteID); !notePtr || !_db.removeNote(noteID)) {
         return false;
     }
     if (_cache.isActive) {

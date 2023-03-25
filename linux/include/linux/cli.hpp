@@ -11,7 +11,7 @@ namespace linux {
 class CLI {
 public:
     explicit CLI(const core::AppContext& config);
-    void run(const CmdLineArgs& args);
+    bool run(const CmdLineArgs& args);
 
 private:
     Client _client;

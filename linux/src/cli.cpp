@@ -7,27 +7,29 @@ namespace linux {
 CLI::CLI(const core::AppContext& context)
     : _client(context) {}
 
-void CLI::run(const CmdLineArgs& args) {
+bool CLI::run(const CmdLineArgs& args) {
     // TODO: add operation enum
     if (args.has("list-books")) {
-        _client.listBooks();
+        return _client.listBooks();
     } else if (args.has("print-book")) {
-        _client.printBook(args.getUInt64("print-book"));
+        return _client.printBook(args.getUInt64("print-book"));
     } else if (args.has("print-note")) {
-        _client.printNote(args.getUInt64("print-note"));
+        return _client.printNote(args.getUInt64("print-note"));
     } else if (args.has("create-book")) {
-        _client.createBook(args.getString("create-book"));
+        return _client.createBook(args.getString("create-book"));
     } else if (args.has("create-note")) {
-        _client.createNote(args.getUInt64("create-note"), args.getString("note-content"));
+        return _client.createNote(args.getUInt64("create-note"), args.getString("note-content"));
     } else if (args.has("update-book")) {
-        _client.updateBook(args.getUInt64("update-book"), args.getString("book-name"));
+        return _client.updateBook(args.getUInt64("update-book"), args.getString("book-name"));
     } else if (args.has("update-note")) {
-        _client.updateNote(args.getUInt64("update-note"), args.getString("note-content"));
+        return _client.updateNote(args.getUInt64("update-note"), args.getString("note-content"));
     } else if (args.has("remove-book")) {
-        _client.removeBook(args.getUInt64("update-book"));
+        return _client.removeBook(args.getUInt64("remove-book"));
     } else if (args.has("remove-note")) {
-        _client.removeNote(args.getUInt64("update-note"));
+        return _client.removeNote(args.getUInt64("remove-note"));
     }
+
+    return false;
 }
 
 }  // namespace linux

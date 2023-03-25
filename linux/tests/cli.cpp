@@ -15,6 +15,13 @@ core::BookID createBook(core::Storage& storage, std::string name) {
     return bookID.value();
 }
 
+bool runClient(core::AppContext context, int argc, const char* const argv[]) {
+    linux::CmdLineArgs cliArgs;
+    cliArgs.parse(argc, argv);
+    auto cli = linux::CLI{context};
+    return cli.run(cliArgs);
+}
+
 TEST_CASE("cli", "[linux]") {
     namespace fs = std::filesystem;
     const auto database = "testdb-linux.sqlite3";
@@ -39,12 +46,7 @@ TEST_CASE("cli", "[linux]") {
                                  "--create-note",     bookIDStr.c_str(),  //
                                  "--note-content",    noteContent,        //
                                  "--database",        database};
-
-        // run client
-        linux::CmdLineArgs cliArgs;
-        cliArgs.parse(argc, argv);
-        auto cli = linux::CLI{context};
-        cli.run(cliArgs);
+        runClient(context, argc, argv);
 
         // check db state
         auto loadedNotes = storage.getNotesInfoByBookID(bookID);
@@ -65,15 +67,72 @@ TEST_CASE("cli", "[linux]") {
         const char* const argv[]{linux::program_name,  //
                                  "--list-books",       //
                                  "--database", database};
-
-        // run client
-        linux::CmdLineArgs cliArgs;
-        cliArgs.parse(argc, argv);
-        auto cli = linux::CLI{context};
-        cli.run(cliArgs);
+        runClient(context, argc, argv);
 
         // check db state
         auto loadedBooks = storage.getBooksInfo();
         REQUIRE(loadedBooks.size() == 4);
+    }
+
+    SECTION("print nonexistant book") {
+        // prepare env args
+        int argc = 5;
+        const char* const argv[]{linux::program_name,    //
+                                 "--print-book", "999",  //
+                                 "--database", database};
+        bool succeded = runClient(context, argc, argv);
+        REQUIRE(!succeded);
+    }
+
+    SECTION("print nonexistant note") {
+        // prepare env args
+        int argc = 5;
+        const char* const argv[]{linux::program_name,    //
+                                 "--print-note", "999",  //
+                                 "--database", database};
+        bool succeded = runClient(context, argc, argv);
+        REQUIRE(!succeded);
+    }
+
+    SECTION("update non-existant book") {
+        // prepare env args
+        int argc = 7;
+        const char* const argv[]{linux::program_name,          //
+                                 "--update-book",     "999",   //
+                                 "--book-name",       "name",  //
+                                 "--database",        database};
+        bool succeded = runClient(context, argc, argv);
+        REQUIRE(!succeded);
+    }
+
+    SECTION("update non-existant note") {
+        // prepare env args
+        int argc = 7;
+        const char* const argv[]{linux::program_name,             //
+                                 "--update-note",     "999",      //
+                                 "--note-content",    "content",  //
+                                 "--database",        database};
+        bool succeded = runClient(context, argc, argv);
+        REQUIRE(!succeded);
+    }
+
+    SECTION("remove nonexistant book") {
+        // prepare env args
+        int argc = 5;
+        const char* const argv[]{linux::program_name,     //
+                                 "--remove-book", "999",  //
+                                 "--database", database};
+        bool succeded = runClient(context, argc, argv);
+        REQUIRE(!succeded);
+    }
+
+    SECTION("remove nonexistant note") {
+        // prepare env args
+        int argc = 5;
+        const char* const argv[]{linux::program_name,     //
+                                 "--remove-note", "999",  //
+                                 "--database", database};
+        bool succeded = runClient(context, argc, argv);
+        REQUIRE(!succeded);
     }
 }
