@@ -45,7 +45,79 @@
             + open in pager [TODO later]
         - remove book [ok]
         - remove note [ok]
-    + implement same functions as above with TUI
+    + implement logging
+        - log storage
+    + implement TUI
+        - implement scrollable list
+        - implement scrollable text viewer
+        - global bindings:
+            + bind: quit app with q/Ctrl-c
+        - three panes joplin-like interface
+            + print books on left pane
+            + print notes first line on middle pane (think of separating it as a replacable format)
+            + print note content on right pane
+            + bind: switch panes with h/l, Left/Right, Shift+Tab/Tab
+            + bind: switch panes to the right with Enter (only on left and middle panes)
+            + bind: scroll items in lists with j/k, Down/Up
+            + bind: scroll note content with j/k, Down/Up
+            + bind: refresh content with r (refresh cache)
+        - status line last log
+            + bind: search button with '/' (mock search)
+            + bind: command input with ':' (mock commands)
+            + bind: ESC to cancel status line input (both search and command)
+        - command/keybinding proper implementation
+            + cycle (toggle) commands
+        - toggle panel with logs
+        - floating window with help on keybindings
+            + bind: help message with '?' (mock floating window, implement later)
+        - status-line commands:
+            + search (should know call source to differentiate search)
+            + status (commons stats for all books/notes)
+            + panel (show last logs and commands)
+            + help
+        - implement search
+            + book titles (vim-like)
+            + note titles (vim-like)
+            + all notes content (think of where to show results)
+            + book notes content (think of where to show results)
+            + bind: n/N to jump across results
+            + status-line interaction (vim-like, without logging jumps)
+        - editor opening
+            + hardcoded options in priority: nvim, vim, nano, vi
+            + configurable through cli (like "database")
+            + bind: Enter in right panel to open the note (remember: book may be empty)
+            + algorithm:
+                1. create temp file
+                2. dump note content to it
+                3. freeze app keys handling
+                4. open with editor in separated process or thread (need to think)
+                5. read temp file content
+                6. update note in cache/database
+                7. unfreeze app
+                8. remove temp file
+            + chosen editor should be printed in help
+    + implement CLI functions in TUI
+        - add book
+            + bind: 'a' [left pane]
+            + command: 'add-book'
+        - add note
+            + bind: 'a' [middle pane]
+            + command: 'add-note'
+        - update book:
+            + bind: 'u' [left pane]
+            + command: 'update-book'
+        - update note:
+            + bind: 'u' [middle/right panes]
+            + command: 'update-note'
+        - implement prompt "Are you sure ... [y/N]"
+        - remove book:
+            + bind: 'd' [left pane]
+            + command: 'delete-book'
+            + use are_you_sure prompt
+        - remove note:
+            + bind: 'd' [middle/right panes]
+            + command: 'delete-note'
+            + use are_you_sure prompt
 + common:
     + project level cmake to build lib and linux client
 + testing: create simple testing server
@@ -55,6 +127,7 @@
 + linux unit tests
 
 ## for simplicity in POC
++ handle signals later
 + add proper return codes in client (instead of booleans) later
 + make error print from client, not from database wrapper later
 + non-static compilation with sqlite made for now
