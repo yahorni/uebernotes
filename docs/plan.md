@@ -14,7 +14,8 @@
 | chromium bookmarks          | computer | import/export notes to compatible HTML bookmarks                         |
 | knife.media links directory | computer | import/export + directory sync                                           |
 | newsboat links              | computer | automated script with cli on computer to add note executed from newsboat |
-| ~/.local/share/bin/user/    | computer | notes with code snippets support                                         |
+| ~/.local/bin/user/          | computer | notes with code snippets support                                         |
+| ssh config                  | computer | automated script with cli on computer to periodicaly update ssh config   |
 | notally app                 | phone    | android app (which is such as fast and convenient)                       |
 | habar app                   | phone    | sharing to android app                                                   |
 | via bookmarks               | phone    | sharing to android app                                                   |

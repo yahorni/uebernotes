@@ -46,7 +46,7 @@ CmdLineArgs::CmdLineArgs() {
         _options.add_options(groups.at(GroupIdx::create_update))                       //
             ("n,book-name", "Set book name", cxxopts::value<std::string>(), "<name>")  //
             ("c,note-content", "Set note content", cxxopts::value<std::string>(), "<string>");
-    } catch (const cxxopts::OptionSpecException& ex) {
+    } catch (const cxxopts::exceptions::specification& ex) {
         throw CmdLineError(ex.what());
     }
 }
@@ -77,7 +77,7 @@ bool CmdLineArgs::hasOperation() const {
 void CmdLineArgs::_parse(int argc, const char* const* argv) {
     try {
         _parseResult = _options.parse(argc, argv);
-    } catch (const cxxopts::OptionParseException& ex) {
+    } catch (const cxxopts::exceptions::parsing& ex) {
         throw CmdLineError(ex.what());
     }
 }

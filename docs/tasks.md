@@ -7,6 +7,7 @@
 + C++ logging
     + article: https://habr.com/ru/post/313686/
     + option: Baical P7 logging https://baical.net/index.html
+    + option: loguru https://github.com/emilk/loguru
 + WebDAV implementation
     + option: simple impl https://github.com/erikzenker/WebdavClient
     + option: big library https://github.com/CloudPolis/webdav-client-cpp

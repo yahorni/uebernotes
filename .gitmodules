@@ -1,18 +1,14 @@
 [submodule "third_party/sqlite_orm"]
 	path = third_party/sqlite_orm
 	url = https://github.com/fnc12/sqlite_orm
-	branch = ff7c878af872f7987b62d825284fb25d6043af10   # tags/v1.8.2
 [submodule "third_party/cxxopts"]
 	path = third_party/cxxopts
 	url = https://github.com/jarro2783/cxxopts
-    branch = c74846a891b3cc3bfa992d588b1295f528d43039   # tags/v3.0.0
 [submodule "third_party/catch2"]
 	path = third_party/catch2
 	url = https://github.com/catchorg/Catch2
-    branch = ab6c7375be9a8e71ee84c6f8537113f9f47daf99   # tags/v3.2.1
 	ignore = dirty
-[submodule "third_party/FTXUI"]
-	path = third_party/FTXUI
+[submodule "third_party/ftxui"]
+	path = third_party/ftxui
 	url = https://github.com/ArthurSonzogni/FTXUI
-    branch = c033ca61ae8fb264542d0326d1309e0a3bde945a   # tags/v3.0.0
 	ignore = dirty
