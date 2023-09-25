@@ -12,3 +12,7 @@
 	path = third_party/ftxui
 	url = https://github.com/ArthurSonzogni/FTXUI
 	ignore = dirty
+[submodule "third_party/elpp"]
+	path = third_party/elpp
+	url = https://github.com/abumq/easyloggingpp
+	ignore = dirty

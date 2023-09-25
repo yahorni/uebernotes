@@ -1,12 +1,13 @@
 #include "core/database.hpp"
 
-#include <iostream>
+#include "core/logger.hpp"
 
 namespace core {
 
 Database::Database(std::string_view dbName)
     : _dbName(dbName),
       _dbStorage(initStorage(dbName)) {
+    Log::info("Initializing database: {}", dbName);
     _dbStorage.sync_schema();
 }
 
@@ -14,8 +15,8 @@ std::optional<BookID> Database::insertBook(const BookInfo& book) {
     try {
         return _dbStorage.insert(book);
     } catch (const std::system_error& ex) {
-        std::cout << "Failed to insert book: bookID = " << book.id << ", code = " << ex.code()
-                  << ", message = " << ex.what() << std::endl;
+        Log::error("Failed to insert book: bookID = {}, code = {}, message = {}", book.id, ex.code().value(),
+                   ex.what());
     }
     return std::nullopt;
 }
@@ -24,8 +25,8 @@ std::optional<NoteID> Database::insertNote(const NoteInfo& note) {
     try {
         return _dbStorage.insert(note);
     } catch (const std::system_error& ex) {
-        std::cout << "Failed to insert note: noteID = " << note.id << ", code = " << ex.code()
-                  << ", message = " << ex.what() << std::endl;
+        Log::error("Failed to insert note: noteID = {}, code = {}, message = {}", note.id, ex.code().value(),
+                   ex.what());
     }
     return std::nullopt;
 }
@@ -45,9 +46,7 @@ std::shared_ptr<BookInfo> Database::loadBookByID(BookID bookID) {
         // TODO: use get_pointer with std::unique_ptr to get rid of exception
         return std::make_shared<BookInfo>(_dbStorage.get<BookInfo>(bookID));
     } catch (std::system_error& ex) {
-        // TODO: log error
-        std::cout << "Failed to get book: bookID = " << bookID << ", code = " << ex.code()
-                  << ", message = " << ex.what() << std::endl;
+        Log::error("Failed to get book: bookID = {}, code = {}, message = {}", bookID, ex.code().value(), ex.what());
     }
     return nullptr;
 }
@@ -57,9 +56,7 @@ std::shared_ptr<NoteInfo> Database::loadNoteByID(NoteID noteID) {
         // TODO: use get_pointer with std::unique_ptr to get rid of exception
         return std::make_shared<NoteInfo>(_dbStorage.get<NoteInfo>(noteID));
     } catch (std::system_error& ex) {
-        // TODO: log error
-        std::cout << "Failed to get note: noteID = " << noteID << ", code = " << ex.code()
-                  << ", message = " << ex.what() << std::endl;
+        Log::error("Failed to get note: noteID = {}, code = {}, message = {}", noteID, ex.code().value(), ex.what());
     }
     return nullptr;
 }
@@ -89,9 +86,7 @@ bool Database::removeBook(BookID bookID) {
         _dbStorage.remove<BookInfo>(bookID);
         return true;
     } catch (std::system_error& ex) {
-        // TODO: log error
-        std::cout << "Failed to remove book: bookID = " << bookID << ", code = " << ex.code()
-                  << ", message = " << ex.what() << std::endl;
+        Log::error("Failed to remove book: bookID = {}, code = {}, message = {}", bookID, ex.code().value(), ex.what());
     }
     return false;
 }
@@ -101,9 +96,7 @@ bool Database::removeNote(NoteID noteID) {
         _dbStorage.remove<NoteInfo>(noteID);
         return true;
     } catch (std::system_error& ex) {
-        // TODO: log error
-        std::cout << "Failed to remove note: noteID = " << noteID << ", code = " << ex.code()
-                  << ", message = " << ex.what() << std::endl;
+        Log::error("Failed to remove note: noteID = {}, code = {}, message = {}", noteID, ex.code().value(), ex.what());
     }
     return false;
 }

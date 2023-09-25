@@ -1,11 +1,16 @@
 #include "core/appcontext.hpp"
 #include "linux/argparser.hpp"
 #include "linux/cli.hpp"
+#include "linux/logger.hpp"
 #include "linux/tui.hpp"
 
 #include <iostream>
 
-auto parseArguments(int argc, char* argv[]) {
+using linux::Log;
+
+LOGGER_STATIC_INIT
+
+auto parseArguments(int argc, const char* argv[]) {
     try {
         linux::CmdLineArgs clArgs;
         clArgs.parse(argc, argv);
@@ -15,26 +20,27 @@ auto parseArguments(int argc, char* argv[]) {
         }
         return clArgs;
     } catch (const linux::CmdLineError& ex) {
-        // TODO: print it properly, no need to log
-        std::cout << ex.what() << std::endl;
+        Log::fatal("Command line error: {}", ex.what());
+        std::cerr << "Command line error: " << ex.what() << std::endl;
         // TODO: check standard error codes
         exit(1);
     }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char* argv[]) {
+    Log::init(argc, argv);
     auto cliArgs = parseArguments(argc, argv);
 
     const core::AppContext context{cliArgs.getString("database"), !cliArgs.hasOperation()};
-    std::cout << "Using database: " << context.database << std::endl;
-    std::cout << "Using cache: " << std::boolalpha << context.useCaching << std::endl;
+    Log::info("Using database: {}", context.database.c_str());
+    Log::info("Using cache: {}", context.useCaching);
 
     if (cliArgs.hasOperation() || cliArgs.has("help")) {
-        std::cout << "CLI mode" << std::endl;
+        Log::debug("CLI mode");
         linux::CLI cli{context};
         cli.run(cliArgs);
     } else {
-        std::cout << "TUI mode" << std::endl;
+        Log::debug("TUI mode");
         linux::TUI tui{context};
         tui.run();
     }

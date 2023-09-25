@@ -8,6 +8,7 @@
     + article: https://habr.com/ru/post/313686/
     + option: Baical P7 logging https://baical.net/index.html
     + option: loguru https://github.com/emilk/loguru
+    + option: easyloggingpp https://github.com/abumq/easyloggingpp
 + WebDAV implementation
     + option: simple impl https://github.com/erikzenker/WebdavClient
     + option: big library https://github.com/CloudPolis/webdav-client-cpp
@@ -46,9 +47,11 @@
             + open in pager [TODO later]
         - remove book [ok]
         - remove note [ok]
-    + implement logging
-        - log storage
-    + implement TUI
+    + implement logging [ok]
+        - log storage [ok]
+        - log to file [ok]
+        - logrotate [ok]
+    + implement TUI [...]
         - implement scrollable list
         - implement scrollable text viewer
         - global bindings:

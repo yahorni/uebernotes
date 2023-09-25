@@ -19,6 +19,16 @@ target_link_libraries(${LINUX_CLIENT} PRIVATE uebernotes-core)
 target_link_directories(${LINUX_CLIENT} PRIVATE ${PROJECT_ROOT}/pkg)
 # -----------------------------------------------------------------------------
 
+# easyloggingpp ---------------------------------------------------------------
+add_library(elpp STATIC IMPORTED)
+set_property(TARGET elpp PROPERTY
+  IMPORTED_LOCATION ${PROJECT_ROOT}/pkg/elpp/lib/libeasyloggingpp.a)
+
+target_include_directories(
+  ${LINUX_CLIENT} SYSTEM PUBLIC ${PROJECT_ROOT}/pkg/elpp/include)
+target_link_libraries(${LINUX_CLIENT} PUBLIC elpp)
+# -----------------------------------------------------------------------------
+
 # cxxopts ---------------------------------------------------------------------
 # TODO: make variable for cxxopts
 target_include_directories(${LINUX_CLIENT} PRIVATE ${PROJECT_ROOT}/third_party/cxxopts/include)
@@ -51,4 +61,7 @@ target_link_libraries(${LINUX_TESTS} PRIVATE Catch2::Catch2WithMain)
 # FTXUI
 target_include_directories(${LINUX_TESTS} PRIVATE ${PROJECT_ROOT}/pkg/ftxui/include)
 target_link_libraries(${LINUX_TESTS} PRIVATE ftxui::screen ftxui::dom ftxui::component)
+# easyloggingpp
+target_include_directories(${LINUX_TESTS} PRIVATE ${PROJECT_ROOT}/pkg/elpp/include)
+target_link_libraries(${LINUX_TESTS} PRIVATE elpp)
 # -----------------------------------------------------------------------------

@@ -1,13 +1,15 @@
 #include "linux/argparser.hpp"
 
 #include "core/types.hpp"
+#include "linux/logger.hpp"
 
 #include <map>
 
 namespace linux {
 
 // TODO: add unittests for CmdLineArgs
-// TODO: log all CmdLineError
+// TODO: maybe worth get rid of CmdLineError
+// TODO: fix crash when passing "--v=2" -> "IOT instruction (core dumped)"
 
 enum GroupIdx { standard = 0, operation = 1, create_update = 2 };
 static const std::vector<std::string> groups{"", "Operation", "Create/update"};
