@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/appcontext.hpp"
+#include "core/storage.hpp"
 #include "linux/argparser.hpp"
-#include "linux/client.hpp"
 
 #include <string_view>
 
@@ -14,7 +14,7 @@ public:
     bool run();
 
 private:
-    Client _client;
+    core::Storage _storage;
 };
 
 }  // namespace linux

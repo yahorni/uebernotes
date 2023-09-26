@@ -7,10 +7,13 @@
 #include "ftxui/component/component.hpp"           // for CatchEvent, Renderer, operator|=
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 
+// ftxui/dom/elements.hpp - list of elements to create layouts
+// ftxui/dom/component.hpp - interactive components to respond to events
+
 namespace linux {
 
 TUI::TUI(const core::AppContext& context)
-    : _client(context) {}
+    : _storage(context) {}
 
 bool TUI::run() {
     using namespace ftxui;
@@ -29,7 +32,15 @@ bool TUI::run() {
 
     auto renderer = Renderer(container, [&] { return container->Render() | border; });
 
-    screen.Loop(renderer);
+    auto component = CatchEvent(renderer, [&](Event event) {
+      if (event == Event::Character('q')) {
+        screen.ExitLoopClosure()();
+        return true;
+      }
+      return false;
+    });
+
+    screen.Loop(component);
     return true;
 }
 

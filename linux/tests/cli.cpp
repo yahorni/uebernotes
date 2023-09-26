@@ -18,7 +18,7 @@ core::BookID createBook(core::Storage& storage, std::string name) {
     return bookID.value();
 }
 
-bool runClient(core::AppContext context, int argc, const char* argv[]) {
+bool runCLI(core::AppContext context, int argc, const char* argv[]) {
     linux::CmdLineArgs cliArgs;
     cliArgs.parse(argc, argv);
     auto cli = linux::CLI{context};
@@ -49,7 +49,7 @@ TEST_CASE("cli", "[linux]") {
                            "--create-note",     bookIDStr.c_str(),  //
                            "--note-content",    noteContent,        //
                            "--database",        database};
-        runClient(context, argc, argv);
+        runCLI(context, argc, argv);
 
         // check db state
         auto loadedNotes = storage.getNotesInfoByBookID(bookID);
@@ -70,7 +70,7 @@ TEST_CASE("cli", "[linux]") {
         const char* argv[]{linux::program_name,  //
                            "--list-books",       //
                            "--database", database};
-        runClient(context, argc, argv);
+        runCLI(context, argc, argv);
 
         // check db state
         auto loadedBooks = storage.getBooksInfo();
@@ -83,7 +83,7 @@ TEST_CASE("cli", "[linux]") {
         const char* argv[]{linux::program_name,    //
                            "--print-book", "999",  //
                            "--database", database};
-        bool succeded = runClient(context, argc, argv);
+        bool succeded = runCLI(context, argc, argv);
         REQUIRE(!succeded);
     }
 
@@ -93,7 +93,7 @@ TEST_CASE("cli", "[linux]") {
         const char* argv[]{linux::program_name,    //
                            "--print-note", "999",  //
                            "--database", database};
-        bool succeded = runClient(context, argc, argv);
+        bool succeded = runCLI(context, argc, argv);
         REQUIRE(!succeded);
     }
 
@@ -104,7 +104,7 @@ TEST_CASE("cli", "[linux]") {
                            "--update-book",     "999",   //
                            "--book-name",       "name",  //
                            "--database",        database};
-        bool succeded = runClient(context, argc, argv);
+        bool succeded = runCLI(context, argc, argv);
         REQUIRE(!succeded);
     }
 
@@ -115,7 +115,7 @@ TEST_CASE("cli", "[linux]") {
                            "--update-note",     "999",      //
                            "--note-content",    "content",  //
                            "--database",        database};
-        bool succeded = runClient(context, argc, argv);
+        bool succeded = runCLI(context, argc, argv);
         REQUIRE(!succeded);
     }
 
@@ -125,7 +125,7 @@ TEST_CASE("cli", "[linux]") {
         const char* argv[]{linux::program_name,     //
                            "--remove-book", "999",  //
                            "--database", database};
-        bool succeded = runClient(context, argc, argv);
+        bool succeded = runCLI(context, argc, argv);
         REQUIRE(!succeded);
     }
 
@@ -135,7 +135,7 @@ TEST_CASE("cli", "[linux]") {
         const char* argv[]{linux::program_name,     //
                            "--remove-note", "999",  //
                            "--database", database};
-        bool succeded = runClient(context, argc, argv);
+        bool succeded = runCLI(context, argc, argv);
         REQUIRE(!succeded);
     }
 }

@@ -55,7 +55,8 @@
         - implement scrollable list
         - implement scrollable text viewer
         - global bindings:
-            + bind: quit app with q/Ctrl-c
+            + bind: quit app with q [ok]
+            + bind: quit app with Ctrl-c
         - three panes joplin-like interface
             + print books on left pane
             + print notes first line on middle pane (think of separating it as a replacable format)

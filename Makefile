@@ -5,9 +5,9 @@ FTXUI_INSTALL_DIR=$(PKG_DIR)/ftxui
 CATCH2_INSTALL_DIR=$(PKG_DIR)/catch2
 ELPP_INSTALL_DIR=$(PKG_DIR)/elpp
 
-.PHONY: core linux run
+.PHONY: core linux
 
-default: core linux run
+default: core linux run-tui
 
 ### core
 
@@ -30,8 +30,16 @@ linux-tests: build-deps build-test-deps
 	cd linux/build && make -j uebernotes-cli-tests
 	pkg/uebernotes-cli-tests
 
-run: pkg/uebernotes-cli
+run: run-tui
+
+run-cli: pkg/uebernotes-cli
 	@pkg/uebernotes-cli --list-books
+
+run-tui: pkg/uebernotes-cli
+	@pkg/uebernotes-cli
+
+run-help:
+	@pkg/uebernotes-cli --help
 
 clean-core:
 	rm -rf core/build
