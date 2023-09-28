@@ -17,20 +17,54 @@ TUI::TUI(const core::AppContext& context)
 
 bool TUI::run() {
     using namespace ftxui;
+
+    const auto& books = _storage.getBooksInfo();
+
+    std::vector<std::string> book_names;
+    book_names.reserve(books.size());
+
+    for (const auto& book : books) {
+        book_names.emplace_back(book->name);
+    }
+
+    int selected = 0;
+    auto book_list = Menu(&book_names, &selected);
+
+    auto notes_list = Renderer([] { return text("notes") | center; });
+    auto note_preview = Renderer([] { return text("note preview") | center; });
+
+    auto container = Container::Horizontal({
+        book_list,
+        notes_list,
+        note_preview,
+    });
+
+    int quarter = Terminal::Size().dimx / 4;
+
+    auto renderer = Renderer(container, [&] {
+        return hbox({
+            // books pane
+            vbox({
+                hcenter(bold(text("Books"))),
+                separator(),
+                book_list->Render(),
+            }) | size(WIDTH, EQUAL, quarter) | border,
+            // notes pane
+            vbox({
+                hcenter(bold(text("Notes"))),
+                separator(),
+                notes_list->Render(),
+            }) | size(WIDTH, EQUAL, quarter) | border,
+            // note preview
+            vbox({
+                hcenter(bold(text("Note preview"))),
+                separator(),
+                note_preview->Render(),
+            }) | xflex | border
+        });
+    });
+
     auto screen = ScreenInteractive::Fullscreen();
-
-    auto left = Renderer([] { return text("left") | center; });
-    auto middle = Renderer([] { return text("middle") | center; });
-    auto right = Renderer([] { return text("right") | center; });
-
-    int left_size = 20;
-    int middle_size = 20;
-
-    auto container = right;
-    container = ResizableSplitLeft(middle, container, &middle_size);
-    container = ResizableSplitLeft(left, container, &left_size);
-
-    auto renderer = Renderer(container, [&] { return container->Render() | border; });
 
     auto component = CatchEvent(renderer, [&](Event event) {
       if (event == Event::Character('q')) {

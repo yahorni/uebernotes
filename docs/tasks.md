@@ -52,13 +52,14 @@
         - log to file [ok]
         - logrotate [ok]
     + implement TUI [...]
-        - implement scrollable list
+        - implement scrollable list [ok]
         - implement scrollable text viewer
-        - global bindings:
+        - screen resize handling
+        - global bindings: [...]
             + bind: quit app with q [ok]
             + bind: quit app with Ctrl-c
-        - three panes joplin-like interface
-            + print books on left pane
+        - three panes joplin-like interface [...]
+            + print books on left pane [ok]
             + print notes first line on middle pane (think of separating it as a replacable format)
             + print note content on right pane
             + bind: switch panes with h/l, Left/Right, Shift+Tab/Tab
