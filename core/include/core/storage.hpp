@@ -50,8 +50,8 @@ public:
     Storage(Storage&&) = delete;
     Storage& operator=(Storage&&) = delete;
 
-    BooksCache getBooksInfo() const;
-    NotesCache getNotesInfoByBookID(BookID bookID) const;
+    BooksCache getBookInfos() const;
+    NotesCache getNoteInfosByBookID(BookID bookID) const;
 
     std::optional<BookID> createBook(BookInfo&& book);
     std::optional<Book> getBook(BookID bookID);

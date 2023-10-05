@@ -15,6 +15,7 @@ namespace core {
 class Storage;
 
 struct BookInfo {
+    // TODO(same for NoteInfo): if the fields are not constant that means they can be changed?
     BookID id;
     std::string name;
 

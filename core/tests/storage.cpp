@@ -39,11 +39,11 @@ TEST_CASE("books", "[core.storage.cache]") {
         createNote(storage, bookID, "content2");
 
         // show notes in book
-        const auto& notes = storage.getNotesInfoByBookID(bookID);
+        const auto& notes = storage.getNoteInfosByBookID(bookID);
         REQUIRE(notes.size() == 2);
 
         // get books to display
-        const auto& books = storage.getBooksInfo();
+        const auto& books = storage.getBookInfos();
         // displaying all books
         REQUIRE(books.size() == 1);
     }
@@ -70,12 +70,12 @@ TEST_CASE("books", "[core.storage.cache]") {
             }
         }
 
-        const auto& bookInfos = storage.getBooksInfo();
+        const auto& bookInfos = storage.getBookInfos();
         REQUIRE(bookInfos.size() == booksAmount);
         size_t notesAmount = 0;
         for (const auto& bookInfo : bookInfos) {
             notesAmount++;
-            const auto& notes = storage.getNotesInfoByBookID(bookInfo->id);
+            const auto& notes = storage.getNoteInfosByBookID(bookInfo->id);
             REQUIRE(notes.size() == notesAmount);
         }
     }
@@ -88,7 +88,7 @@ TEST_CASE("books", "[core.storage.cache]") {
         createNote(storage, bookID, "old_content2");
 
         // checking notes
-        const auto& loadedNotes = storage.getNotesInfoByBookID(bookID);
+        const auto& loadedNotes = storage.getNoteInfosByBookID(bookID);
         REQUIRE(loadedNotes.size() == 2);
 
         // choosing one note by noteID

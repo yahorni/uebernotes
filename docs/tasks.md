@@ -26,7 +26,8 @@
 + linux: POC CLI client with add/show [...]
     + basic cmake [ok]
     + include static library [ok]
-    + ~static~ compilation with sqlite (v1.8)
+    + compilation with sqlite (v1.8)
+        - static compilation [TODO later]
     + static compilation with catch2 [ok]
     + static compilation with cxxopts [ok]
     + implement functions below through CLI [...]
@@ -54,14 +55,14 @@
     + implement TUI [...]
         - implement scrollable list [ok]
         - implement scrollable text viewer
-        - screen resize handling
+        - screen resize handling [ok]
         - global bindings: [...]
             + bind: quit app with q [ok]
             + bind: quit app with Ctrl-c
         - three panes joplin-like interface [...]
             + print books on left pane [ok]
             + print notes first line on middle pane (think of separating it as a replacable format)
-            + print note content on right pane
+            + print note content on right pane [ok]
             + bind: switch panes with h/l, Left/Right, Shift+Tab/Tab
             + bind: switch panes to the right with Enter (only on left and middle panes)
             + bind: scroll items in lists with j/k, Down/Up
@@ -124,6 +125,10 @@
             + bind: 'd' [middle/right panes]
             + command: 'delete-note'
             + use are_you_sure prompt
+    + technical debt:
+        - properly configure segfault handling
+        - add error messages when CLI client fails
+        - divide rendering logic
 + common:
     + project level cmake to build lib and linux client
 + testing: create simple testing server

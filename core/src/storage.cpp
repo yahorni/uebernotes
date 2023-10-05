@@ -82,7 +82,7 @@ Storage::Storage(const AppContext& context)
     }
 }
 
-BooksCache Storage::getBooksInfo() const {
+BooksCache Storage::getBookInfos() const {
     if (_cache.isActive) {
         return _cache.getBooks();
     }
@@ -90,7 +90,7 @@ BooksCache Storage::getBooksInfo() const {
     return _db.loadBooks();
 }
 
-NotesCache Storage::getNotesInfoByBookID(BookID bookID) const {
+NotesCache Storage::getNoteInfosByBookID(BookID bookID) const {
     if (_cache.isActive) {
         return _cache.getNotesByBookID(bookID);
     }

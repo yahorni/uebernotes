@@ -35,7 +35,7 @@ bool CLI::run(const CmdLineArgs& args) {
 }
 
 bool CLI::listBooks() {
-    const auto& books = _storage.getBooksInfo();
+    const auto& books = _storage.getBookInfos();
     std::cout << "Amount of books: " << books.size() << std::endl;
     for (const auto& book : books) {
         std::cout << "ID: " << book->id  //
@@ -46,11 +46,12 @@ bool CLI::listBooks() {
 
 bool CLI::printBook(core::BookID bookID) {
     if (auto book = _storage.getBook(bookID); !book.has_value()) {
+        // TODO: print "book not found"
         return false;
     }
 
     // TODO pass error here, without additional check above
-    const auto& notes = _storage.getNotesInfoByBookID(bookID);
+    const auto& notes = _storage.getNoteInfosByBookID(bookID);
     std::cout << "Amount of notes: " << notes.size() << std::endl;
     for (const auto& note : notes) {
         auto truncated_content = std::string_view(note->content).substr(0, 50);
@@ -68,6 +69,7 @@ bool CLI::printNote(core::NoteID noteID) {
         std::cout << "Content: " << std::endl << note->getContent() << std::endl;
         return true;
     }
+    // TODO: print "note not found"
     return false;
 }
 
@@ -77,6 +79,7 @@ bool CLI::createBook(std::string&& name) {
         std::cout << "New book ID: " << bookID.value() << std::endl;
         return true;
     }
+    // TODO: print "book not created"
     return false;
 }
 
@@ -87,6 +90,7 @@ bool CLI::createNote(core::BookID bookID, std::string&& content) {
         std::cout << "New note ID: " << noteID.value() << std::endl;
         return true;
     }
+    // TODO: print "note not created"
     return false;
 }
 
@@ -95,6 +99,7 @@ bool CLI::updateBook(core::BookID bookID, std::string&& name) {
         std::cout << "Failed to update book" << std::endl;
         return false;
     }
+    // TODO: print "book not updated"
     return true;
 }
 
@@ -103,6 +108,7 @@ bool CLI::updateNote(core::NoteID noteID, std::string&& content) {
         std::cout << "Failed to update note" << std::endl;
         return false;
     }
+    // TODO: print "note not updated"
     return true;
 }
 
@@ -111,6 +117,7 @@ bool CLI::removeBook(core::BookID bookID) {
         std::cout << "Failed to remove book" << std::endl;
         return false;
     }
+    // TODO: print "book not removed"
     return true;
 }
 
@@ -119,6 +126,7 @@ bool CLI::removeNote(core::NoteID noteID) {
         std::cout << "Failed to remove note" << std::endl;
         return false;
     }
+    // TODO: print "note not removed"
     return true;
 }
 

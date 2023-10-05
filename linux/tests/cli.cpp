@@ -52,7 +52,7 @@ TEST_CASE("cli", "[linux]") {
         runCLI(context, argc, argv);
 
         // check db state
-        auto loadedNotes = storage.getNotesInfoByBookID(bookID);
+        auto loadedNotes = storage.getNoteInfosByBookID(bookID);
         REQUIRE(loadedNotes.size() == 1);
         auto loadedNote = *loadedNotes.begin();
         REQUIRE(loadedNote->content == noteContent);
@@ -73,7 +73,7 @@ TEST_CASE("cli", "[linux]") {
         runCLI(context, argc, argv);
 
         // check db state
-        auto loadedBooks = storage.getBooksInfo();
+        auto loadedBooks = storage.getBookInfos();
         REQUIRE(loadedBooks.size() == 4);
     }
 
