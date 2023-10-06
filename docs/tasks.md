@@ -127,7 +127,7 @@
             + use are_you_sure prompt
     + technical debt:
         - properly configure segfault handling
-        - add error messages when CLI client fails
+        - add error messages when CLI client fails [ok]
         - divide rendering logic
 + common:
     + project level cmake to build lib and linux client
