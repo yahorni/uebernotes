@@ -100,6 +100,8 @@
 
 ## web client:
 + try HUGO static page generator
++ GitHub - alexfoxy/lax.js: Simple & lightweight vanilla JS library to create smooth & beautiful animations when you scroll: https://github.com/alexfoxy/lax.js
++ nostalgic-css/NES.css: NES-style CSS Framework: https://github.com/nostalgic-css/NES.css
 
 ## analogues:
 + Joplin (linux, android, web), [https://github.com/laurent22/joplin]

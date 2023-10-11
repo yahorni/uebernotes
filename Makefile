@@ -15,7 +15,7 @@ core:
 	cmake -S . -B core/build -DBUILD_SHARED_LIBS=1
 	cd core/build && make -j uebernotes-core
 
-core-tests: build-catch2
+core-tests: build-test-deps
 	cmake -S . -B core/build
 	cd core/build && make -j uebernotes-core-tests
 	pkg/uebernotes-core-tests
@@ -24,11 +24,15 @@ linux: build-deps
 	cmake -S . -B linux/build
 	cd linux/build && make -j uebernotes-cli
 
-# TODO: remove ftxui?
-linux-tests: build-deps build-test-deps
+build-linux-tests: build-deps build-test-deps
 	cmake -S . -B linux/build
 	cd linux/build && make -j uebernotes-cli-tests
+
+linux-tests: build-linux-tests
 	pkg/uebernotes-cli-tests
+
+linux-tests-tui: build-linux-tests
+	pkg/uebernotes-cli-tests tui-scroll
 
 run: run-tui
 
@@ -90,8 +94,6 @@ build-elpp:
 		cmake -S . -B build -Dbuild_static_lib=1 -DCMAKE_INSTALL_PREFIX=$(ELPP_INSTALL_DIR) &&\
 		cmake --build build -- -j &&\
 		cmake --install build
-
-build-test-deps: build-catch2
 
 build-deps:
 	@[ -d "$(FTXUI_INSTALL_DIR)"  ] || make build-ftxui

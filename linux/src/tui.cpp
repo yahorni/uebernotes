@@ -1,12 +1,12 @@
 #include "linux/tui.hpp"
 #include "linux/logger.hpp"
+#include "linux/pager.hpp"
 
-#include "ftxui/dom/elements.hpp"
-#include "ftxui/screen/screen.hpp"
-#include "ftxui/screen/string.hpp"
-
-#include "ftxui/component/component.hpp"           // for CatchEvent, Renderer, operator|=
-#include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/screen.hpp>
+#include <ftxui/screen/string.hpp>
 
 // ftxui/dom/elements.hpp - list of elements to create layouts
 // ftxui/dom/component.hpp - interactive components to respond to events
@@ -102,7 +102,7 @@ bool TUI::run() {
     auto bookList = Menu(&bookNames, &selectedBookIdx, bookMenuOption);
 
     auto&& noteMenuOption = MenuOption::Vertical();
-     // to select focused item immediately
+    // to select focused item immediately
     noteMenuOption.focused_entry = &selectedNoteIdx;
     noteMenuOption.on_enter = [&]() {
         _setStatusMessage(std::format("Enter note: {}:{}", selectedBookIdx, selectedNoteIdx));
@@ -113,17 +113,20 @@ bool TUI::run() {
         storedNoteIndeces[bookPtr->id] = selectedNoteIdx;
         Log::debug("Changed note: book={}, note={}", selectedBookIdx, selectedNoteIdx);
     };
+    // FIXME: show note name only before newline
     auto noteList = Menu(&noteNames, &selectedNoteIdx, noteMenuOption);
 
     // TODO: optimize copying
     std::string noteContent;
-    auto notePreview = Renderer([&] { return hflow(paragraph(noteContent)); });
+    auto notePreview = Pager(noteContent);
 
     auto container = Container::Horizontal({
         bookList,
         noteList,
         notePreview,
     });
+
+    // TODO: show focus on notes and preview when no notes in book
 
     auto renderer = Renderer(container, [&] {
         int paneSize = Terminal::Size().dimx / 4;
@@ -141,7 +144,7 @@ bool TUI::run() {
 
         auto booksPane = Renderer([&] {
             return vbox({
-                       hcenter(bold(text("Books"))),  //
+                       hcenter(bold(text("Books"))),  // consider using "window"
                        separator(),                   //
                        bookList->Render(),            //
                    }) |
@@ -150,7 +153,7 @@ bool TUI::run() {
 
         auto notesPane = Renderer([&] {
             return vbox({
-                       hcenter(bold(text("Notes"))),  //
+                       hcenter(bold(text("Notes"))),  // consider using "window"
                        separator(),                   //
                        noteList->Render(),            //
                    }) |
@@ -159,9 +162,9 @@ bool TUI::run() {
 
         auto previewPane = Renderer([&] {
             return vbox({
-                       hcenter(bold(text("Note preview"))),  //
-                       separator(),                          //
-                       notePreview->Render(),                //
+                       hcenter(bold(text("Note preview"))),    // consider using "window"
+                       separator(),                            //
+                       notePreview->Render() | flex | yframe,  //
                    }) |
                    xflex | border;
         });

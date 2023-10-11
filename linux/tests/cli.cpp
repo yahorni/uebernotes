@@ -9,6 +9,8 @@
 #include <filesystem>
 #include <string>
 
+// FIXME: move to catch2 main
+// TODO: use separated log file for tests
 LOGGER_STATIC_INIT
 
 core::BookID createBook(core::Storage& storage, std::string name) {

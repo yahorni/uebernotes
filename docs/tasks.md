@@ -12,6 +12,7 @@
 + WebDAV implementation
     + option: simple impl https://github.com/erikzenker/WebdavClient
     + option: big library https://github.com/CloudPolis/webdav-client-cpp
+    + TUI input: https://github.com/mingsheng13/ip-input-ftxui
 + XML parsing lib for WebDAV PROPFIND operation
     + nice chart: https://stackoverflow.com/questions/9387610/what-xml-parser-should-i-use-in-c
     + option: https://github.com/leethomason/tinyxml2
@@ -54,8 +55,8 @@
         - logrotate [ok]
     + implement TUI [...]
         - implement scrollable list [ok]
-        - implement scrollable text viewer
         - screen resize handling [ok]
+        - implement scrollable text viewer [ok]
         - global bindings: [...]
             + bind: quit app with q [ok]
             + bind: quit app with Ctrl-c
@@ -129,6 +130,7 @@
         - properly configure segfault handling
         - add error messages when CLI client fails [ok]
         - divide rendering logic
+        - when UI crash during initialization logs are not written in file and myeasylog.log file created
 + common:
     + project level cmake to build lib and linux client
 + testing: create simple testing server
@@ -146,3 +148,5 @@
 + skip cxxopts unicode support enabling (https://github.com/jarro2783/cxxopts/wiki/Unicode-support)
 + define proper public API for core later
 + linux: only one app instance assumed running
++ no specific support for huge files viewing in terminal
++ usage of std::string_view to access note content to scroll in terminal

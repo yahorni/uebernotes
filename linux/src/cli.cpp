@@ -52,6 +52,7 @@ bool CLI::printBook(core::BookID bookID) {
 
         // TODO: add formatted table printing
         for (const auto& note : notes) {
+            // FIXME: truncate till newline
             auto truncated_content = std::string_view(note->content).substr(0, 50);
             std::cout << std::format("Note ID: {} | Content: {}", note->id, truncated_content) << std::endl;
         }
