@@ -27,12 +27,14 @@ public:
         CLOG(LEVEL, _linuxLoggerName) << msg;                                                                          \
     }
 
+    LOG_LINUX(trace, TRACE)
     LOG_LINUX(debug, DEBUG)
     LOG_LINUX(info, INFO)
     LOG_LINUX(warning, WARNING)
     LOG_LINUX(error, ERROR)
     LOG_LINUX(fatal, FATAL)
 
+    static void coreTrace(const char* msg);
     static void coreDebug(const char* msg);
     static void coreInfo(const char* msg);
     static void coreWarning(const char* msg);

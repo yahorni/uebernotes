@@ -7,6 +7,7 @@ namespace linux {
 #define LOG_CORE(NAME, LEVEL)                                                                                          \
     void Log::core##NAME(const char* msg) { CLOG(LEVEL, "core") << msg; }
 
+LOG_CORE(Trace, TRACE)
 LOG_CORE(Debug, DEBUG)
 LOG_CORE(Info, INFO)
 LOG_CORE(Warning, WARNING)
@@ -43,6 +44,7 @@ void Log::init(int argc, const char** argv) {
     el::Loggers::getLogger(_linuxLoggerName);
     el::Loggers::getLogger(_coreLoggerName);
 
+    core::Log::setTraceLogger(&Log::coreTrace);
     core::Log::setDebugLogger(&Log::coreDebug);
     core::Log::setInfoLogger(&Log::coreInfo);
     core::Log::setWarningLogger(&Log::coreWarning);

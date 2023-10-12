@@ -24,6 +24,7 @@ public:                                                                         
         (*_log##NAME)(msg.c_str());                                                                                    \
     }
 
+    LOG_CALLBACK(Trace, trace)
     LOG_CALLBACK(Debug, debug)
     LOG_CALLBACK(Info, info)
     LOG_CALLBACK(Warning, warning)
