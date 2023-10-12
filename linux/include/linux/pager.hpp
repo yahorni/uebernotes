@@ -14,7 +14,7 @@ public:
     void SetBox(Box box) final;
 
 private:
-    void NormalizeShift(int yMax);
+    void normalizeShift(const Box& box);
 
     int& _shift;
     const int _linesAmount;
@@ -23,20 +23,22 @@ private:
 Element pagerarea(Elements children, int& shift);
 
 // 1. to make it scroll use 'yframe'
-// 2. to show entries use 'flex'
+// 2. to show entries use '*flex'
+//
+// TODO: text wrapping
 class PagerBase : public ComponentBase {
 public:
-    explicit PagerBase(const std::string& content);
+    explicit PagerBase(int& shift, const std::string& content);
 
 private:
     Element Render() final;
     bool OnEvent(Event event) final;
-    bool Focusable() const final { return true; }
+    bool Focusable() const final;
 
+    int& _shift;
     const std::string& _content;
-    int _shift = 0;
 };
 
-Component Pager(const std::string& content);
+Component Pager(int& shift, const std::string& content);
 
 }  // namespace ftxui

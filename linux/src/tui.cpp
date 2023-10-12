@@ -43,7 +43,7 @@ std::vector<std::string> TUI::getNoteNames(core::BookID bookID, int paneWidth) {
     std::vector<std::string> noteNames;
     noteNames.reserve(notes.size());
     for (const auto& note : notes) {
-        noteNames.emplace_back(note->content.substr(0, paneWidth));
+        noteNames.emplace_back(note->getHeader().substr(0, paneWidth));
     }
     return noteNames;
 }
@@ -87,20 +87,24 @@ bool TUI::run() {
     std::map<core::BookID, int> storedNoteIndeces;
     int selectedNoteIdx = 0;
 
+    // preview data
+    int previewShift = 0;
+    std::string noteContent;  // TODO: optimize copying
+
+    // initialize book list pane
     auto&& bookMenuOption = MenuOption::Vertical();
     // to select focused item immediately
     bookMenuOption.focused_entry = &selectedBookIdx;
     bookMenuOption.on_change = [&]() {
         auto bookPtr = getSelectedBook(selectedBookIdx);
-        if (storedNoteIndeces.count(bookPtr->id)) {
-            selectedNoteIdx = storedNoteIndeces.at(bookPtr->id);
-        } else {
-            selectedNoteIdx = 0;
-        }
+        selectedNoteIdx = (storedNoteIndeces.count(bookPtr->id) ? storedNoteIndeces.at(bookPtr->id) : 0);
+        previewShift = 0;
+
         Log::debug("Changed book: book={}, note={}", selectedBookIdx, selectedNoteIdx);
     };
     auto bookList = Menu(&bookNames, &selectedBookIdx, bookMenuOption);
 
+    // initialize note list pane
     auto&& noteMenuOption = MenuOption::Vertical();
     // to select focused item immediately
     noteMenuOption.focused_entry = &selectedNoteIdx;
@@ -111,22 +115,27 @@ bool TUI::run() {
     noteMenuOption.on_change = [&]() {
         auto bookPtr = getSelectedBook(selectedBookIdx);
         storedNoteIndeces[bookPtr->id] = selectedNoteIdx;
+        previewShift = 0;
+
         Log::debug("Changed note: book={}, note={}", selectedBookIdx, selectedNoteIdx);
     };
     // FIXME: show note name only before newline
     auto noteList = Menu(&noteNames, &selectedNoteIdx, noteMenuOption);
 
-    // TODO: optimize copying
-    std::string noteContent;
-    auto notePreview = Pager(noteContent);
+    // initialize preview pane
+    auto notePreview = Pager(previewShift, noteContent);
 
+    // components container
     auto container = Container::Horizontal({
         bookList,
         noteList,
         notePreview,
     });
 
-    // TODO: show focus on notes and preview when no notes in book
+    // set up focus borders
+    const auto focusBorder = borderStyled(BorderStyle::HEAVY);
+    const auto unfocusBorder = borderStyled(BorderStyle::LIGHT);
+    auto setBorder = [&](bool focused) { return focused ? focusBorder : unfocusBorder; };
 
     auto renderer = Renderer(container, [&] {
         int paneSize = Terminal::Size().dimx / 4;
@@ -142,40 +151,40 @@ bool TUI::run() {
             noteContent.clear();
         }
 
-        auto booksPane = Renderer([&] {
+        auto booksPane = [&] {
             return vbox({
                        hcenter(bold(text("Books"))),  // consider using "window"
                        separator(),                   //
                        bookList->Render(),            //
                    }) |
-                   size(WIDTH, EQUAL, paneSize) | border;
-        });
+                   size(WIDTH, EQUAL, paneSize) | setBorder(bookList->Focused());
+        };
 
-        auto notesPane = Renderer([&] {
+        auto notesPane = [&] {
             return vbox({
                        hcenter(bold(text("Notes"))),  // consider using "window"
                        separator(),                   //
                        noteList->Render(),            //
                    }) |
-                   size(WIDTH, EQUAL, Terminal::Size().dimx / 4) | border;
-        });
+                   size(WIDTH, EQUAL, paneSize) | setBorder(noteList->Focused());
+        };
 
-        auto previewPane = Renderer([&] {
+        auto previewPane = [&] {
             return vbox({
-                       hcenter(bold(text("Note preview"))),    // consider using "window"
-                       separator(),                            //
-                       notePreview->Render() | flex | yframe,  //
+                       hcenter(bold(text("Preview"))),          // consider using "window"
+                       separator(),                             //
+                       notePreview->Render() | yflex | yframe,  //
                    }) |
-                   xflex | border;
-        });
+                   xflex | setBorder(notePreview->Focused());
+        };
 
         auto statusLine = Renderer([&] { return text(_lastMessage.c_str()) | size(HEIGHT, EQUAL, 1); });
 
         return vbox({
             hbox({
-                booksPane->Render(),    //
-                notesPane->Render(),    //
-                previewPane->Render(),  //
+                booksPane(),    //
+                notesPane(),    //
+                previewPane(),  //
             }) | yflex,
             statusLine->Render(),
         });

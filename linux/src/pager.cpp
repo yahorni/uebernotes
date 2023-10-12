@@ -9,6 +9,7 @@
 #include <utility>
 
 // https://github.com/ArthurSonzogni/FTXUI/issues/247
+// Feature request: Support multi-paragraph text layout #247
 
 namespace ftxui {
 
@@ -18,14 +19,14 @@ PagerArea::PagerArea(Elements children, int& shift)
     children_ = {vbox(std::move(children))};
 }
 
-// FIXME: fix last line is not shown when border enabled
-void PagerArea::NormalizeShift(int yMax) {
+void PagerArea::normalizeShift(const Box& box) {
+    int height = box.y_max - box.y_min + 1;
     if (_shift < 0) {
         _shift = 0;
-    } else if (_linesAmount > yMax) {
-        if (_shift > _linesAmount - yMax) {
-            _shift = _linesAmount - yMax;  // to not overscroll when
-                                           // shift is bigger than remaining lines
+    } else if (_linesAmount > height) {
+        if (_shift > _linesAmount - height) {
+            // to not overscroll when shift is bigger than remaining lines
+            _shift = _linesAmount - height;
         }
     } else {
         // shift > 0, but _linesAmount <= y_max, so need to scroll
@@ -34,7 +35,7 @@ void PagerArea::NormalizeShift(int yMax) {
 }
 
 void PagerArea::SetBox(Box box) {
-    NormalizeShift(box.y_max);
+    normalizeShift(box);
     box.y_min -= _shift;
 
     Node::SetBox(box);
@@ -55,8 +56,9 @@ Elements Split(const std::string& content) {
 }
 }  // namespace
 
-PagerBase::PagerBase(const std::string& content)
-    : _content(content) {}
+PagerBase::PagerBase(int& shift, const std::string& content)
+    : _shift(shift),
+      _content(content) {}
 
 Element PagerBase::Render() { return pagerarea(Split(_content), _shift); }
 
@@ -77,6 +79,8 @@ bool PagerBase::OnEvent(Event event) {
     return false;
 }
 
-Component Pager(const std::string& content) { return Make<PagerBase>(content); }
+bool PagerBase::Focusable() const { return !_content.empty(); }
+
+Component Pager(int& shift, const std::string& content) { return Make<PagerBase>(shift, content); }
 
 }  // namespace ftxui

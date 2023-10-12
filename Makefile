@@ -32,7 +32,7 @@ linux-tests: build-linux-tests
 	pkg/uebernotes-cli-tests
 
 linux-tests-tui: build-linux-tests
-	pkg/uebernotes-cli-tests tui-scroll
+	pkg/uebernotes-cli-tests manual-tui -c focus # scroll
 
 run: run-tui
 

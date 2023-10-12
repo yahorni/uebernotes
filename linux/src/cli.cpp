@@ -52,9 +52,9 @@ bool CLI::printBook(core::BookID bookID) {
 
         // TODO: add formatted table printing
         for (const auto& note : notes) {
-            // FIXME: truncate till newline
-            auto truncated_content = std::string_view(note->content).substr(0, 50);
-            std::cout << std::format("Note ID: {} | Content: {}", note->id, truncated_content) << std::endl;
+            auto header = note->getHeader();
+            auto truncatedContent = header.substr(0, 50);
+            std::cout << std::format("Note ID: {} | Content: {}", note->id, truncatedContent) << std::endl;
         }
         return true;
     }
@@ -74,6 +74,7 @@ bool CLI::printNote(core::NoteID noteID) {
 }
 
 bool CLI::createBook(std::string&& name) {
+    // FIXME: do not accept names with newlines or empty names (add tests)
     core::BookInfo info{std::move(name)};
 
     if (auto bookID = _storage.createBook(std::move(info)); bookID.has_value()) {

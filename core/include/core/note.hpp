@@ -22,6 +22,9 @@ struct NoteInfo {
     NoteInfo(NoteID id, BookID bookID, std::string&& content);
     NoteInfo(const NoteInfo&) = delete;
     NoteInfo(NoteInfo&&);
+
+    // TODO: move to note format
+    std::string_view getHeader() const;
 };
 
 class Note {
