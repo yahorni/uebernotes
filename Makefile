@@ -7,7 +7,7 @@ ELPP_INSTALL_DIR=$(PKG_DIR)/elpp
 
 .PHONY: core linux
 
-default: core linux run-tui
+default: core linux run
 
 ### core
 
@@ -20,41 +20,49 @@ core-tests: build-test-deps
 	cd core/build && make -j uebernotes-core-tests
 	pkg/uebernotes-core-tests
 
+### linux
+
 linux: build-deps
 	cmake -S . -B linux/build
-	cd linux/build && make -j uebernotes-cli
+	cd linux/build && make -j uebernotes
 
 build-linux-tests: build-deps build-test-deps
 	cmake -S . -B linux/build
-	cd linux/build && make -j uebernotes-cli-tests
+	cd linux/build && make -j uebernotes-tests
 
 linux-tests: build-linux-tests
-	pkg/uebernotes-cli-tests
+	pkg/uebernotes-tests
 
 linux-tests-tui: build-linux-tests
-	pkg/uebernotes-cli-tests manual-tui -c focus # scroll
+	pkg/uebernotes-tests manual-tui -c focus # scroll
 
-run: run-tui
+### common
 
-run-cli: pkg/uebernotes-cli
-	@pkg/uebernotes-cli --list-books
+tests: core-tests linux-tests
 
-run-tui: pkg/uebernotes-cli
-	@pkg/uebernotes-cli
+run: pkg/uebernotes
+	@pkg/uebernotes
 
 run-help:
-	@pkg/uebernotes-cli --help
+	@pkg/uebernotes --help
 
 clean-core:
 	rm -rf core/build
+	rm -f pkg/libuebernotes-core.so
 
 clean-linux:
 	rm -rf linux/build
+	rm -f pkg/libuebernotes-core.a pkg/uebernotes
 
 clean: clean-core clean-linux
+
+clean-all: clean-core clean-linux
 	rm -rf pkg
 
 ### dependencies
+
+init-deps: sb-add sb-tag
+clean-deps: sb-rm-deps
 
 sb-add:
 	git submodule add https://github.com/fnc12/sqlite_orm     third_party/sqlite_orm || true
@@ -107,9 +115,9 @@ sb-rm:
 	git submodule deinit -f third_party/$(DEP_NAME) || true
 	git rm -f third_party/$(DEP_NAME) || true
 	rm -rf \
-		$(CURDIR)/third_party/$(DEP_NAME) \
-		$(CURDIR)/pkg/$(DEP_NAME) \
-		$(CURDIR)/.git/modules/third_party/$(DEP_NAME)
+		third_party/$(DEP_NAME) \
+		pkg/$(DEP_NAME) \
+		.git/modules/third_party/$(DEP_NAME)
 
 sb-rm-deps:
 	DEP_NAME=ftxui      make sb-rm

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25.1)
 
-set(LINUX_CLIENT ${PROJECT_NAME}-cli)
+set(LINUX_CLIENT ${PROJECT_NAME})
 
 file(GLOB_RECURSE LINUX_SOURCES "src/*.cpp")
 set(LINUX_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -41,7 +41,7 @@ target_link_libraries(${LINUX_CLIENT} PRIVATE ftxui::screen ftxui::dom ftxui::co
 
 # tests
 # TODO include only if building tests
-set (LINUX_TESTS ${PROJECT_NAME}-cli-tests)
+set (LINUX_TESTS ${PROJECT_NAME}-tests)
 file(GLOB_RECURSE LINUX_SOURCES_TESTS "tests/*.cpp")
 
 add_executable(${LINUX_TESTS} ${LINUX_SOURCES_TESTS} ${LINUX_SOURCES})
