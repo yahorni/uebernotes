@@ -145,6 +145,7 @@
 - testing: create simple testing server
 - lib: add webdav sync for files
 - linux: sync to CLI client
+- tg bot: simple python backend
 - android: POC app to sync and show books
 - linux unit tests
 

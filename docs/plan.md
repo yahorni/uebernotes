@@ -21,7 +21,7 @@
 | via bookmarks               | phone    | sharing to android app                                                   |
 | instagram bookmarks         | phone    | sharing to android app                                                   |
 
-## library:
+## library
 + external server WebDAV protocol sync
 + sync mechanism:
     - CRDT sync (https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
@@ -74,7 +74,7 @@
     - make cxxopts as precompiled header
 
 
-## linux client:
+## linux client
 + C++ lang
 + FXTUI lib
 + markdown preview
@@ -90,7 +90,7 @@
 + backup system (tied on import/export system)
 + csv in deckbook (delimiter '\,' - ?)
 
-## android client:
+## android client
 + Kotlin lang
 + C++ shared lib integration
 + fast opening (not like `joplin`, but like `notally`)
@@ -98,12 +98,16 @@
 + markdown preview
 + fast access screen
 
-## web client:
+## telegram bot
+Android app will take some significant time to develop. To start using notes earlier a simple telegram bot will be implemented
++ tg bot python backend on digital ocean
+
+## web client
 + try HUGO static page generator
 + GitHub - alexfoxy/lax.js: Simple & lightweight vanilla JS library to create smooth & beautiful animations when you scroll: https://github.com/alexfoxy/lax.js
 + nostalgic-css/NES.css: NES-style CSS Framework: https://github.com/nostalgic-css/NES.css
 
-## analogues:
+## analogues
 + Joplin (linux, android, web), [https://github.com/laurent22/joplin]
 + Notally (android), [kotlin], [https://github.com/OmGodse/Notally]
 + AppFlowy (linux, web), [rust/flutter], [https://github.com/AppFlowy-IO/AppFlowy]
@@ -120,6 +124,3 @@
 + sqlite_orm examples: https://github.com/fnc12/sqlite_orm/tree/master/examples
 + catch2: https://github.com/catchorg/Catch2/blob/devel/docs/
 + android screening: https://github.com/Genymobile/scrcpy
-
-## long term
-+ in long term: telegram-bot for inbox book to be accessed from machine without app
