@@ -1,6 +1,6 @@
 #include "linux/tui.hpp"
+#include "linux/component.hpp"
 #include "linux/logger.hpp"
-#include "linux/pager.hpp"
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
@@ -91,6 +91,9 @@ bool TUI::run() {
     int previewShift = 0;
     std::string noteContent;  // TODO: optimize copying
 
+    auto ignoreTabDecorator =
+        IgnoreEvent([&](Event event) { return event == Event::Tab || event == Event::TabReverse; });
+
     // initialize book list pane
     auto&& bookMenuOption = MenuOption::Vertical();
     // to select focused item immediately
@@ -100,9 +103,9 @@ bool TUI::run() {
         selectedNoteIdx = (storedNoteIndeces.count(bookPtr->id) ? storedNoteIndeces.at(bookPtr->id) : 0);
         previewShift = 0;
 
-        Log::debug("Changed book: book={}, note={}", selectedBookIdx, selectedNoteIdx);
+        Log::debug("Selected book: book={}, note={}", selectedBookIdx, selectedNoteIdx);
     };
-    auto bookList = Menu(&bookNames, &selectedBookIdx, bookMenuOption);
+    auto bookList = Menu(&bookNames, &selectedBookIdx, bookMenuOption) | ignoreTabDecorator;
 
     // initialize note list pane
     auto&& noteMenuOption = MenuOption::Vertical();
@@ -117,10 +120,10 @@ bool TUI::run() {
         storedNoteIndeces[bookPtr->id] = selectedNoteIdx;
         previewShift = 0;
 
-        Log::debug("Changed note: book={}, note={}", selectedBookIdx, selectedNoteIdx);
+        Log::debug("Selected note: book={}, note={}", selectedBookIdx, selectedNoteIdx);
     };
     // FIXME: show note name only before newline
-    auto noteList = Menu(&noteNames, &selectedNoteIdx, noteMenuOption);
+    auto noteList = Menu(&noteNames, &selectedNoteIdx, noteMenuOption) | ignoreTabDecorator;
 
     // initialize preview pane
     auto notePreview = Pager(previewShift, noteContent);
@@ -151,40 +154,34 @@ bool TUI::run() {
             noteContent.clear();
         }
 
-        auto booksPane = [&] {
-            return vbox({
-                       hcenter(bold(text("Books"))),  // consider using "window"
-                       separator(),                   //
-                       bookList->Render(),            //
-                   }) |
-                   size(WIDTH, EQUAL, paneSize) | setBorder(bookList->Focused());
-        };
+        auto booksPane = vbox({
+                             hcenter(bold(text("Books"))),  // consider using "window"
+                             separator(),                   //
+                             bookList->Render(),            //
+                         }) |
+                         size(WIDTH, EQUAL, paneSize) | setBorder(bookList->Focused());
 
-        auto notesPane = [&] {
-            return vbox({
-                       hcenter(bold(text("Notes"))),  // consider using "window"
-                       separator(),                   //
-                       noteList->Render(),            //
-                   }) |
-                   size(WIDTH, EQUAL, paneSize) | setBorder(noteList->Focused());
-        };
+        auto notesPane = vbox({
+                             hcenter(bold(text("Notes"))),  // consider using "window"
+                             separator(),                   //
+                             noteList->Render(),            //
+                         }) |
+                         size(WIDTH, EQUAL, paneSize) | setBorder(noteList->Focused());
 
-        auto previewPane = [&] {
-            return vbox({
-                       hcenter(bold(text("Preview"))),          // consider using "window"
-                       separator(),                             //
-                       notePreview->Render() | yflex | yframe,  //
-                   }) |
-                   xflex | setBorder(notePreview->Focused());
-        };
+        auto previewPane = vbox({
+                               hcenter(bold(text("Preview"))),          // consider using "window"
+                               separator(),                             //
+                               notePreview->Render() | yflex | yframe,  //
+                           }) |
+                           xflex | setBorder(notePreview->Focused());
 
         auto statusLine = Renderer([&] { return text(_lastMessage.c_str()) | size(HEIGHT, EQUAL, 1); });
 
         return vbox({
             hbox({
-                booksPane(),    //
-                notesPane(),    //
-                previewPane(),  //
+                booksPane,    //
+                notesPane,    //
+                previewPane,  //
             }) | yflex,
             statusLine->Render(),
         });

@@ -63,18 +63,19 @@
         - implement scrollable list [ok]
         - screen resize handling [ok]
         - implement scrollable text viewer [ok]
-        - global bindings: [...]
-            + bind: quit app with q [ok]
-            + bind: quit app with Ctrl-c
-        - three panes joplin-like interface [...]
+        - three panes joplin-like interface [ok]
             + print books on left pane [ok]
             + print notes first line on middle pane [ok]
                 - think of separating it as a replacable format [TODO]
             + print note content on right pane [ok]
-            + bind: switch panes [...]
+        - global bindings: [...]
+            + bind: quit app with q [ok]
+            + bind: quit app with Ctrl-c [ok]
+            + bind: switch panes [ok]
                 - h/l [ok]
                 - Left/Right [ok]
-                - Shift+Tab/Tab [...]
+                - Shift+Tab/Tab [ok]
+                - h/l, Left/Right cycle scrolling (like Tab/Shift+Tab) [TODO]
             + bind: switch panes to the right with Enter (only on left and middle panes)
             + bind: scroll items in lists with j/k, Down/Up
             + bind: scroll note content with j/k, Down/Up

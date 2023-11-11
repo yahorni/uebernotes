@@ -1,7 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include "linux/component.hpp"
 #include "linux/logger.hpp"
-#include "linux/pager.hpp"
 
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/screen_interactive.hpp"
@@ -95,6 +95,39 @@ TEST_CASE("manual-tui", "[.]") {
         auto screen = ScreenInteractive::Fullscreen();
 
         auto component = CatchEvent(renderer, [&](Event event) {
+            if (event == Event::Character('q')) {
+                screen.ExitLoopClosure()();
+                return true;
+            }
+            return false;
+        });
+
+        screen.Loop(component);
+    }
+
+    SECTION("switch-with-tab") {
+        auto ignoreTabDecorator =
+            IgnoreEvent([&](Event event) { return event == Event::Tab || event == Event::TabReverse; });
+
+        std::vector<std::string> menu1Opts{"m1o1", "m1o2", "m1o3"};
+        std::vector<std::string> menu2Opts{"m2o1", "m2o2", "m2o3", "m2o4", "m2o5"};
+        int selected1 = 0;
+        int selected2 = 0;
+        MenuOption menuOpt1;
+        MenuOption menuOpt2;
+        auto menu1 = Menu(&menu1Opts, &selected1, menuOpt1) | ignoreTabDecorator;
+        auto menu2 = Menu(&menu2Opts, &selected2, menuOpt2) | ignoreTabDecorator;
+
+        auto pane = Renderer([&](bool focused) {
+            if (focused) return text("focused pane") | bold;
+            return text("usual pane");
+        });
+
+        auto container = Container::Horizontal({menu1, menu2, pane});
+
+        auto screen = ScreenInteractive::Fullscreen();
+
+        auto component = CatchEvent(container, [&](Event event) {
             if (event == Event::Character('q')) {
                 screen.ExitLoopClosure()();
                 return true;

@@ -5,6 +5,7 @@ FTXUI_INSTALL_DIR=$(PKG_DIR)/ftxui
 CATCH2_INSTALL_DIR=$(PKG_DIR)/catch2
 ELPP_INSTALL_DIR=$(PKG_DIR)/elpp
 
+# TODO: rename linux client to tui/cli
 .PHONY: core linux
 
 default: core linux run
@@ -34,7 +35,11 @@ linux-tests: build-linux-tests
 	pkg/uebernotes-tests
 
 linux-tests-tui: build-linux-tests
-	pkg/uebernotes-tests manual-tui -c focus # scroll
+	@# file: linux/tests/tui.cpp
+	@# focus
+	@# scroll
+	@# switch-with-tab
+	pkg/uebernotes-tests manual-tui -c "switch-with-tab"
 
 ### common
 
