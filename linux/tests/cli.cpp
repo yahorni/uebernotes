@@ -60,6 +60,34 @@ TEST_CASE("cli", "[linux]") {
         REQUIRE(loadedNote->content == noteContent);
     }
 
+    SECTION("create_empty_note") {
+        // prepare note in cli
+        const std::vector<std::string> noteContents{"", "\n", "\n\n"};
+
+        for (size_t i = 0; i < noteContents.size(); i++) {
+            // prepare book in db
+            auto bookID = createBook(storage, std::to_string(i));
+            auto bookIDStr = std::to_string(bookID);
+
+            const std::string noteContent{noteContents.at(i)};
+
+            // prepare env args
+            int argc = 7;
+            const char* argv[]{linux::program_name,                       //
+                               "--create-note",     bookIDStr.c_str(),    //
+                               "--note-content",    noteContent.c_str(),  //
+                               "--database",        database};
+            runCLI(context, argc, argv);
+
+            // check db state
+            auto loadedNotes = storage.getNoteInfosByBookID(bookID);
+            REQUIRE(loadedNotes.size() == 1);
+            auto loadedNote = *loadedNotes.begin();
+            REQUIRE(loadedNote->content == noteContent);
+            REQUIRE(loadedNote->getHeader() == "<untitled>");
+        }
+    }
+
     SECTION("list_books") {
         // prepare book in db
         createBook(storage, "book1");

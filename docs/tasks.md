@@ -77,8 +77,8 @@
                 - Shift+Tab/Tab [ok]
                 - h/l, Left/Right cycle scrolling (like Tab/Shift+Tab) [TODO]
             + bind: switch panes to the right with Enter (only on left and middle panes)
-            + bind: scroll items in lists with j/k, Down/Up
-            + bind: scroll note content with j/k, Down/Up
+            + bind: scroll items in lists with j/k, Down/Up [ok]
+            + bind: scroll note content with j/k, Down/Up [ok]
             + bind: refresh content with r (refresh cache)
         - status line last log
             + bind: search button with '/' (mock search)

@@ -88,7 +88,7 @@ private:
         }
         return false;
     }
-    bool Focusable() const { return !_content.empty(); }
+    bool Focusable() const { return true; }
 
     int& _shift;
     const std::string& _content;

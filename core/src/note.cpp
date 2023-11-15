@@ -17,12 +17,16 @@ NoteInfo::NoteInfo(NoteInfo&& other)
     : NoteInfo(other.id, other.bookID, std::move(other.content)) {}
 
 std::string_view NoteInfo::getHeader() const {
+    static const auto headerPlaceholder = "<untitled>";
+
+    if (content.empty()) return headerPlaceholder;
+
     auto contentView = std::string_view(content);
-    // TODO: add test for empty header
     if (auto firstLineEnd = contentView.find('\n'); firstLineEnd != std::string_view::npos) {
-        if (firstLineEnd == 0) return "<empty>";
+        if (firstLineEnd == 0) return headerPlaceholder;
         return contentView.substr(0, firstLineEnd);
     }
+
     return contentView;
 }
 
