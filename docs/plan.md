@@ -17,7 +17,7 @@
 | ~/.local/bin/user/          | computer | notes with code snippets support                                         |
 | ssh config                  | computer | automated script with cli on computer to periodicaly update ssh config   |
 | notally app                 | phone    | android app (which is such as fast and convenient)                       |
-| habar app                   | phone    | sharing to android app                                                   |
+| feeder app                  | phone    | sharing to android app                                                   |
 | via bookmarks               | phone    | sharing to android app                                                   |
 | instagram bookmarks         | phone    | sharing to android app                                                   |
 

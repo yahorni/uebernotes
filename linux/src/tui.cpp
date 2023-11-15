@@ -94,9 +94,12 @@ bool TUI::run() {
     auto ignoreTabDecorator =
         IgnoreEvent([&](Event event) { return event == Event::Tab || event == Event::TabReverse; });
 
+    auto screen = ScreenInteractive::Fullscreen();
+
     // initialize book list pane
     auto&& bookMenuOption = MenuOption::Vertical();
     // to select focused item immediately
+    // FIXME: allow select without focusing
     bookMenuOption.focused_entry = &selectedBookIdx;
     bookMenuOption.on_change = [&]() {
         auto bookPtr = getSelectedBook(selectedBookIdx);
@@ -105,11 +108,13 @@ bool TUI::run() {
 
         Log::debug("Selected book: book={}, note={}", selectedBookIdx, selectedNoteIdx);
     };
-    auto bookList = Menu(&bookNames, &selectedBookIdx, bookMenuOption) | ignoreTabDecorator;
+    bookMenuOption.on_enter = [&]() { screen.PostEvent(Event::ArrowRight); };
+    auto bookList = Menu(&bookNames, &selectedBookIdx, bookMenuOption) | ignoreTabDecorator | FocusableWrapper();
 
     // initialize note list pane
     auto&& noteMenuOption = MenuOption::Vertical();
     // to select focused item immediately
+    // FIXME: allow select without focusing
     noteMenuOption.focused_entry = &selectedNoteIdx;
     noteMenuOption.on_enter = [&]() {
         _setStatusMessage(std::format("Enter note: {}:{}", selectedBookIdx, selectedNoteIdx));
@@ -123,7 +128,7 @@ bool TUI::run() {
         Log::debug("Selected note: book={}, note={}", selectedBookIdx, selectedNoteIdx);
     };
     // FIXME: show note name only before newline
-    auto noteList = Menu(&noteNames, &selectedNoteIdx, noteMenuOption) | ignoreTabDecorator;
+    auto noteList = Menu(&noteNames, &selectedNoteIdx, noteMenuOption) | ignoreTabDecorator | FocusableWrapper();
 
     // initialize preview pane
     auto notePreview = Pager(previewShift, noteContent);
@@ -186,8 +191,6 @@ bool TUI::run() {
             statusLine->Render(),
         });
     });
-
-    auto screen = ScreenInteractive::Fullscreen();
 
     auto component = CatchEvent(renderer, [&](Event event) {
         if (event == Event::Character('q')) {

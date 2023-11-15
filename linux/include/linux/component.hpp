@@ -19,4 +19,8 @@ Component Pager(int& shift, const std::string& content);
 Component IgnoreEvent(Component child, std::function<bool(Event event)> on_event);
 ComponentDecorator IgnoreEvent(std::function<bool(Event)> on_event);
 
+/* To make focusable component, which are not focusable by default */
+Component FocusableWrapper(Component child);
+ComponentDecorator FocusableWrapper();
+
 }  // namespace ftxui

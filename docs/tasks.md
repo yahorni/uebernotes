@@ -76,7 +76,7 @@
                 - Left/Right [ok]
                 - Shift+Tab/Tab [ok]
                 - h/l, Left/Right cycle scrolling (like Tab/Shift+Tab) [TODO]
-            + bind: switch panes to the right with Enter (only on left and middle panes)
+            + bind: switch panes to the right with Enter (only on left pane) [ok]
             + bind: scroll items in lists with j/k, Down/Up [ok]
             + bind: scroll note content with j/k, Down/Up [ok]
             + bind: refresh content with r (refresh cache)
@@ -84,8 +84,8 @@
             + bind: search button with '/' (mock search)
             + bind: command input with ':' (mock commands)
             + bind: ESC to cancel status line input (both search and command)
-        - command/keybinding proper implementation
-            + cycle (toggle) commands
+        - command/keybinding proper implementation [TODO]
+            + cycle (toggle) commands [TODO]
         - toggle panel with logs
         - floating window with help on keybindings
             + bind: help message with '?' (mock floating window, implement later)
@@ -104,7 +104,7 @@
         - editor opening
             + hardcoded options in priority: nvim, vim, nano, vi
             + configurable through cli (like "database")
-            + bind: Enter in right panel to open the note (remember: book may be empty)
+            + bind: Enter in middle/right panel to open the note (remember: book may be empty)
             + algorithm:
                 1. create temp file
                 2. dump note content to it

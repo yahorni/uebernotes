@@ -111,19 +111,32 @@ TEST_CASE("manual-tui", "[.]") {
 
         std::vector<std::string> menu1Opts{"m1o1", "m1o2", "m1o3"};
         std::vector<std::string> menu2Opts{"m2o1", "m2o2", "m2o3", "m2o4", "m2o5"};
+        std::vector<std::string> menu3Opts{};
         int selected1 = 0;
         int selected2 = 0;
+        int selected3 = 0;
+
         MenuOption menuOpt1;
         MenuOption menuOpt2;
+        MenuOption menuOpt3;
+
+        menuOpt3.elements_prefix = [] { return text("[empty menu]"); };
+        menuOpt3.on_enter = [&]() {
+            menu3Opts.push_back("entry");
+            return true;
+        };
+
         auto menu1 = Menu(&menu1Opts, &selected1, menuOpt1) | ignoreTabDecorator;
-        auto menu2 = Menu(&menu2Opts, &selected2, menuOpt2) | ignoreTabDecorator;
+        auto menu2_ = Menu(&menu2Opts, &selected2, menuOpt2) | ignoreTabDecorator;
+        auto menu2 = FocusableWrapper(menu2_);
+        auto menu3 = Menu(&menu3Opts, &selected3, menuOpt3) | ignoreTabDecorator | FocusableWrapper();
 
         auto pane = Renderer([&](bool focused) {
             if (focused) return text("focused pane") | bold;
             return text("usual pane");
         });
 
-        auto container = Container::Horizontal({menu1, menu2, pane});
+        auto container = Container::Horizontal({menu1, menu2, menu3, pane});
 
         auto screen = ScreenInteractive::Fullscreen();
 
