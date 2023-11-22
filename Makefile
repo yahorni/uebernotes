@@ -48,6 +48,10 @@ tests: core-tests linux-tests
 run: pkg/uebernotes
 	@pkg/uebernotes
 
+run-clean: pkg/uebernotes
+	rm -rf non-existant-database.sqlite
+	@pkg/uebernotes -d non-existant-database.sqlite
+
 run-help:
 	@pkg/uebernotes --help
 

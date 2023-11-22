@@ -11,9 +11,12 @@ BookList::BookList(core::Storage* storage, Context* ctx, ftxui::ScreenInteractiv
     : _storage(storage),
       _ctx(ctx) {
     auto bookMenuOption = ftxui::MenuOption::Vertical();
+
     // to select focused item immediately
     // FIXME: allow select without focusing
     bookMenuOption.focused_entry = &_ctx->selectedBookIdx;
+
+    // set events
     bookMenuOption.on_change = [&]() {
         auto bookPtr = getSelected();
         _ctx->selectedNoteIdx =
@@ -23,8 +26,13 @@ BookList::BookList(core::Storage* storage, Context* ctx, ftxui::ScreenInteractiv
         Log::debug("Selected book: book={}, note={}", _ctx->selectedBookIdx, _ctx->selectedNoteIdx);
     };
     bookMenuOption.on_enter = [&]() { screen.PostEvent(ftxui::Event::ArrowRight); };
-    bookMenu = ftxui::Menu(&bookNames, &_ctx->selectedBookIdx, bookMenuOption) | ignoreTabDecorator |
-               ftxui::FocusableWrapper();
+
+    // set component
+    bookMenu = ftxui::Menu(&bookNames, &_ctx->selectedBookIdx, bookMenuOption);
+    bookMenu |= ftxui::FocusableWrapper();
+
+    // set keys
+    bookMenu |= ignoreTabDecorator;
 }
 
 // TODO: error-prone way. need to think how to redo it

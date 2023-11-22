@@ -48,10 +48,14 @@ bool TUI::run() {
         bookList.updateItems();
         auto bookPtr = bookList.getSelected();
 
-        noteList.updateItems(bookPtr->id);
-        auto notePtr = noteList.getSelected(bookPtr->id);
+        if (bookPtr) {
+            noteList.updateItems(bookPtr->id);
+            auto notePtr = noteList.getSelected(bookPtr->id);
 
-        previewPane.updateContent(notePtr);
+            previewPane.updateContent(notePtr);
+        } else {
+            Log::debug("No books found");
+        }
 
         return vbox({
             hbox({

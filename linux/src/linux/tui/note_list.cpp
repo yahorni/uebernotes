@@ -10,9 +10,12 @@ NoteList::NoteList(core::Storage* storage, Context* ctx, BookList& bookList)
     : _storage(storage),
       _ctx(ctx) {
     auto noteMenuOption = ftxui::MenuOption::Vertical();
+
     // to select focused item immediately
     // FIXME: allow select without focusing
     noteMenuOption.focused_entry = &_ctx->selectedNoteIdx;
+
+    // set events
     noteMenuOption.on_enter = [&]() {
         _ctx->lastMessage = std::format("Enter note: {}:{}", _ctx->selectedBookIdx, _ctx->selectedNoteIdx);
         // TODO: open editor
@@ -24,9 +27,13 @@ NoteList::NoteList(core::Storage* storage, Context* ctx, BookList& bookList)
 
         Log::debug("Selected note: book={}, note={}", _ctx->selectedBookIdx, _ctx->selectedNoteIdx);
     };
-    // FIXME: show note name only before newline
-    noteMenu = ftxui::Menu(&noteNames, &_ctx->selectedNoteIdx, noteMenuOption) | ignoreTabDecorator |
-               ftxui::FocusableWrapper();
+
+    // set component
+    noteMenu = ftxui::Menu(&noteNames, &_ctx->selectedNoteIdx, noteMenuOption);
+    noteMenu |= ftxui::FocusableWrapper();
+
+    // set keys
+    noteMenu |= ignoreTabDecorator;
 }
 
 // TODO: error-prone way. need to think how to redo it
