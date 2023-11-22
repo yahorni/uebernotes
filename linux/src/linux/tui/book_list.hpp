@@ -18,7 +18,7 @@ public:
 
     // TODO: error-prone way. need to think how to redo it
     std::shared_ptr<core::BookInfo> getSelected();
-    void updateItems();
+    void updateItems(bool forceUpdate = false);
 
     const ftxui::Component& getComponent() const;
     ftxui::Element getElement() const;

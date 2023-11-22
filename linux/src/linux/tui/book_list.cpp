@@ -33,6 +33,16 @@ BookList::BookList(core::Storage* storage, Context* ctx, ftxui::ScreenInteractiv
 
     // set keys
     bookMenu |= ignoreTabDecorator;
+    bookMenu |= ftxui::CatchEvent([&](ftxui::Event event) {
+        if (event == ftxui::Event::Character('r')) {
+            Log::info("Refreshing books cache");
+            this->updateItems(true);
+            // TODO: decide, what should be updated: book list or note list when book is selected
+            // TODO: refresh notes for selected book
+            return true;
+        }
+        return false;
+    });
 }
 
 // TODO: error-prone way. need to think how to redo it
@@ -48,8 +58,9 @@ std::shared_ptr<core::BookInfo> BookList::getSelected() {
     return nullptr;
 }
 
-void BookList::updateItems() {
-    const auto& books = _storage->getBookInfos();
+void BookList::updateItems(bool forceUpdate) {
+    // TODO: add force refresh without cache
+    const auto& books = _storage->getBookInfos(forceUpdate);
 
     // TODO: shrink_to_fit()
     bookNames.clear();

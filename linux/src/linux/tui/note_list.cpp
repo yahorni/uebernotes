@@ -17,7 +17,7 @@ NoteList::NoteList(core::Storage* storage, Context* ctx, BookList& bookList)
 
     // set events
     noteMenuOption.on_enter = [&]() {
-        _ctx->lastMessage = std::format("Enter note: {}:{}", _ctx->selectedBookIdx, _ctx->selectedNoteIdx);
+        _ctx->lastMessage = std::format("Open note: book={}, note={}", _ctx->selectedBookIdx, _ctx->selectedNoteIdx);
         // TODO: open editor
     };
     noteMenuOption.on_change = [&]() {
@@ -34,6 +34,17 @@ NoteList::NoteList(core::Storage* storage, Context* ctx, BookList& bookList)
 
     // set keys
     noteMenu |= ignoreTabDecorator;
+    noteMenu |= ftxui::CatchEvent([&](ftxui::Event event) {
+        if (event == ftxui::Event::Character('r')) {
+            auto bookPtr = bookList.getSelected();
+            if (bookPtr) {
+                Log::info("Refreshing notes cache: book={}", bookPtr->id);
+                this->updateItems(bookPtr->id, true);
+            }
+            return true;
+        }
+        return false;
+    });
 }
 
 // TODO: error-prone way. need to think how to redo it
@@ -49,8 +60,8 @@ std::shared_ptr<core::NoteInfo> NoteList::getSelected(core::BookID bookID) {
     return nullptr;
 }
 
-void NoteList::updateItems(core::BookID bookID) {
-    const auto& notes = _storage->getNoteInfosByBookID(bookID);
+void NoteList::updateItems(core::BookID bookID, bool forceUpdate) {
+    const auto& notes = _storage->getNoteInfosByBookID(bookID, forceUpdate);
 
     // TODO: shrink_to_fit()
     noteNames.clear();

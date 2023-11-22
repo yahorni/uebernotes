@@ -68,7 +68,7 @@
             + print notes first line on middle pane [ok]
                 - think of separating it as a replacable format [TODO]
             + print note content on right pane [ok]
-        - global bindings: [...]
+        - global bindings: [ok]
             + bind: quit app with q [ok]
             + bind: quit app with Ctrl-c [ok]
             + bind: switch panes [ok]
@@ -79,13 +79,13 @@
             + bind: switch panes to the right with Enter (only on left pane) [ok]
             + bind: scroll items in lists with j/k, Down/Up [ok]
             + bind: scroll note content with j/k, Down/Up [ok]
-            + bind: refresh content with r (refresh cache)
+            + bind: refresh content with r (refresh cache) [ok]
+        - command/keybinding proper implementation [TODO]
+            + cycle (toggle) commands [TODO]
         - status line last log
             + bind: search button with '/' (mock search)
             + bind: command input with ':' (mock commands)
             + bind: ESC to cancel status line input (both search and command)
-        - command/keybinding proper implementation [TODO]
-            + cycle (toggle) commands [TODO]
         - toggle panel with logs
         - floating window with help on keybindings
             + bind: help message with '?' (mock floating window, implement later)
@@ -139,7 +139,8 @@
             + use are_you_sure prompt
     + technical debt:
         - properly configure segfault handling
-        - when UI crash during initialization logs are not written in file
+        - when UI crashes during initialization the logs aren't written in file
+        - get rid of tui::Context
 - common:
     + project level cmake to build lib and linux client
 - testing: create simple testing server

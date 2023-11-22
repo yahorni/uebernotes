@@ -15,6 +15,9 @@ namespace core {
 
 class Database;
 
+// TODO:
+// 1. make StorageCache private
+// 2. rewrite cache to work with database which can be changed outside
 class StorageCache {
 public:
     explicit StorageCache(bool isActive);
@@ -34,6 +37,8 @@ public:
     void removeBook(BookID bookID);
     void removeNote(NoteID noteID);
 
+    void replaceBooks(BooksCache&& books);
+
     const bool isActive;
 
 private:
@@ -52,8 +57,8 @@ public:
     Storage(Storage&&) = delete;
     Storage& operator=(Storage&&) = delete;
 
-    BooksCache getBookInfos() const;
-    NotesCache getNoteInfosByBookID(BookID bookID) const;
+    BooksCache getBookInfos(bool skipCache = false) const;
+    NotesCache getNoteInfosByBookID(BookID bookID, bool skipCache = false) const;
 
     std::optional<BookID> createBook(BookInfo&& book);
     std::optional<Book> getBook(BookID bookID);
@@ -71,7 +76,7 @@ private:
 
     std::unique_ptr<Database> _db;
 
-    StorageCache _cache;
+    mutable StorageCache _cache;
 };
 
 }  // namespace core

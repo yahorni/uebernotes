@@ -74,6 +74,11 @@ void StorageCache::removeNote(NoteID noteID) {
     _notesCache.erase(noteIter);
 }
 
+void StorageCache::replaceBooks(BooksCache&& books) {
+    _booksCache.clear();
+    _booksCache = std::move(books);
+}
+
 /*** storage ***/
 
 Storage::Storage(const Config& config)
@@ -86,16 +91,25 @@ Storage::Storage(const Config& config)
 
 Storage::~Storage() = default;
 
-BooksCache Storage::getBookInfos() const {
+BooksCache Storage::getBookInfos(bool skipCache) const {
     if (_cache.isActive) {
+        if (skipCache) {
+            auto&& books = _db->loadBooks();
+            _cache.replaceBooks(std::move(books));
+        }
         return _cache.getBooks();
     }
 
     return _db->loadBooks();
 }
 
-NotesCache Storage::getNoteInfosByBookID(BookID bookID) const {
+NotesCache Storage::getNoteInfosByBookID(BookID bookID, bool skipCache) const {
     if (_cache.isActive) {
+        if (skipCache) {
+            auto notes = _db->loadNotesByBookID(bookID);
+            _cache.addNotes(notes);
+            return notes;
+        }
         return _cache.getNotesByBookID(bookID);
     }
 
