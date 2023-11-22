@@ -1,4 +1,4 @@
-#include "linux/component.hpp"
+#include "ftxui/component.hpp"
 
 #include "linux/logger.hpp"
 

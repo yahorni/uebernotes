@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.25.1)
 set(CORE_LIB ${PROJECT_NAME}-core)
 
 file(GLOB_RECURSE CORE_SOURCES "src/*.cpp")
-set(CORE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(CORE_PUBLIC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(CORE_PRIVATE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # TODO: get rid of system lib dependency if possible
 find_package(SQLite3)
@@ -18,11 +19,12 @@ else()
   add_library(${CORE_LIB} STATIC ${CORE_SOURCES})
 endif()
 
-target_include_directories(${CORE_LIB} PRIVATE ${CORE_DIRS})
+target_include_directories(${CORE_LIB}
+  PUBLIC ${CORE_PUBLIC_HEADERS}
+  PRIVATE ${CORE_PRIVATE_HEADERS})
 
 # SQLite3 ---------------------------------------------------------------------
-target_include_directories(
-  ${CORE_LIB} SYSTEM PUBLIC ${PROJECT_ROOT}/third_party/sqlite_orm/include/)
+target_include_directories(${CORE_LIB} SYSTEM PUBLIC ${PROJECT_ROOT}/extras/sqlite_orm/include/)
 target_link_libraries(${CORE_LIB} PUBLIC sqlite3)
 set_target_properties(${CORE_LIB} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_ROOT}/pkg)
 set_target_properties(${CORE_LIB} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_ROOT}/pkg)
@@ -34,7 +36,7 @@ set(CORE_TESTS ${PROJECT_NAME}-core-tests)
 file(GLOB_RECURSE CORE_SOURCES_TESTS "tests/*.cpp")
 
 add_executable(${CORE_TESTS} ${CORE_SOURCES_TESTS})
-target_include_directories(${CORE_TESTS} PRIVATE ${CORE_DIRS})
+target_include_directories(${CORE_TESTS} PRIVATE ${CORE_PUBLIC_HEADERS} ${CORE_PRIVATE_HEADERS})
 target_compile_options(${CORE_TESTS} PRIVATE -ggdb)
 target_link_libraries(${CORE_TESTS} PRIVATE ${CORE_LIB})
 set_target_properties(${CORE_TESTS} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_ROOT}/pkg)

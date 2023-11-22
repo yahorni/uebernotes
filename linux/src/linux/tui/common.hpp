@@ -1,6 +1,6 @@
 #pragma once
 
-#include "linux/component.hpp"
+#include "ftxui/component.hpp"
 
 namespace linux::tui {
 

@@ -1,5 +1,7 @@
 #include "core/storage.hpp"
 
+#include "core/database.hpp"
+
 #include <algorithm>
 
 namespace core {
@@ -74,20 +76,22 @@ void StorageCache::removeNote(NoteID noteID) {
 
 /*** storage ***/
 
-Storage::Storage(const AppContext& context)
-    : _db(context.database),
-      _cache(context.useCaching) {
+Storage::Storage(const Config& config)
+    : _db(new Database{config.database}),
+      _cache(config.useCaching) {
     if (_cache.isActive) {
-        _cache.initialize(_db.loadBooks(), _db.loadAllNotes());
+        _cache.initialize(_db->loadBooks(), _db->loadAllNotes());
     }
 }
+
+Storage::~Storage() = default;
 
 BooksCache Storage::getBookInfos() const {
     if (_cache.isActive) {
         return _cache.getBooks();
     }
 
-    return _db.loadBooks();
+    return _db->loadBooks();
 }
 
 NotesCache Storage::getNoteInfosByBookID(BookID bookID) const {
@@ -95,11 +99,11 @@ NotesCache Storage::getNoteInfosByBookID(BookID bookID) const {
         return _cache.getNotesByBookID(bookID);
     }
 
-    return _db.loadNotesByBookID(bookID);
+    return _db->loadNotesByBookID(bookID);
 }
 
 std::optional<BookID> Storage::createBook(BookInfo&& book) {
-    auto id = _db.insertBook(book);
+    auto id = _db->insertBook(book);
     if (!id.has_value()) {
         return std::nullopt;
     }
@@ -112,7 +116,7 @@ std::optional<BookID> Storage::createBook(BookInfo&& book) {
 }
 
 std::optional<NoteID> Storage::createNote(NoteInfo&& note) {
-    auto id = _db.insertNote(note);
+    auto id = _db->insertNote(note);
     if (!id.has_value()) {
         return std::nullopt;
     }
@@ -129,7 +133,7 @@ std::shared_ptr<BookInfo> Storage::loadBookInfo(BookID bookID) const {
     if (_cache.isActive) {
         bookPtr = _cache.getBook(bookID);
     } else {
-        bookPtr = _db.loadBookByID(bookID);
+        bookPtr = _db->loadBookByID(bookID);
     }
     return bookPtr;
 }
@@ -139,7 +143,7 @@ std::shared_ptr<NoteInfo> Storage::loadNoteInfo(NoteID noteID) const {
     if (_cache.isActive) {
         notePtr = _cache.getNote(noteID);
     } else {
-        notePtr = _db.loadNoteByID(noteID);
+        notePtr = _db->loadNoteByID(noteID);
     }
     return notePtr;
 }
@@ -155,7 +159,7 @@ std::optional<Note> Storage::getNote(NoteID noteID) const {
 }
 
 bool Storage::updateBook(BookID bookID, std::string&& name) {
-    if (auto bookPtr = loadBookInfo(bookID); bookPtr && _db.updateBook(bookID, name)) {
+    if (auto bookPtr = loadBookInfo(bookID); bookPtr && _db->updateBook(bookID, name)) {
         bookPtr->name = std::move(name);
         return true;
     }
@@ -163,7 +167,7 @@ bool Storage::updateBook(BookID bookID, std::string&& name) {
 }
 
 bool Storage::updateNote(NoteID noteID, std::string&& content) {
-    if (auto notePtr = loadNoteInfo(noteID); notePtr && _db.updateNote(noteID, content)) {
+    if (auto notePtr = loadNoteInfo(noteID); notePtr && _db->updateNote(noteID, content)) {
         notePtr->content = std::move(content);
         return true;
     }
@@ -172,7 +176,7 @@ bool Storage::updateNote(NoteID noteID, std::string&& content) {
 
 bool Storage::removeBook(BookID bookID) {
     // DB removal doesn't return error on non-existant entity
-    if (auto bookPtr = loadBookInfo(bookID); !bookPtr || !_db.removeBook(bookID)) {
+    if (auto bookPtr = loadBookInfo(bookID); !bookPtr || !_db->removeBook(bookID)) {
         return false;
     }
     if (_cache.isActive) {
@@ -183,7 +187,7 @@ bool Storage::removeBook(BookID bookID) {
 
 bool Storage::removeNote(NoteID noteID) {
     // DB removal doesn't return error on non-existant entity
-    if (auto notePtr = loadNoteInfo(noteID); !notePtr || !_db.removeNote(noteID)) {
+    if (auto notePtr = loadNoteInfo(noteID); !notePtr || !_db->removeNote(noteID)) {
         return false;
     }
     if (_cache.isActive) {

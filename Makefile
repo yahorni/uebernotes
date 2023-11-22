@@ -23,11 +23,11 @@ core-tests: build-test-deps
 
 ### linux
 
-linux: build-deps
+linux: build-linux-deps
 	cmake -S . -B linux/build
 	cd linux/build && make -j uebernotes
 
-build-linux-tests: build-deps build-test-deps
+build-linux-tests: build-linux-deps build-test-deps
 	cmake -S . -B linux/build
 	cd linux/build && make -j uebernotes-tests
 
@@ -66,27 +66,50 @@ clean-all: clean-core clean-linux
 
 ### dependencies
 
-init-deps: sb-add sb-tag
+init-deps: sb-add-deps sb-tag-deps
 clean-deps: sb-rm-deps
 
-sb-add:
-	git submodule add https://github.com/fnc12/sqlite_orm     third_party/sqlite_orm || true
-	git submodule add https://github.com/jarro2783/cxxopts    third_party/cxxopts    || true
-	git submodule add https://github.com/catchorg/Catch2      third_party/catch2     || true
-	git submodule add https://github.com/ArthurSonzogni/FTXUI third_party/ftxui      || true
-	git submodule add https://github.com/abumq/easyloggingpp  third_party/elpp       || true
+sb-add-deps:
+	git submodule add --force https://github.com/fnc12/sqlite_orm     extras/sqlite_orm || true
+	git submodule add --force https://github.com/jarro2783/cxxopts    extras/cxxopts    || true
+	git submodule add --force https://github.com/catchorg/Catch2      extras/catch2     || true
+	git submodule add --force https://github.com/ArthurSonzogni/FTXUI extras/ftxui      || true
+	git submodule add --force https://github.com/abumq/easyloggingpp  extras/elpp       || true
 
-sb-tag:
-	cd third_party/sqlite_orm && git checkout tags/v1.8.2
-	cd third_party/cxxopts    && git checkout tags/v3.1.1
-	cd third_party/catch2     && git checkout tags/v3.4.0
-	cd third_party/ftxui      && git checkout tags/v5.0.0
-	cd third_party/elpp       && git checkout tags/v9.97.1
+sb-tag-deps:
+	cd extras/sqlite_orm && git checkout tags/v1.8.2
+	cd extras/cxxopts    && git checkout tags/v3.1.1
+	cd extras/catch2     && git checkout tags/v3.4.0
+	cd extras/ftxui      && git checkout tags/v5.0.0
+	cd extras/elpp       && git checkout tags/v9.97.1
+
+sb-rm-deps:
+	DEP_NAME=sqlite_orm make sb-rm
+	DEP_NAME=cxxopts    make sb-rm
+	DEP_NAME=catch2     make sb-rm
+	DEP_NAME=ftxui      make sb-rm
+	DEP_NAME=elpp       make sb-rm
+
+sb-rm:
+	[ -n "$(DEP_NAME)" ] || (echo "usage: DEP_NAME=<dep> make sb-rm" ; exit 1)
+	git submodule deinit -f extras/$(DEP_NAME) || true
+	git rm -f extras/$(DEP_NAME) || true
+	rm -rf \
+		extras/$(DEP_NAME) \
+		pkg/$(DEP_NAME) \
+		.git/modules/extras/$(DEP_NAME)
+
+build-linux-deps:
+	@[ -d "$(FTXUI_INSTALL_DIR)"  ] || make build-ftxui
+	@[ -d "$(ELPP_INSTALL_DIR)" ] || make build-elpp
+
+build-test-deps:
+	@[ -d "$(CATCH2_INSTALL_DIR)" ] || make build-catch2
 
 build-catch2:
 	rm -rf pkg/catch2
 	mkdir -p pkg/catch2
-	cd third_party/catch2 &&\
+	cd extras/catch2 &&\
 		cmake -S . -B build &&\
 		cmake --build build -- -j &&\
 		cmake --install build --prefix $(CATCH2_INSTALL_DIR)
@@ -94,8 +117,9 @@ build-catch2:
 build-ftxui:
 	rm -rf pkg/ftxui
 	mkdir -p pkg/ftxui
-	cd third_party/ftxui &&\
-		cmake -S . -B build -DFTXUI_BUILD_EXAMPLES=OFF &&\
+	cd extras/ftxui &&\
+		cmake -S . -B build \
+			-DFTXUI_BUILD_EXAMPLES=OFF &&\
 		cmake --build build -- -j &&\
 		cmake --install build --prefix $(FTXUI_INSTALL_DIR)
 
@@ -103,38 +127,23 @@ build-elpp:
 	rm -rf pkg/elpp
 	mkdir -p pkg/elpp
 	# use ELPP_STL_LOGGING to log stl containers
-	cd third_party/elpp &&\
-		cmake -S . -B build -Dbuild_static_lib=1 -DCMAKE_INSTALL_PREFIX=$(ELPP_INSTALL_DIR) &&\
+	# ELPP_DEFAULT_LOG_FILE to set default file
+	cd extras/elpp &&\
+		cmake -S . -B build \
+			-Dbuild_static_lib=1 \
+			-DCMAKE_INSTALL_PREFIX=$(ELPP_INSTALL_DIR) \
+			-DCMAKE_CXX_FLAGS=-DELPP_NO_DEFAULT_LOG_FILE &&\
 		cmake --build build -- -j &&\
 		cmake --install build
 
-build-deps:
-	@[ -d "$(FTXUI_INSTALL_DIR)"  ] || make build-ftxui
-	@[ -d "$(ELPP_INSTALL_DIR)" ] || make build-elpp
-
-build-test-deps:
-	@[ -d "$(CATCH2_INSTALL_DIR)" ] || make build-catch2
-
-sb-rm:
-	[ -n "$(DEP_NAME)" ] || (echo "set DEP_NAME" ; exit 1)
-	git submodule deinit -f third_party/$(DEP_NAME) || true
-	git rm -f third_party/$(DEP_NAME) || true
-	rm -rf \
-		third_party/$(DEP_NAME) \
-		pkg/$(DEP_NAME) \
-		.git/modules/third_party/$(DEP_NAME)
-
-sb-rm-deps:
-	DEP_NAME=ftxui      make sb-rm
-	DEP_NAME=catch2     make sb-rm
-	DEP_NAME=cxxopts    make sb-rm
-	DEP_NAME=sqlite_orm make sb-rm
-
 clean-ftxui:
-	rm -rf third_party/ftxui/build
+	rm -rf $(FTXUI_INSTALL_DIR)
+	rm -rf extras/ftxui/build
 
 clean-catch2:
-	rm -rf third_party/catch2/build
+	rm -rf $(CATCH2_INSTALL_DIR)
+	rm -rf extras/catch2/build
 
 clean-elpp:
-	rm -rf third_party/elpp/build
+	rm -rf $(ELPP_INSTALL_DIR)
+	rm -rf extras/elpp/build

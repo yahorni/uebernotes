@@ -1,18 +1,18 @@
-[submodule "third_party/sqlite_orm"]
-	path = third_party/sqlite_orm
+[submodule "extras/sqlite_orm"]
+	path = extras/sqlite_orm
 	url = https://github.com/fnc12/sqlite_orm
-[submodule "third_party/cxxopts"]
-	path = third_party/cxxopts
+[submodule "extras/cxxopts"]
+	path = extras/cxxopts
 	url = https://github.com/jarro2783/cxxopts
-[submodule "third_party/catch2"]
-	path = third_party/catch2
+[submodule "extras/catch2"]
+	path = extras/catch2
 	url = https://github.com/catchorg/Catch2
 	ignore = dirty
-[submodule "third_party/ftxui"]
-	path = third_party/ftxui
+[submodule "extras/ftxui"]
+	path = extras/ftxui
 	url = https://github.com/ArthurSonzogni/FTXUI
 	ignore = dirty
-[submodule "third_party/elpp"]
-	path = third_party/elpp
+[submodule "extras/elpp"]
+	path = extras/elpp
 	url = https://github.com/abumq/easyloggingpp
 	ignore = dirty

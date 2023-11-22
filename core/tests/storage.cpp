@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "core/appcontext.hpp"
+#include "core/config.hpp"
 #include "core/book.hpp"
 #include "core/note.hpp"
 #include "core/storage.hpp"
@@ -29,7 +29,7 @@ TEST_CASE("books", "[core.storage.cache]") {
     if (fs::exists(database)) REQUIRE(fs::remove(database));
 
     // TODO: get rid of direct storage usage in common tests
-    core::Storage storage{core::AppContext{database, true}};
+    core::Storage storage{core::Config{database, true}};
 
     SECTION("book with notes creation") {
         auto bookID = createBook(storage, "book1");

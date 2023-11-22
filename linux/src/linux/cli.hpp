@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/appcontext.hpp"
+#include "core/config.hpp"
 #include "core/storage.hpp"
 #include "linux/argparser.hpp"
 
@@ -11,7 +11,7 @@ namespace linux {
 
 class CLI {
 public:
-    explicit CLI(const core::AppContext& context);
+    explicit CLI(const core::Config& config);
 
     bool run(const CmdLineArgs& args);
 

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "core/appcontext.hpp"
 #include "core/book.hpp"
-#include "core/database.hpp"
+#include "core/config.hpp"
 #include "core/note.hpp"
 #include "core/types.hpp"
 
@@ -13,6 +12,8 @@
 #include <unordered_set>
 
 namespace core {
+
+class Database;
 
 class StorageCache {
 public:
@@ -43,7 +44,8 @@ private:
 
 class Storage {
 public:
-    explicit Storage(const AppContext& context);
+    explicit Storage(const Config& config);
+    ~Storage();
 
     Storage(const Storage&) = delete;
     Storage& operator=(const Storage&) = delete;
@@ -67,7 +69,7 @@ private:
     std::shared_ptr<BookInfo> loadBookInfo(BookID bookID) const;
     std::shared_ptr<NoteInfo> loadNoteInfo(NoteID noteID) const;
 
-    mutable Database _db;
+    std::unique_ptr<Database> _db;
 
     StorageCache _cache;
 };

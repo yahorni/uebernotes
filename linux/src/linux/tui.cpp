@@ -1,6 +1,6 @@
 #include "linux/tui.hpp"
 
-#include "linux/component.hpp"
+#include "ftxui/component.hpp"
 #include "linux/logger.hpp"
 #include "linux/tui/book_list.hpp"
 #include "linux/tui/note_list.hpp"
@@ -20,8 +20,8 @@
 
 namespace linux {
 
-TUI::TUI(const core::AppContext& context)
-    : _storage(context) {}
+TUI::TUI(const core::Config& config)
+    : _storage(config) {}
 
 bool TUI::run() {
     using namespace ftxui;

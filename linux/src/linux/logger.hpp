@@ -1,5 +1,6 @@
 #pragma once
 
+// #define ELPP_NO_DEFAULT_LOG_FILE
 #include <easylogging++.h>
 
 #include <format>

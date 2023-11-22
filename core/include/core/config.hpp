@@ -4,7 +4,7 @@
 
 namespace core {
 
-struct AppContext {
+struct Config {
     std::string database;
     bool useCaching;
 };

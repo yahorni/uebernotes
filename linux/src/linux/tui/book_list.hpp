@@ -13,6 +13,7 @@ namespace linux::tui {
 
 class BookList {
 public:
+    // TODO: get rid of straight screen passing
     BookList(core::Storage* storage, Context* ctx, ftxui::ScreenInteractive& screen);
 
     // TODO: error-prone way. need to think how to redo it

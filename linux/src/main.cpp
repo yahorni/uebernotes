@@ -1,4 +1,4 @@
-#include "core/appcontext.hpp"
+#include "core/config.hpp"
 #include "linux/argparser.hpp"
 #include "linux/cli.hpp"
 #include "linux/logger.hpp"
@@ -31,18 +31,18 @@ int main(int argc, const char* argv[]) {
     Log::init(argc, argv);
     auto cliArgs = parseArguments(argc, argv);
 
-    const core::AppContext context{cliArgs.getString("database"), !cliArgs.hasOperation()};
+    const core::Config config{cliArgs.getString("database"), !cliArgs.hasOperation()};
 
-    Log::info("Using database: {}", context.database.c_str());
-    Log::info("Using cache: {}", context.useCaching);
+    Log::info("Using database: {}", config.database.c_str());
+    Log::info("Using cache: {}", config.useCaching);
 
     if (cliArgs.hasOperation() || cliArgs.has("help")) {
         Log::debug("CLI mode");
-        linux::CLI cli{context};
+        linux::CLI cli{config};
         return cli.run(cliArgs) ? 0 : 1;
     } else {
         Log::debug("TUI mode");
-        linux::TUI tui{context};
+        linux::TUI tui{config};
         return tui.run() ? 0 : 1;
     }
 }

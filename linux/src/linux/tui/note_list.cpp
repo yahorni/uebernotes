@@ -1,6 +1,6 @@
 #include "linux/tui/note_list.hpp"
 
-#include "linux/component.hpp"
+#include "ftxui/component.hpp"
 #include "linux/logger.hpp"
 #include "linux/tui/common.hpp"
 

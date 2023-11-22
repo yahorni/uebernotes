@@ -1,14 +1,14 @@
 #include "linux/cli.hpp"
 
-#include "core/appcontext.hpp"
+#include "core/config.hpp"
 
 #include <format>
 #include <iostream>
 
 namespace linux {
 
-CLI::CLI(const core::AppContext& context)
-    : _storage(context) {}
+CLI::CLI(const core::Config& config)
+    : _storage(config) {}
 
 bool CLI::run(const CmdLineArgs& args) {
     // TODO: add operation enum

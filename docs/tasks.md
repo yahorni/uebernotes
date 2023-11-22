@@ -139,7 +139,7 @@
             + use are_you_sure prompt
     + technical debt:
         - properly configure segfault handling
-        - when UI crash during initialization logs are not written in file and myeasylog.log file created
+        - when UI crash during initialization logs are not written in file
 - common:
     + project level cmake to build lib and linux client
 - testing: create simple testing server
