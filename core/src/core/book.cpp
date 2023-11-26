@@ -1,7 +1,5 @@
 #include "core/book.hpp"
 
-#include "core/storage.hpp"
-
 namespace core {
 
 // BookInfo

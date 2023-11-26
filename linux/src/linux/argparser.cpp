@@ -1,7 +1,6 @@
 #include "linux/argparser.hpp"
 
 #include "core/types.hpp"
-#include "linux/logger.hpp"
 
 #include <map>
 

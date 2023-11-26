@@ -82,7 +82,7 @@
             + bind: refresh content with r (refresh cache) [ok]
         - command/keybinding proper implementation [TODO]
             + cycle (toggle) commands [TODO]
-        - status line last log
+        - status line last log [...]
             + bind: search button with '/' (mock search)
             + bind: command input with ':' (mock commands)
             + bind: ESC to cancel status line input (both search and command)

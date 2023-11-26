@@ -1,7 +1,5 @@
 #include "ftxui/component.hpp"
 
-#include "linux/logger.hpp"
-
 #include <ftxui/component/event.hpp>
 
 #include <memory>

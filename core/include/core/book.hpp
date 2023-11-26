@@ -1,12 +1,9 @@
 #pragma once
 
 #include "core/comparator.hpp"
-#include "core/note.hpp"
 #include "core/types.hpp"
 
-#include <list>
 #include <memory>
-#include <optional>
 #include <set>
 #include <string>
 

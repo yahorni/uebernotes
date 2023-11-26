@@ -3,8 +3,6 @@
 #include "core/comparator.hpp"
 #include "core/types.hpp"
 
-#include <cstdint>
-#include <list>
 #include <memory>
 #include <string>
 #include <unordered_set>

@@ -1,6 +1,5 @@
 #include "linux/tui.hpp"
 
-#include "ftxui/component.hpp"
 #include "linux/logger.hpp"
 #include "linux/tui/book_list.hpp"
 #include "linux/tui/note_list.hpp"

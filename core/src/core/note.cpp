@@ -1,7 +1,5 @@
 #include "core/note.hpp"
 
-#include "core/storage.hpp"
-
 namespace core {
 
 // NoteInfo

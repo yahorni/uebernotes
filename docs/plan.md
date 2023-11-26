@@ -124,3 +124,4 @@ Android app will take some significant time to develop. To start using notes ear
 + sqlite_orm examples: https://github.com/fnc12/sqlite_orm/tree/master/examples
 + catch2: https://github.com/catchorg/Catch2/blob/devel/docs/
 + android screening: https://github.com/Genymobile/scrcpy
++ json: https://github.com/stephenberry/glaze
