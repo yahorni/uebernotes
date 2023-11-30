@@ -10,9 +10,10 @@
 one-line `if` and `for` should be used with brackets
 in cpp file header is put on the first line, then one blank line followed by other includes
 
-pitchfork structure: https://github.com/vector-of-bool/pitchfork
+pitchfork structure: <https://github.com/vector-of-bool/pitchfork>
 
 ## notes
+
 + move private headers to `src/`, public to `include/`
 + [add to clang-format] order of headers:
     1. (for cpp file) corresponding header file
