@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/storage.hpp"
+#include <core/types.hpp>
 
 #include <string>
 #include <unordered_map>

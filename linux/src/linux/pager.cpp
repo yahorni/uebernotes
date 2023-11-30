@@ -20,7 +20,6 @@ public:
     }
 
     void SetBox(Box box) final {
-
         normalizeShift(box);
         box.y_min -= _shift;
 

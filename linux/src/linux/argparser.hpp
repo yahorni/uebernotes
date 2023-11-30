@@ -7,6 +7,7 @@
 
 namespace linux {
 
+// TODO: get rid of exception
 class CmdLineError : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };

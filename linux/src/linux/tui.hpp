@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/config.hpp"
-#include "core/storage.hpp"
+#include <core/config.hpp>
+#include <core/storage.hpp>
 
 namespace linux {
 

@@ -20,7 +20,7 @@ public:
     static void init(int argc, const char** argv);
 
 #define LOG_LINUX(NAME, LEVEL)                                                                                         \
-    template <typename... Args>                                                                                        \
+    template<typename... Args>                                                                                         \
     static constexpr void NAME(std::format_string<Args...> fmt_str, Args&&... args) {                                  \
         std::string msg;                                                                                               \
         auto it = std::back_inserter(msg);                                                                             \

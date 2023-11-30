@@ -3,6 +3,8 @@
 #include "linux/tui/book_list.hpp"
 #include "linux/tui/context.hpp"
 
+#include <core/storage.hpp>
+
 #include <ftxui/component/component.hpp>
 
 #include <memory>

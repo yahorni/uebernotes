@@ -1,9 +1,10 @@
 #include "linux/cli.hpp"
 
-#include "core/config.hpp"
+#include <core/config.hpp>
 
 #include <format>
 #include <iostream>
+#include <utility>
 
 namespace linux {
 
@@ -91,9 +92,9 @@ bool CLI::createNote(core::BookID bookID, std::string&& content) {
 
     if (auto book = _storage.getBook(bookID); book.has_value()) {
         if (auto noteID = _storage.createNote(std::move(info)); noteID.has_value()) {
-                std::clog << std::format("New note ID: {}", noteID.value()) << std::endl;
-                return true;
-            }
+            std::clog << std::format("New note ID: {}", noteID.value()) << std::endl;
+            return true;
+        }
     }
 
     std::cerr << std::format("Failed to create note") << std::endl;

@@ -4,6 +4,8 @@
 #include "linux/tui/common.hpp"
 #include "linux/tui/context.hpp"
 
+#include <core/note.hpp>
+
 #include <ftxui/component/component.hpp>
 
 #include <memory>
