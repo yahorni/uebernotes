@@ -1,7 +1,6 @@
 #pragma once
 
-#include "linux/tui/book_list.hpp"
-#include "linux/tui/context.hpp"
+#include "linux/tui/event_queue.hpp"
 
 #include <core/storage.hpp>
 
@@ -10,26 +9,33 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace linux::tui {
 
 class NoteList {
 public:
-    NoteList(core::Storage* storage, Context* ctx, BookList& bookList);
+    NoteList(core::Storage* storage, EventQueue* eventQueue);
+    void reset();
 
-    // TODO: error-prone way. need to think how to redo it
-    std::shared_ptr<core::NoteInfo> getSelected(core::BookID bookID);
-    void updateItems(core::BookID bookID, bool forceUpdate = false);
+    std::shared_ptr<core::NoteInfo> getSelected(core::BookID bookID, bool refresh = false);
+    void updateItems(core::BookID bookID, bool refresh = false);
 
+    void cacheNoteIdx(core::BookID bookID);
+
+    // UI
     const ftxui::Component& getComponent() const;
     ftxui::Element getElement() const;
 
 private:
     core::Storage* _storage{nullptr};
-    Context* _ctx{nullptr};
+    EventQueue* _eventQueue{nullptr};
 
-    std::vector<std::string> noteNames;
-    ftxui::Component noteMenu;
+    int _selectedNoteIdx = 0;
+    std::unordered_map<core::BookID, int> _storedNoteIndeces{};
+
+    std::vector<std::string> _noteNames;
+    ftxui::Component _noteMenu;
 };
 
 }  // namespace linux::tui

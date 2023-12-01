@@ -6,8 +6,9 @@
 #include "core/storage.hpp"
 
 #include <filesystem>
-#include <iostream>
 #include <string>
+
+// TODO: add logger with cout
 
 core::BookID createBook(core::Storage& storage, std::string name) {
     auto bookID = storage.createBook(core::BookInfo{std::move(name)});
@@ -108,5 +109,28 @@ TEST_CASE("books", "[core.storage.cache]") {
     SECTION("get nonexistant note") {
         auto note = storage.getNote(999);
         REQUIRE(!note.has_value());
+    }
+
+    SECTION("remove book") {
+        auto bookID1 = createBook(storage, "book1");
+        auto bookID2 = createBook(storage, "book1");
+
+        // creating notes
+        createNote(storage, bookID1, "b1n1");
+        createNote(storage, bookID1, "b1n2");
+        createNote(storage, bookID2, "b2n1");
+        createNote(storage, bookID2, "b2n2");
+        createNote(storage, bookID2, "b2n3");
+
+        // remove book
+        REQUIRE(storage.getBookInfos().size() == 2);
+        REQUIRE(storage.getNoteInfosByBookID(bookID1).size() == 2);
+        REQUIRE(storage.getNoteInfosByBookID(bookID2).size() == 3);
+
+        REQUIRE(storage.removeBook(bookID2) == true);
+
+        REQUIRE(storage.getBookInfos().size() == 1);
+        REQUIRE(storage.getNoteInfosByBookID(bookID1).size() == 2);
+        REQUIRE(storage.getNoteInfosByBookID(bookID2).size() == 0);
     }
 }

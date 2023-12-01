@@ -16,6 +16,7 @@ class Database;
 // TODO:
 // 1. make StorageCache private
 // 2. rewrite cache to work with database which can be changed outside
+// (implement cache miss properly)
 class StorageCache {
 public:
     explicit StorageCache(bool isActive);
@@ -33,9 +34,8 @@ public:
     std::shared_ptr<NoteInfo> getNote(NoteID noteID) const;
 
     void removeBook(BookID bookID);
+    void removeBookNotes(BookID bookID);
     void removeNote(NoteID noteID);
-
-    void replaceBooks(BooksCache&& books);
 
     const bool isActive;
 
@@ -50,13 +50,15 @@ public:
     explicit Storage(const Config& config);
     ~Storage();
 
+    void loadStorage();
+
     Storage(const Storage&) = delete;
     Storage& operator=(const Storage&) = delete;
     Storage(Storage&&) = delete;
     Storage& operator=(Storage&&) = delete;
 
-    BooksCache getBookInfos(bool skipCache = false) const;
-    NotesCache getNoteInfosByBookID(BookID bookID, bool skipCache = false) const;
+    BooksCache getBookInfos() const;
+    NotesCache getNoteInfosByBookID(BookID bookID, bool refreshCache = false) const;
 
     std::optional<BookID> createBook(BookInfo&& book);
     std::optional<Book> getBook(BookID bookID);

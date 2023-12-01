@@ -2,6 +2,10 @@
 
 #include "core/logger.hpp"
 
+#include <utility>
+
+#include <iostream>  // TODO: remove
+
 namespace core {
 
 Database::Database(std::string_view dbName)
@@ -110,7 +114,7 @@ BooksCache Database::loadBooks() {
     return books;
 }
 
-template <class T>
+template<class T>
 static NotesCache convertDBNotesToCollection(T&& dbNotes) {
     NotesCache notes;
     for (auto& note : dbNotes) {

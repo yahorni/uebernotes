@@ -59,14 +59,20 @@ std::shared_ptr<NoteInfo> StorageCache::getNote(NoteID noteID) const {
 }
 
 void StorageCache::removeBook(BookID bookID) {
-    for (auto note : _notesCache) {
-        if (note->bookID == bookID) {
-            _notesCache.erase(note);
-        }
-    }
+    removeBookNotes(bookID);
 
     auto bookIter = findBookInCache(_booksCache, bookID);
     _booksCache.erase(bookIter);
+}
+
+void StorageCache::removeBookNotes(BookID bookID) {
+    for (auto it = _notesCache.begin(); it != _notesCache.end();) {
+        if ((*it)->bookID == bookID) {
+            it = _notesCache.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void StorageCache::removeNote(NoteID noteID) {
@@ -74,43 +80,40 @@ void StorageCache::removeNote(NoteID noteID) {
     _notesCache.erase(noteIter);
 }
 
-void StorageCache::replaceBooks(BooksCache&& books) {
-    _booksCache.clear();
-    _booksCache = std::move(books);
-}
-
 /*** storage ***/
 
 Storage::Storage(const Config& config)
     : _db(new Database{config.database}),
       _cache(config.useCaching) {
+    loadStorage();
+}
+
+Storage::~Storage() = default;
+
+void Storage::loadStorage() {
     if (_cache.isActive) {
         _cache.initialize(_db->loadBooks(), _db->loadAllNotes());
     }
 }
 
-Storage::~Storage() = default;
-
-BooksCache Storage::getBookInfos(bool skipCache) const {
+BooksCache Storage::getBookInfos() const {
     if (_cache.isActive) {
-        if (skipCache) {
-            auto&& books = _db->loadBooks();
-            _cache.replaceBooks(std::move(books));
-        }
         return _cache.getBooks();
     }
 
     return _db->loadBooks();
 }
 
-NotesCache Storage::getNoteInfosByBookID(BookID bookID, bool skipCache) const {
+NotesCache Storage::getNoteInfosByBookID(BookID bookID, bool refreshCache) const {
     if (_cache.isActive) {
-        if (skipCache) {
-            auto notes = _db->loadNotesByBookID(bookID);
-            _cache.addNotes(notes);
-            return notes;
+        if (!refreshCache) {
+            return _cache.getNotesByBookID(bookID);
         }
-        return _cache.getNotesByBookID(bookID);
+
+        auto notes = _db->loadNotesByBookID(bookID);
+        _cache.removeBookNotes(bookID);
+        _cache.addNotes(notes);
+        return notes;
     }
 
     return _db->loadNotesByBookID(bookID);

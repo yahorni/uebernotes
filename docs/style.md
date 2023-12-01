@@ -7,7 +7,6 @@
 | argument            | pascalCase              |
 | private class field | underscore + pascalCase |
 
-one-line `if` and `for` should be used with brackets
 in cpp file header is put on the first line, then one blank line followed by other includes
 
 pitchfork structure: <https://github.com/vector-of-bool/pitchfork>

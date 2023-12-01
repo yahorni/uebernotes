@@ -3,84 +3,85 @@
 #include "ftxui/component.hpp"
 #include "linux/logger.hpp"
 #include "linux/tui/common.hpp"
+#include "linux/tui/event_queue.hpp"
+
+#include <algorithm>
 
 namespace linux {
 namespace tui {
 
-BookList::BookList(core::Storage* storage, Context* ctx, ftxui::ScreenInteractive& screen)
+BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
     : _storage(storage),
-      _ctx(ctx) {
+      _eventQueue(eventQueue) {
     auto bookMenuOption = ftxui::MenuOption::Vertical();
 
     // to select focused item immediately
     // FIXME: allow select without focusing
-    bookMenuOption.focused_entry = &_ctx->selectedBookIdx;
+    bookMenuOption.focused_entry = &_selectedBookIdx;
 
     // set events
-    bookMenuOption.on_change = [&]() {
-        auto bookPtr = getSelected();
-        _ctx->selectedNoteIdx =
-            (_ctx->storedNoteIndeces.count(bookPtr->id) ? _ctx->storedNoteIndeces.at(bookPtr->id) : 0);
-        _ctx->previewShift = 0;
-
-        Log::debug("Selected book: book={}, note={}", _ctx->selectedBookIdx, _ctx->selectedNoteIdx);
-    };
-    bookMenuOption.on_enter = [&]() { screen.PostEvent(ftxui::Event::ArrowRight); };
+    bookMenuOption.on_change = [&]() { _eventQueue->push(Event::BookChanged); };
+    bookMenuOption.on_enter = [&]() { _eventQueue->push(Event::PostScreenEvent, ftxui::Event::ArrowRight); };
 
     // set component
-    bookMenu = ftxui::Menu(&bookNames, &_ctx->selectedBookIdx, bookMenuOption);
-    bookMenu |= ftxui::FocusableWrapper();
+    _bookMenu = ftxui::Menu(&_bookNames, &_selectedBookIdx, bookMenuOption);
+    _bookMenu |= ftxui::FocusableWrapper();
 
     // set keys
-    bookMenu |= ignoreTabDecorator;
-    bookMenu |= ftxui::CatchEvent([&](ftxui::Event event) {
+    _bookMenu |= ignoreTabDecorator;
+    _bookMenu |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Character('r')) {
-            Log::info("Refreshing books cache");
-            this->updateItems(true);
-            // TODO: decide, what should be updated: book list or note list when book is selected
-            // TODO: refresh notes for selected book
+            _eventQueue->push(Event::RefreshBook);
             return true;
         }
         return false;
     });
 }
 
-// TODO: error-prone way. need to think how to redo it
-std::shared_ptr<core::BookInfo> BookList::getSelected() {
-    const auto& books = _storage->getBookInfos();
-    if (!books.size()) return nullptr;
+void BookList::reset() { _selectedBookIdx = 0; }
 
-    int i = 0;
-    for (const auto& book : books) {
-        if (i == _ctx->selectedBookIdx) return book;
-        i++;
+std::optional<core::BookID> BookList::getSelectedBookID() {
+    const auto& books = _storage->getBookInfos();
+    if (books.empty()) {
+        return std::nullopt;
     }
-    return nullptr;
+
+    if (static_cast<size_t>(_selectedBookIdx) >= books.size()) {
+        Log::warning("selected book index ({}) > amount of books ({})", _selectedBookIdx, books.size());
+        return std::nullopt;
+    }
+
+    auto book = *std::next(books.begin(), _selectedBookIdx);
+    return book->id;
 }
 
-void BookList::updateItems(bool forceUpdate) {
-    // TODO: add force refresh without cache
-    const auto& books = _storage->getBookInfos(forceUpdate);
+void BookList::updateItems() {
+    _selectedBookIdx = 0;
+
+    const auto& books = _storage->getBookInfos();
 
     // TODO: shrink_to_fit()
-    bookNames.clear();
-    bookNames.reserve(books.size());
+    _bookNames.clear();
+    _bookNames.reserve(books.size());
 
     for (const auto& book : books) {
-        bookNames.emplace_back(book->name);
+        _bookNames.emplace_back(book->name);
     }
+
+    // TODO: add sorting + selectedBookIdx
+    // std::sort(_bookNames.begin(), _bookNames.end());
 }
 
-const ftxui::Component& BookList::getComponent() const { return bookMenu; }
+const ftxui::Component& BookList::getComponent() const { return _bookMenu; }
 
 ftxui::Element BookList::getElement() const {
     using namespace ftxui;
     return vbox({
                hcenter(bold(text("Books"))),  // consider using "window"
                separator(),                   //
-               bookMenu->Render(),            //
+               _bookMenu->Render(),           //
            }) |
-           borderDecorator(bookMenu->Focused());
+           borderDecorator(_bookMenu->Focused());
 }
 
 }  // namespace tui

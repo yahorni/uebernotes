@@ -22,14 +22,14 @@ LOG_CORE(Fatal, FATAL)
 // --logging-flags=3
 // --default-log-file=FILE
 
+static std::string getPID(const el::LogMessage*) { return std::to_string(getpid()); }
+
 void Log::init(int argc, const char** argv) {
     START_EASYLOGGINGPP(argc, argv);
 
     // TODO: move configuration to file
     el::Configurations defaultConf;
     defaultConf.setToDefault();
-    // log message
-    defaultConf.setGlobally(el::ConfigurationType::Format, "%datetime %level [%logger] %msg");
     // log file
     // TODO: configurable path
     defaultConf.setGlobally(el::ConfigurationType::Filename, "uebernotes.log");
@@ -37,6 +37,11 @@ void Log::init(int argc, const char** argv) {
     defaultConf.setGlobally(el::ConfigurationType::MaxLogFileSize, "2097152");
     // stdout/stderr
     defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
+    // add PID formatter
+    el::Helpers::installCustomFormatSpecifier(el::CustomFormatSpecifier("%pid", getPID));
+    // log message
+    defaultConf.setGlobally(el::ConfigurationType::Format, "%datetime <%pid> %level [%logger] %msg");
+
     // configure all loggers
     el::Loggers::setDefaultConfigurations(defaultConf, true);
 

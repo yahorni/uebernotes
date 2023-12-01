@@ -1,20 +1,27 @@
 #pragma once
 
-#include "linux/tui/context.hpp"
+#include "linux/tui/event_queue.hpp"
 
 #include <ftxui/component/component.hpp>
+
+#include <string>
+#include <utility>
 
 namespace linux::tui {
 
 class StatusLine {
 public:
-    explicit StatusLine(Context* ctx)
-        : _ctx(ctx) {}
+    explicit StatusLine(EventQueue* eventQueue)
+        : _eventQueue(eventQueue) {}
 
-    ftxui::Element getElement() const { return ftxui::text(_ctx->lastMessage.c_str()); }
+    void setMessage(std::string message) { _lastMessage = std::move(message); }
+
+    // UI
+    ftxui::Element getElement() const { return ftxui::text(_lastMessage.c_str()); }
 
 private:
-    Context* _ctx{nullptr};
+    EventQueue* _eventQueue{nullptr};
+    std::string _lastMessage = "Welcome to uebernotes";
 };
 
 }  // namespace linux::tui
