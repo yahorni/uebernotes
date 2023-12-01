@@ -132,7 +132,9 @@ TEST_CASE("manual-tui", "[.]") {
         auto menu3 = Menu(&menu3Opts, &selected3, menuOpt3) | ignoreTabDecorator | FocusableWrapper();
 
         auto pane = Renderer([&](bool focused) {
-            if (focused) return text("focused pane") | bold;
+            if (focused) {
+                return text("focused pane") | bold;
+            }
             return text("usual pane");
         });
 

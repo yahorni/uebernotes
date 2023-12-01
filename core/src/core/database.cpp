@@ -4,8 +4,6 @@
 
 #include <utility>
 
-#include <iostream>  // TODO: remove
-
 namespace core {
 
 Database::Database(std::string_view dbName)

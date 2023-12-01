@@ -1,8 +1,9 @@
-#include "core/config.hpp"
 #include "linux/argparser.hpp"
 #include "linux/cli.hpp"
 #include "linux/logger.hpp"
 #include "linux/tui.hpp"
+
+#include <core/config.hpp>
 
 #include <iostream>
 

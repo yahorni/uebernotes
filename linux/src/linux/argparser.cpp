@@ -71,7 +71,9 @@ uint64_t CmdLineArgs::getUInt64(const std::string& arg) const { return _parseRes
 
 bool CmdLineArgs::hasOperation() const {
     for (const auto& [_, op] : operations) {
-        if (has(op)) return true;
+        if (has(op)) {
+            return true;
+        }
     }
     return false;
 }
@@ -88,7 +90,9 @@ void CmdLineArgs::_validate() {
     // TODO: make common dictionary/exclusive group subclass to use in ctor and here
     uint8_t opsAmount = 0;
     for (const auto& [_, op] : operations) {
-        if (has(op)) opsAmount++;
+        if (has(op)) {
+            opsAmount++;
+        }
     }
 
     if (opsAmount > 1) {

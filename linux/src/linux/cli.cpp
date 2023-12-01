@@ -41,8 +41,9 @@ bool CLI::listBooks() {
     const auto& books = _storage.getBookInfos();
 
     // TODO: add formatted table printing
-    for (const auto& book : books)
+    for (const auto& book : books) {
         std::cout << std::format("Book ID: {} | Name: {}", book->id, book->name) << std::endl;
+    }
 
     return true;
 }
@@ -102,28 +103,36 @@ bool CLI::createNote(core::BookID bookID, std::string&& content) {
 }
 
 bool CLI::updateBook(core::BookID bookID, std::string&& name) {
-    if (_storage.updateBook(bookID, std::move(name))) return true;
+    if (_storage.updateBook(bookID, std::move(name))) {
+        return true;
+    }
 
     std::cerr << std::format("Failed to update book, ID {}", bookID) << std::endl;
     return false;
 }
 
 bool CLI::updateNote(core::NoteID noteID, std::string&& content) {
-    if (_storage.updateNote(noteID, std::move(content))) return true;
+    if (_storage.updateNote(noteID, std::move(content))) {
+        return true;
+    }
 
     std::cerr << std::format("Failed to update note, ID {}", noteID) << std::endl;
     return false;
 }
 
 bool CLI::removeBook(core::BookID bookID) {
-    if (_storage.removeBook(bookID)) return true;
+    if (_storage.removeBook(bookID)) {
+        return true;
+    }
 
     std::cerr << std::format("Failed to remove book: ID {}", bookID) << std::endl;
     return false;
 }
 
 bool CLI::removeNote(core::NoteID noteID) {
-    if (_storage.removeNote(noteID)) return true;
+    if (_storage.removeNote(noteID)) {
+        return true;
+    }
 
     std::cerr << std::format("Failed to remove note: ID {}", noteID) << std::endl;
     return false;

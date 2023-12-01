@@ -79,6 +79,7 @@
       + bind: refresh content with r (refresh cache) [ok]
     + command/keybinding proper implementation [TODO]
       + cycle (toggle) commands [TODO]
+    + add sorting in panes
     + status line last log [...]
       + bind: search button with '/' (mock search)
       + bind: command input with ':' (mock commands)
@@ -137,7 +138,7 @@
   + technical debt:
     + properly configure segfault handling
     + when UI crashes during initialization the logs aren't written in file
-    + get rid of tui::Context
+    + make logger in tests to use cout
 + common:
   + project level cmake to build lib and linux client
 

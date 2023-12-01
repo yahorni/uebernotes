@@ -32,7 +32,9 @@ TEST_CASE("cli", "[linux]") {
     const auto database = "testdb-linux.sqlite3";
 
     // remove old database
-    if (fs::exists(database)) REQUIRE(fs::remove(database));
+    if (fs::exists(database)) {
+        REQUIRE(fs::remove(database));
+    }
 
     core::Config config{database, false};
     core::Storage storage{config};

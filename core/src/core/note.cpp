@@ -17,11 +17,15 @@ NoteInfo::NoteInfo(NoteInfo&& other)
 std::string_view NoteInfo::getHeader() const {
     static const auto headerPlaceholder = "<untitled>";
 
-    if (content.empty()) return headerPlaceholder;
+    if (content.empty()) {
+        return headerPlaceholder;
+    }
 
     auto contentView = std::string_view(content);
     if (auto firstLineEnd = contentView.find('\n'); firstLineEnd != std::string_view::npos) {
-        if (firstLineEnd == 0) return headerPlaceholder;
+        if (firstLineEnd == 0) {
+            return headerPlaceholder;
+        }
         return contentView.substr(0, firstLineEnd);
     }
 

@@ -5,8 +5,6 @@
 #include "linux/tui/common.hpp"
 #include "linux/tui/event_queue.hpp"
 
-#include <algorithm>
-
 namespace linux {
 namespace tui {
 

@@ -7,8 +7,6 @@
 
 #include <core/types.hpp>
 
-#include <algorithm>
-
 namespace linux::tui {
 
 NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
@@ -90,7 +88,7 @@ ftxui::Element NoteList::getElement() const {
     return vbox({
                hcenter(bold(text("Notes"))),  // consider using "window"
                separator(),                   //
-               _noteMenu->Render(),            //
+               _noteMenu->Render(),           //
            }) |
            borderDecorator(_noteMenu->Focused());
 }

@@ -1,7 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "core/config.hpp"
 #include "core/book.hpp"
+#include "core/config.hpp"
 #include "core/note.hpp"
 #include "core/storage.hpp"
 
@@ -27,7 +27,9 @@ TEST_CASE("books", "[core.storage.cache]") {
     const auto database = "testdb-core.sqlite3";
 
     // remove old database
-    if (fs::exists(database)) REQUIRE(fs::remove(database));
+    if (fs::exists(database)) {
+        REQUIRE(fs::remove(database));
+    }
 
     // TODO: get rid of direct storage usage in common tests
     core::Storage storage{core::Config{database, true}};

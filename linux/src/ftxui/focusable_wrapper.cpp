@@ -19,9 +19,7 @@ public:
 Component FocusableWrapper(Component child) { return Make<FocusableWrapperBase>(std::move(child)); }
 
 ComponentDecorator FocusableWrapper() {
-  return [](Component component) {
-    return FocusableWrapper(std::move(component));
-  };
+    return [](Component component) { return FocusableWrapper(std::move(component)); };
 }
 
 }  // namespace ftxui

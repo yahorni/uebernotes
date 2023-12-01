@@ -6,7 +6,6 @@
 
 #include <core/note.hpp>
 
-#include <cwchar>
 #include <ftxui/component/component.hpp>
 
 #include <string>

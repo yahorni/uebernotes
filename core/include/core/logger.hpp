@@ -16,7 +16,7 @@ private:                                                                        
                                                                                                                        \
 public:                                                                                                                \
     static void set##NAME##Logger(CallbackType logger) { _log##NAME = logger; }                                        \
-    template <typename... Args>                                                                                        \
+    template<typename... Args>                                                                                         \
     static constexpr void LEVEL(std::format_string<Args...> fmt_str, Args&&... args) {                                 \
         std::string msg;                                                                                               \
         auto it = std::back_inserter(msg);                                                                             \
