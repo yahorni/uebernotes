@@ -75,31 +75,29 @@ bool TUI::run() {
 }
 
 void TUI::updateComponents() {
-    _bookList.updateItems();
+    _bookList.reloadItems();
     updateNoteComponents();
 }
 
-void TUI::updateNoteComponents(bool refresh) {
+bool TUI::updateNoteComponents(bool refresh) {
     if (auto bookID = _bookList.getSelectedID(); bookID) {
-        _noteList.updateItems(*bookID, refresh);
+        _noteList.reloadItems(*bookID, refresh);
         updateNotePreview(*bookID);
-        if (refresh) {
-            Log::info("Refreshed book: {}", *bookID);
-        }
-    } else {
-        _previewPane.reset();
-        if (refresh) {
-            Log::warning("No book to refresh");
-        }
+        return true;
     }
+
+    _previewPane.reset();
+    return false;
 }
 
-void TUI::updateNotePreview(core::BookID) {
+bool TUI::updateNotePreview(core::BookID) {
     if (auto notePtr = _noteList.getSelectedItem(); notePtr) {
         _previewPane.setContent(notePtr->content);
-    } else {
-        _previewPane.reset();
+        return true;
     }
+
+    _previewPane.reset();
+    return false;
 }
 
 void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
@@ -112,13 +110,13 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
     switch (event) {
     case tui::Event::BookChanged: {
         updateNoteComponents();
-        Log::debug("Book changed: book='{}'", *_bookList.getSelectedID());
+        Log::debug("Book changed: {}", *_bookList.getSelectedID());
     } break;
     case tui::Event::NoteChanged: {
         if (auto bookID = _bookList.getSelectedID(); bookID) {
             _noteList.cacheIndex(*bookID);
             updateNotePreview(*bookID);
-            Log::debug("Note changed: note='{}'", *_noteList.getSelectedID());
+            Log::debug("Note changed: {}", *_noteList.getSelectedID());
         }
     } break;
 
@@ -137,15 +135,22 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         _noteList.reset();
         _previewPane.reset();
         updateComponents();
-        Log::info("Refreshed books and notes");
+        _statusLine.setMessage("Refreshed books and notes");
     } break;
     case tui::Event::RefreshBook: {
-        updateNoteComponents(true);
+        if (updateNoteComponents(true)) {
+            _statusLine.setMessage(std::format("Refreshed book: {}", *_bookList.getSelectedID()));
+        } else {
+            _statusLine.setMessage("No book to refresh");
+        }
     } break;
     case tui::Event::RefreshNote: {
         if (auto bookID = _bookList.getSelectedID(); bookID) {
-            updateNotePreview(*bookID);
-            Log::info("Refreshed note");
+            if (updateNotePreview(*bookID)) {
+                _statusLine.setMessage(std::format("Refreshed note: {}", *_noteList.getSelectedID()));
+            } else {
+                _statusLine.setMessage("No note to refresh");
+            }
         }
     } break;
 
@@ -154,6 +159,18 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
             _statusLine.setMessage(std::format("TODO: Open note: {}", *_noteList.getSelectedID()));
         }
     } break;
+
+    case tui::Event::ToggleShowBookID: {
+        auto enabled{std::any_cast<bool>(data)};
+        _statusLine.setMessage(std::format("Toggle book IDs: {}", enabled));
+        _bookList.updateItems();
+    } break;
+    case tui::Event::ToggleShowNoteID: {
+        auto enabled{std::any_cast<bool>(data)};
+        _statusLine.setMessage(std::format("Toggle note IDs: {}", enabled));
+        _noteList.updateItems();
+    } break;
+
     default: {
         // TODO: add map with event names
         Log::warning("Unhandled event: {}", static_cast<int>(event));

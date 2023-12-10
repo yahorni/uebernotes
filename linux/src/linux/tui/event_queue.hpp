@@ -24,23 +24,20 @@ enum class Event {
     RefreshNote,
     /* opens external editor with selected note */
     OpenEditor,
+    /* toggle showing of book IDs in list*/
+    ToggleShowBookID,
+    /* toggle showing of note IDs in list*/
+    ToggleShowNoteID,
 };
 
 class EventQueue {
 public:
     std::queue<std::tuple<Event, std::any>> _queue;
 
-    void push(Event event, std::any data = std::any{}) {  // replace with std::variant
-        _queue.push(std::make_tuple(event, data));
-    }
-
-    bool empty() { return _queue.empty(); }
-
-    std::tuple<Event, std::any> pop() {
-        auto cmd = _queue.front();
-        _queue.pop();
-        return cmd;
-    }
+    // TODO: replace with std::variant
+    void push(Event event, std::any data = std::any{});
+    bool empty();
+    std::tuple<Event, std::any> pop();
 };
 
 }  // namespace linux::tui

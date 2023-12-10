@@ -42,6 +42,10 @@ NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
                 _eventQueue->push(Event::RefreshBook);
             }
             return true;
+        } else if (event == ftxui::Event::Character('i')) {
+            bool enabled = _menuController.toggleShowID();
+            _eventQueue->push(Event::ToggleShowNoteID, enabled);
+            return true;
         }
         return false;
     });
@@ -55,17 +59,21 @@ std::shared_ptr<core::Note> NoteList::getSelectedItem() const { return _menuCont
 
 std::optional<core::NoteID> NoteList::getSelectedID() const { return _menuController.getSelectedItemID(); }
 
-void NoteList::updateItems(core::BookID bookID, bool refresh) {
-    if (refresh) {
+void NoteList::reloadItems(core::BookID bookID, bool force) {
+    if (force) {
         _menuController.resetIndex(bookID);
     }
 
-    const auto& notes = _storage->getNotesByBookID(bookID, refresh);
-    _menuController.reloadItems(notes);
+    const auto& notes = _storage->getNotesByBookID(bookID, force);
+    _menuController.setItems(notes);
 
-    if (!refresh) {
+    if (!force) {
         _menuController.useCachedIndex(bookID);
     }
+}
+
+void NoteList::updateItems() {
+    _menuController.updateNames();
 }
 
 const ftxui::Component& NoteList::getComponent() const { return _noteMenu; }

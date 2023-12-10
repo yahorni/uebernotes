@@ -29,8 +29,8 @@ private:
     tui::StatusLine _statusLine;
 
     void updateComponents();
-    void updateNoteComponents(bool refresh = false);
-    void updateNotePreview(core::BookID bookID);
+    bool updateNoteComponents(bool refresh = false);
+    bool updateNotePreview(core::BookID bookID);
 
     void handleCommands(ftxui::ScreenInteractive& screen);
 };

@@ -40,6 +40,10 @@ BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
                 _eventQueue->push(Event::RefreshAll);
             }
             return true;
+        } else if (event == ftxui::Event::Character('i')) {
+            bool enabled = _menuController.toggleShowID();
+            _eventQueue->push(Event::ToggleShowBookID, enabled);
+            return true;
         }
         return false;
     });
@@ -49,9 +53,13 @@ void BookList::reset() { _menuController.resetIndex(); }
 
 std::optional<core::BookID> BookList::getSelectedID() const { return _menuController.getSelectedItemID(); }
 
-void BookList::updateItems() {
+void BookList::reloadItems() {
     const auto& books = _storage->getBooks();
-    _menuController.reloadItems(books);
+    _menuController.setItems(books);
+}
+
+void BookList::updateItems() {
+    _menuController.updateNames();
 }
 
 const ftxui::Component& BookList::getComponent() const { return _bookMenu; }

@@ -15,6 +15,7 @@ public:
     BookList(core::Storage* storage, EventQueue* eventQueue);
 
     std::optional<core::BookID> getSelectedID() const;
+    void reloadItems();
     void updateItems();
     void reset();
 

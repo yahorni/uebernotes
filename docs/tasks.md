@@ -79,9 +79,9 @@
       + bind: refresh content with r (refresh cache) [ok]
     + command/keybinding proper implementation [TODO]
       + cycle (toggle) commands [TODO]
-    + implement sorting [...]
+    + implement sorting [ok]
       + add sorting in panes [ok]
-      + add possibility to show ID in the lists [...]
+      + add possibility to show ID in the lists [ok]
     + status line last log [...]
       + bind: search button with '/' (mock search)
       + bind: command input with ':' (mock commands)

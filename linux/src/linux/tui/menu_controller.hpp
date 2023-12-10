@@ -58,6 +58,11 @@ public:
         return true;
     }
 
+    bool toggleShowID() {
+        _showID = !_showID;
+        return _showID;
+    }
+
     void resetIndex(std::optional<CacheKey> keyToReset = std::nullopt) {
         _selectedIndex = 0;
         if (_useIndexCache) {
@@ -73,7 +78,8 @@ public:
 
     void useCachedIndex(CacheKey key) { _selectedIndex = _indecesCache.count(key) ? _indecesCache.at(key) : 0; }
 
-    void reloadItems(const Container& items) {
+    void setItems(const Container& items) {
+        // TODO: get rid of index resetting here or in resetIndex()
         _selectedIndex = 0;
 
         _sortedItems.clear();
@@ -92,15 +98,25 @@ public:
         } break;
         }
 
+        updateNames();
+    }
+
+    void updateNames() {
         _itemNames.clear();
         _itemNames.reserve(_sortedItems.size());
         for (const auto& item : _sortedItems) {
-            _itemNames.emplace_back(item->getName());
+            if (_showID) {
+                _itemNames.emplace_back(std::format("[{}] {}", item->id, item->getName()));
+            } else {
+                _itemNames.emplace_back(item->getName());
+            }
         }
     }
 
 private:
     SortType _sortType = SortType::Ascending;
+    bool _showID = false;
+
     Index _selectedIndex = 0;
     std::vector<EntityPtr> _sortedItems;
     std::vector<std::string> _itemNames;

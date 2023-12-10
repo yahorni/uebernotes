@@ -1,5 +1,6 @@
 #pragma once
 
+#include "linux/logger.hpp"
 #include "linux/tui/event_queue.hpp"
 
 #include <ftxui/component/component.hpp>
@@ -14,7 +15,10 @@ public:
     explicit StatusLine(EventQueue* eventQueue)
         : _eventQueue(eventQueue) {}
 
-    void setMessage(std::string message) { _lastMessage = std::move(message); }
+    void setMessage(std::string message) {
+        _lastMessage = std::move(message);
+        Log::info("{}", _lastMessage);
+    }
 
     // UI
     ftxui::Element getElement() const { return ftxui::text(_lastMessage.c_str()); }
