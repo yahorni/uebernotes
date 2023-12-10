@@ -30,8 +30,8 @@ public:
     const BooksCache& getBooks() const;
     NotesCache getNotesByBookID(BookID bookID) const;
 
-    std::shared_ptr<BookInfo> getBook(BookID bookID) const;
-    std::shared_ptr<NoteInfo> getNote(NoteID noteID) const;
+    BookPtr getBook(BookID bookID) const;
+    NotePtr getNote(NoteID noteID) const;
 
     void removeBook(BookID bookID);
     void removeBookNotes(BookID bookID);
@@ -61,21 +61,17 @@ public:
     NotesCache getNoteInfosByBookID(BookID bookID, bool refreshCache = false) const;
 
     std::optional<BookID> createBook(BookInfo&& book);
-    std::optional<Book> getBook(BookID bookID);
+    BookPtr loadBookInfo(BookID bookID) const;
     bool updateBook(BookID bookID, std::string&& name);
     bool removeBook(BookID bookID);
 
     std::optional<NoteID> createNote(NoteInfo&& note);
-    std::optional<Note> getNote(NoteID noteID) const;
+    NotePtr loadNoteInfo(NoteID noteID) const;
     bool updateNote(NoteID noteID, std::string&& content);
     bool removeNote(NoteID noteID);
 
 private:
-    std::shared_ptr<BookInfo> loadBookInfo(BookID bookID) const;
-    std::shared_ptr<NoteInfo> loadNoteInfo(NoteID noteID) const;
-
     std::unique_ptr<Database> _db;
-
     mutable StorageCache _cache;
 };
 

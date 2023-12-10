@@ -2,7 +2,6 @@
 
 namespace core {
 
-// NoteInfo
 NoteInfo::NoteInfo(BookID bookID, std::string&& content)
     : NoteInfo(0, bookID, std::move(content)) {}
 
@@ -14,7 +13,9 @@ NoteInfo::NoteInfo(NoteID id, BookID bookID, std::string&& content)
 NoteInfo::NoteInfo(NoteInfo&& other)
     : NoteInfo(other.id, other.bookID, std::move(other.content)) {}
 
-std::string_view NoteInfo::getHeader() const {
+BookID NoteInfo::getBookID() const { return bookID; }
+
+std::string_view NoteInfo::getName() const {
     static const auto headerPlaceholder = "<untitled>";
 
     if (content.empty()) {
@@ -32,12 +33,6 @@ std::string_view NoteInfo::getHeader() const {
     return contentView;
 }
 
-// Note
-Note::Note(std::shared_ptr<NoteInfo> note)
-    : _note(std::move(note)) {}
-
-BookID Note::getBookID() const { return _note->bookID; }
-
-const std::string& Note::getContent() const { return _note->content; }
+const std::string& NoteInfo::getContent() const { return content; }
 
 }  // namespace core

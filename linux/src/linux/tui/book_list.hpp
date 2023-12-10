@@ -1,13 +1,12 @@
 #pragma once
 
 #include "linux/tui/event_queue.hpp"
+#include "linux/tui/menu_controller.hpp"
 
+#include <core/comparator.hpp>
 #include <core/storage.hpp>
 
 #include <ftxui/component/component.hpp>
-
-#include <string>
-#include <vector>
 
 namespace linux::tui {
 
@@ -15,10 +14,9 @@ class BookList {
 public:
     BookList(core::Storage* storage, EventQueue* eventQueue);
 
-    void reset();
-
-    std::optional<core::BookID> getSelectedBookID();
+    std::optional<core::BookID> getSelectedID() const;
     void updateItems();
+    void reset();
 
     // UI
     const ftxui::Component& getComponent() const;
@@ -28,9 +26,8 @@ private:
     core::Storage* _storage{nullptr};
     EventQueue* _eventQueue{nullptr};
 
-    int _selectedBookIdx = 0;
+    MenuController<core::BookInfo, core::BooksCache> _menuController;
 
-    std::vector<std::string> _bookNames;
     ftxui::Component _bookMenu;
 };
 

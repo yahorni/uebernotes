@@ -4,8 +4,8 @@
 #include "core/types.hpp"
 
 #include <memory>
-#include <set>
 #include <string>
+#include <unordered_set>
 
 namespace core {
 
@@ -17,18 +17,12 @@ struct BookInfo {
 
     explicit BookInfo(std::string&& name = "");
     BookInfo(BookID id, std::string&& name);
-};
-
-class Book {
-public:
-    explicit Book(std::shared_ptr<BookInfo> book);
 
     const std::string& getName() const;
-
-private:
-    std::shared_ptr<BookInfo> _book;
 };
 
-using BooksCache = std::set<std::shared_ptr<BookInfo>, SharedPtrWithID::Compare>;
+using BookPtr = std::shared_ptr<BookInfo>;
+
+using BooksCache = std::unordered_set<BookPtr, SharedPtrExtension::HashID, SharedPtrExtension::CompareID>;
 
 };  // namespace core

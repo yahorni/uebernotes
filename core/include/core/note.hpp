@@ -21,22 +21,14 @@ struct NoteInfo {
     NoteInfo(const NoteInfo&) = delete;
     NoteInfo(NoteInfo&&);
 
-    // TODO: move to note format
-    std::string_view getHeader() const;
-};
-
-class Note {
-public:
-    explicit Note(std::shared_ptr<NoteInfo> note);
-
     BookID getBookID() const;
+    std::string_view getName() const;
     const std::string& getContent() const;
-
-private:
-    std::shared_ptr<NoteInfo> _note;
 };
+
+using NotePtr = std::shared_ptr<NoteInfo>;
 
 // TODO: later add sorting by creation time
-using NotesCache = std::unordered_set<std::shared_ptr<NoteInfo>, SharedPtrWithID::Hash, SharedPtrWithID::Compare>;
+using NotesCache = std::unordered_set<NotePtr, SharedPtrExtension::HashID, SharedPtrExtension::CompareID>;
 
 }  // namespace core

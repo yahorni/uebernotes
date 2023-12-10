@@ -1,7 +1,6 @@
 #include "linux/tui/note_list.hpp"
 
 #include "ftxui/component.hpp"
-#include "linux/logger.hpp"
 #include "linux/tui/common.hpp"
 #include "linux/tui/event_queue.hpp"
 
@@ -14,16 +13,12 @@ NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
       _eventQueue(eventQueue) {
     auto noteMenuOption = ftxui::MenuOption::Vertical();
 
-    // to select focused item immediately
-    // FIXME: allow select without focusing
-    noteMenuOption.focused_entry = &_selectedNoteIdx;
-
     // set events
-    noteMenuOption.on_enter = [&]() { _eventQueue->push(Event::OpenEditor /* pass note index */); };
-    noteMenuOption.on_change = [&]() { _eventQueue->push(Event::NoteChanged, _selectedNoteIdx); };
+    noteMenuOption.on_enter = [&]() { _eventQueue->push(Event::OpenEditor, _menuController.getSelectedItemID()); };
+    noteMenuOption.on_change = [&]() { _eventQueue->push(Event::NoteChanged, _menuController.getSelectedItemID()); };
 
     // set component
-    _noteMenu = ftxui::Menu(&_noteNames, &_selectedNoteIdx, noteMenuOption);
+    _noteMenu = _menuController.createMenu(noteMenuOption);
     _noteMenu |= ftxui::FocusableWrapper();
 
     // set keys
@@ -32,52 +27,44 @@ NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
         if (event == ftxui::Event::Character('r')) {
             _eventQueue->push(Event::RefreshNote);
             return true;
+        } else if (event == ftxui::Event::Character('s')) {
+            if (_menuController.setSortType(SortType::Ascending)) {
+                _eventQueue->push(Event::RefreshBook);
+            }
+            return true;
+        } else if (event == ftxui::Event::Character('S')) {
+            if (_menuController.setSortType(SortType::Descending)) {
+                _eventQueue->push(Event::RefreshBook);
+            }
+            return true;
+        } else if (event == ftxui::Event::Character('t')) {
+            if (_menuController.setSortType(SortType::CreationTime)) {
+                _eventQueue->push(Event::RefreshBook);
+            }
+            return true;
         }
         return false;
     });
 }
 
-void NoteList::reset() {
-    _selectedNoteIdx = 0;
-    _storedNoteIndeces.clear();
-}
+void NoteList::reset() { _menuController.resetIndex(); }
 
-void NoteList::cacheNoteIdx(core::BookID bookID) { _storedNoteIndeces[bookID] = _selectedNoteIdx; }
+void NoteList::cacheIndex(core::BookID bookID) { _menuController.cacheIndex(bookID); }
 
-std::shared_ptr<core::NoteInfo> NoteList::getSelected(core::BookID bookID, bool refresh) {
-    const auto& notes = _storage->getNoteInfosByBookID(bookID, refresh);
-    if (!notes.size()) {
-        return nullptr;
-    }
+std::shared_ptr<core::NoteInfo> NoteList::getSelectedItem() const { return _menuController.getSelectedItem(); }
 
-    if (static_cast<size_t>(_selectedNoteIdx) >= notes.size()) {
-        Log::warning("selected note index ({}) > amount of notes ({})", _selectedNoteIdx, notes.size());
-        return nullptr;
-    }
-
-    return *std::next(notes.begin(), _selectedNoteIdx);
-}
+std::optional<core::NoteID> NoteList::getSelectedID() const { return _menuController.getSelectedItemID(); }
 
 void NoteList::updateItems(core::BookID bookID, bool refresh) {
     if (refresh) {
-        _selectedNoteIdx = 0;
-        _storedNoteIndeces[bookID] = 0;
+        _menuController.resetIndex(bookID);
     }
 
     const auto& notes = _storage->getNoteInfosByBookID(bookID, refresh);
-
-    // TODO: shrink_to_fit()
-    _noteNames.clear();
-    _noteNames.reserve(notes.size());
-    for (const auto& note : notes) {
-        _noteNames.emplace_back(note->getHeader());
-    }
-
-    // add sorting + selectedBookIdx
-    // std::sort(_noteNames.begin(), _noteNames.end());
+    _menuController.reloadItems(notes);
 
     if (!refresh) {
-        _selectedNoteIdx = _storedNoteIndeces.count(bookID) ? _storedNoteIndeces.at(bookID) : 0;
+        _menuController.useCachedIndex(bookID);
     }
 }
 

@@ -48,12 +48,12 @@ static inline auto findNoteInCache(const NotesCache& notesCache, NoteID noteID) 
                         [noteID](const auto& note) { return note->id == noteID; });
 }
 
-std::shared_ptr<BookInfo> StorageCache::getBook(BookID bookID) const {
+BookPtr StorageCache::getBook(BookID bookID) const {
     auto bookIter = findBookInCache(_booksCache, bookID);
     return bookIter != _booksCache.end() ? *bookIter : nullptr;
 }
 
-std::shared_ptr<NoteInfo> StorageCache::getNote(NoteID noteID) const {
+NotePtr StorageCache::getNote(NoteID noteID) const {
     auto noteIter = findNoteInCache(_notesCache, noteID);
     return noteIter != _notesCache.end() ? *noteIter : nullptr;
 }
@@ -145,8 +145,8 @@ std::optional<NoteID> Storage::createNote(NoteInfo&& note) {
     return *id;
 }
 
-std::shared_ptr<BookInfo> Storage::loadBookInfo(BookID bookID) const {
-    std::shared_ptr<BookInfo> bookPtr;
+BookPtr Storage::loadBookInfo(BookID bookID) const {
+    BookPtr bookPtr;
     if (_cache.isActive) {
         bookPtr = _cache.getBook(bookID);
     } else {
@@ -155,24 +155,14 @@ std::shared_ptr<BookInfo> Storage::loadBookInfo(BookID bookID) const {
     return bookPtr;
 }
 
-std::shared_ptr<NoteInfo> Storage::loadNoteInfo(NoteID noteID) const {
-    std::shared_ptr<NoteInfo> notePtr;
+NotePtr Storage::loadNoteInfo(NoteID noteID) const {
+    NotePtr notePtr;
     if (_cache.isActive) {
         notePtr = _cache.getNote(noteID);
     } else {
         notePtr = _db->loadNoteByID(noteID);
     }
     return notePtr;
-}
-
-std::optional<Book> Storage::getBook(BookID bookID) {
-    auto bookPtr = loadBookInfo(bookID);
-    return bookPtr ? std::make_optional(Book(bookPtr)) : std::nullopt;
-}
-
-std::optional<Note> Storage::getNote(NoteID noteID) const {
-    auto notePtr = loadNoteInfo(noteID);
-    return notePtr ? std::make_optional(Note(notePtr)) : std::nullopt;
 }
 
 bool Storage::updateBook(BookID bookID, std::string&& name) {

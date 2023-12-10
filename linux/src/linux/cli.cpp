@@ -49,12 +49,12 @@ bool CLI::listBooks() {
 }
 
 bool CLI::printBook(core::BookID bookID) {
-    if (auto book = _storage.getBook(bookID); book.has_value()) {
+    if (auto book = _storage.loadBookInfo(bookID); book) {
         const auto& notes = _storage.getNoteInfosByBookID(bookID);
 
         // TODO: add formatted table printing
         for (const auto& note : notes) {
-            auto header = note->getHeader();
+            auto header = note->getName();
             auto truncatedContent = header.substr(0, 50);
             std::cout << std::format("Note ID: {} | Content: {}", note->id, truncatedContent) << std::endl;
         }
@@ -66,7 +66,7 @@ bool CLI::printBook(core::BookID bookID) {
 }
 
 bool CLI::printNote(core::NoteID noteID) {
-    if (const auto note = _storage.getNote(noteID); note.has_value()) {
+    if (const auto note = _storage.loadNoteInfo(noteID); note) {
         std::cout << note->getContent() << std::endl;
         return true;
     }
@@ -91,7 +91,7 @@ bool CLI::createBook(std::string&& name) {
 bool CLI::createNote(core::BookID bookID, std::string&& content) {
     core::NoteInfo info{bookID, std::move(content)};
 
-    if (auto book = _storage.getBook(bookID); book.has_value()) {
+    if (auto book = _storage.loadBookInfo(bookID); book) {
         if (auto noteID = _storage.createNote(std::move(info)); noteID.has_value()) {
             std::clog << std::format("New note ID: {}", noteID.value()) << std::endl;
             return true;

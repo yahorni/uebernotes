@@ -1,28 +1,22 @@
 #include "linux/tui/book_list.hpp"
 
 #include "ftxui/component.hpp"
-#include "linux/logger.hpp"
 #include "linux/tui/common.hpp"
 #include "linux/tui/event_queue.hpp"
 
-namespace linux {
-namespace tui {
+namespace linux::tui {
 
 BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
     : _storage(storage),
       _eventQueue(eventQueue) {
     auto bookMenuOption = ftxui::MenuOption::Vertical();
 
-    // to select focused item immediately
-    // FIXME: allow select without focusing
-    bookMenuOption.focused_entry = &_selectedBookIdx;
-
     // set events
     bookMenuOption.on_change = [&]() { _eventQueue->push(Event::BookChanged); };
     bookMenuOption.on_enter = [&]() { _eventQueue->push(Event::PostScreenEvent, ftxui::Event::ArrowRight); };
 
     // set component
-    _bookMenu = ftxui::Menu(&_bookNames, &_selectedBookIdx, bookMenuOption);
+    _bookMenu = _menuController.createMenu(bookMenuOption);
     _bookMenu |= ftxui::FocusableWrapper();
 
     // set keys
@@ -31,43 +25,33 @@ BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
         if (event == ftxui::Event::Character('r')) {
             _eventQueue->push(Event::RefreshBook);
             return true;
+        } else if (event == ftxui::Event::Character('s')) {
+            if (_menuController.setSortType(SortType::Ascending)) {
+                _eventQueue->push(Event::RefreshAll);
+            }
+            return true;
+        } else if (event == ftxui::Event::Character('S')) {
+            if (_menuController.setSortType(SortType::Descending)) {
+                _eventQueue->push(Event::RefreshAll);
+            }
+            return true;
+        } else if (event == ftxui::Event::Character('t')) {
+            if (_menuController.setSortType(SortType::CreationTime)) {
+                _eventQueue->push(Event::RefreshAll);
+            }
+            return true;
         }
         return false;
     });
 }
 
-void BookList::reset() { _selectedBookIdx = 0; }
+void BookList::reset() { _menuController.resetIndex(); }
 
-std::optional<core::BookID> BookList::getSelectedBookID() {
-    const auto& books = _storage->getBookInfos();
-    if (books.empty()) {
-        return std::nullopt;
-    }
-
-    if (static_cast<size_t>(_selectedBookIdx) >= books.size()) {
-        Log::warning("selected book index ({}) > amount of books ({})", _selectedBookIdx, books.size());
-        return std::nullopt;
-    }
-
-    auto book = *std::next(books.begin(), _selectedBookIdx);
-    return book->id;
-}
+std::optional<core::BookID> BookList::getSelectedID() const { return _menuController.getSelectedItemID(); }
 
 void BookList::updateItems() {
-    _selectedBookIdx = 0;
-
     const auto& books = _storage->getBookInfos();
-
-    // TODO: shrink_to_fit()
-    _bookNames.clear();
-    _bookNames.reserve(books.size());
-
-    for (const auto& book : books) {
-        _bookNames.emplace_back(book->name);
-    }
-
-    // TODO: add sorting + selectedBookIdx
-    // std::sort(_bookNames.begin(), _bookNames.end());
+    _menuController.reloadItems(books);
 }
 
 const ftxui::Component& BookList::getComponent() const { return _bookMenu; }
@@ -82,5 +66,4 @@ ftxui::Element BookList::getElement() const {
            borderDecorator(_bookMenu->Focused());
 }
 
-}  // namespace tui
-}  // namespace linux
+}  // namespace linux::tui

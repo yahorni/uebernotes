@@ -80,7 +80,7 @@ void TUI::updateComponents() {
 }
 
 void TUI::updateNoteComponents(bool refresh) {
-    if (auto bookID = _bookList.getSelectedBookID(); bookID) {
+    if (auto bookID = _bookList.getSelectedID(); bookID) {
         _noteList.updateItems(*bookID, refresh);
         updateNotePreview(*bookID);
         if (refresh) {
@@ -94,8 +94,8 @@ void TUI::updateNoteComponents(bool refresh) {
     }
 }
 
-void TUI::updateNotePreview(core::BookID bookID) {
-    if (auto notePtr = _noteList.getSelected(bookID); notePtr) {
+void TUI::updateNotePreview(core::BookID) {
+    if (auto notePtr = _noteList.getSelectedItem(); notePtr) {
         _previewPane.setContent(notePtr->content);
     } else {
         _previewPane.reset();
@@ -112,13 +112,13 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
     switch (event) {
     case tui::Event::BookChanged: {
         updateNoteComponents();
-        Log::debug("Book changed: book='{}'", *_bookList.getSelectedBookID());
+        Log::debug("Book changed: book='{}'", *_bookList.getSelectedID());
     } break;
     case tui::Event::NoteChanged: {
-        if (auto bookID = _bookList.getSelectedBookID(); bookID) {
-            _noteList.cacheNoteIdx(*bookID);
+        if (auto bookID = _bookList.getSelectedID(); bookID) {
+            _noteList.cacheIndex(*bookID);
             updateNotePreview(*bookID);
-            Log::debug("Note changed: note='{}'", _noteList.getSelected(*bookID)->id);
+            Log::debug("Note changed: note='{}'", *_noteList.getSelectedID());
         }
     } break;
 
@@ -143,15 +143,15 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         updateNoteComponents(true);
     } break;
     case tui::Event::RefreshNote: {
-        if (auto bookID = _bookList.getSelectedBookID(); bookID) {
+        if (auto bookID = _bookList.getSelectedID(); bookID) {
             updateNotePreview(*bookID);
             Log::info("Refreshed note");
         }
     } break;
 
     case tui::Event::OpenEditor: {
-        if (auto bookID = _bookList.getSelectedBookID(); bookID) {
-            _statusLine.setMessage(std::format("TODO: Open note: {}", _noteList.getSelected(*bookID)->id));
+        if (auto bookID = _bookList.getSelectedID(); bookID) {
+            _statusLine.setMessage(std::format("TODO: Open note: {}", *_noteList.getSelectedID()));
         }
     } break;
     default: {

@@ -7,6 +7,7 @@
 
 #include <filesystem>
 #include <string>
+#include <set>
 
 // TODO: add logger with cout
 
@@ -56,7 +57,7 @@ TEST_CASE("books", "[core.storage.cache]") {
         std::string newName = "newBookName1";
 
         auto bookID = createBook(storage, oldName);
-        auto book = storage.getBook(bookID);
+        auto book = storage.loadBookInfo(bookID);
 
         REQUIRE(book->getName() == oldName);
         storage.updateBook(bookID, std::string(newName));
@@ -75,8 +76,10 @@ TEST_CASE("books", "[core.storage.cache]") {
 
         const auto& bookInfos = storage.getBookInfos();
         REQUIRE(bookInfos.size() == booksAmount);
+
+        std::set<core::BookPtr, core::SharedPtrExtension::CompareID> books{bookInfos.begin(), bookInfos.end()};
         size_t notesAmount = 0;
-        for (const auto& bookInfo : bookInfos) {
+        for (const auto& bookInfo : books) {
             notesAmount++;
             const auto& notes = storage.getNoteInfosByBookID(bookInfo->id);
             REQUIRE(notes.size() == notesAmount);
@@ -95,7 +98,7 @@ TEST_CASE("books", "[core.storage.cache]") {
         REQUIRE(loadedNotes.size() == 2);
 
         // choosing one note by noteID
-        auto note1 = storage.getNote(noteID1);
+        auto note1 = storage.loadNoteInfo(noteID1);
 
         // modifying content
         std::string newNoteContent = "new_content";
@@ -104,13 +107,13 @@ TEST_CASE("books", "[core.storage.cache]") {
     }
 
     SECTION("get nonexistant book") {
-        auto book = storage.getBook(999);
-        REQUIRE(!book.has_value());
+        auto book = storage.loadBookInfo(999);
+        REQUIRE(!book);
     }
 
     SECTION("get nonexistant note") {
-        auto note = storage.getNote(999);
-        REQUIRE(!note.has_value());
+        auto note = storage.loadNoteInfo(999);
+        REQUIRE(!note);
     }
 
     SECTION("remove book") {

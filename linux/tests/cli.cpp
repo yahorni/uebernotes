@@ -86,7 +86,7 @@ TEST_CASE("cli", "[linux]") {
             REQUIRE(loadedNotes.size() == 1);
             auto loadedNote = *loadedNotes.begin();
             REQUIRE(loadedNote->content == noteContent);
-            REQUIRE(loadedNote->getHeader() == "<untitled>");
+            REQUIRE(loadedNote->getName() == "<untitled>");
         }
     }
 

@@ -43,7 +43,7 @@ bool Database::hasNote(NoteID noteID) {
     return _dbStorage.count<NoteInfo>(sql::where(sql::is_equal(&NoteInfo::id, noteID)));
 }
 
-std::shared_ptr<BookInfo> Database::loadBookByID(BookID bookID) {
+BookPtr Database::loadBookByID(BookID bookID) {
     try {
         // TODO: use get_pointer with std::unique_ptr to get rid of exception
         return std::make_shared<BookInfo>(_dbStorage.get<BookInfo>(bookID));
@@ -53,7 +53,7 @@ std::shared_ptr<BookInfo> Database::loadBookByID(BookID bookID) {
     return nullptr;
 }
 
-std::shared_ptr<NoteInfo> Database::loadNoteByID(NoteID noteID) {
+NotePtr Database::loadNoteByID(NoteID noteID) {
     try {
         // TODO: use get_pointer with std::unique_ptr to get rid of exception
         return std::make_shared<NoteInfo>(_dbStorage.get<NoteInfo>(noteID));

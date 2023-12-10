@@ -38,12 +38,12 @@ public:
     Database& operator=(Database&&) = delete;
 
     std::optional<BookID> insertBook(const BookInfo& book);
-    std::shared_ptr<BookInfo> loadBookByID(BookID bookID);
+    BookPtr loadBookByID(BookID bookID);
     bool updateBook(BookID bookID, const std::string& name);
     bool removeBook(BookID bookID);
 
     std::optional<NoteID> insertNote(const NoteInfo& note);
-    std::shared_ptr<NoteInfo> loadNoteByID(NoteID noteID);
+    NotePtr loadNoteByID(NoteID noteID);
     bool updateNote(NoteID noteID, const std::string& content);
     bool removeNote(NoteID noteID);
 
