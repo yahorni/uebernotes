@@ -6,19 +6,19 @@
 #include "core/storage.hpp"
 
 #include <filesystem>
-#include <string>
 #include <set>
+#include <string>
 
 // TODO: add logger with cout
 
 core::BookID createBook(core::Storage& storage, std::string name) {
-    auto bookID = storage.createBook(core::BookInfo{std::move(name)});
+    auto bookID = storage.createBook(core::Book{std::move(name)});
     REQUIRE(bookID.has_value());
     return bookID.value();
 }
 
 core::NoteID createNote(core::Storage& storage, core::BookID bookID, std::string&& content) {
-    auto noteID = storage.createNote(core::NoteInfo{bookID, std::move(content)});
+    auto noteID = storage.createNote(core::Note{bookID, std::move(content)});
     REQUIRE(noteID.has_value());
     return noteID.value();
 }
@@ -43,11 +43,11 @@ TEST_CASE("books", "[core.storage.cache]") {
         createNote(storage, bookID, "content2");
 
         // show notes in book
-        const auto& notes = storage.getNoteInfosByBookID(bookID);
+        const auto& notes = storage.getNotesByBookID(bookID);
         REQUIRE(notes.size() == 2);
 
         // get books to display
-        const auto& books = storage.getBookInfos();
+        const auto& books = storage.getBooks();
         // displaying all books
         REQUIRE(books.size() == 1);
     }
@@ -57,7 +57,7 @@ TEST_CASE("books", "[core.storage.cache]") {
         std::string newName = "newBookName1";
 
         auto bookID = createBook(storage, oldName);
-        auto book = storage.loadBookInfo(bookID);
+        auto book = storage.loadBook(bookID);
 
         REQUIRE(book->getName() == oldName);
         storage.updateBook(bookID, std::string(newName));
@@ -74,14 +74,14 @@ TEST_CASE("books", "[core.storage.cache]") {
             }
         }
 
-        const auto& bookInfos = storage.getBookInfos();
-        REQUIRE(bookInfos.size() == booksAmount);
+        const auto& books = storage.getBooks();
+        REQUIRE(books.size() == booksAmount);
 
-        std::set<core::BookPtr, core::SharedPtrExtension::CompareID> books{bookInfos.begin(), bookInfos.end()};
+        std::set<core::BookPtr, core::SharedPtrExtension::CompareID> sortedBooks{books.begin(), books.end()};
         size_t notesAmount = 0;
-        for (const auto& bookInfo : books) {
+        for (const auto& book : sortedBooks) {
             notesAmount++;
-            const auto& notes = storage.getNoteInfosByBookID(bookInfo->id);
+            const auto& notes = storage.getNotesByBookID(book->id);
             REQUIRE(notes.size() == notesAmount);
         }
     }
@@ -94,11 +94,11 @@ TEST_CASE("books", "[core.storage.cache]") {
         createNote(storage, bookID, "old_content2");
 
         // checking notes
-        const auto& loadedNotes = storage.getNoteInfosByBookID(bookID);
+        const auto& loadedNotes = storage.getNotesByBookID(bookID);
         REQUIRE(loadedNotes.size() == 2);
 
         // choosing one note by noteID
-        auto note1 = storage.loadNoteInfo(noteID1);
+        auto note1 = storage.loadNote(noteID1);
 
         // modifying content
         std::string newNoteContent = "new_content";
@@ -107,12 +107,12 @@ TEST_CASE("books", "[core.storage.cache]") {
     }
 
     SECTION("get nonexistant book") {
-        auto book = storage.loadBookInfo(999);
+        auto book = storage.loadBook(999);
         REQUIRE(!book);
     }
 
     SECTION("get nonexistant note") {
-        auto note = storage.loadNoteInfo(999);
+        auto note = storage.loadNote(999);
         REQUIRE(!note);
     }
 
@@ -128,14 +128,14 @@ TEST_CASE("books", "[core.storage.cache]") {
         createNote(storage, bookID2, "b2n3");
 
         // remove book
-        REQUIRE(storage.getBookInfos().size() == 2);
-        REQUIRE(storage.getNoteInfosByBookID(bookID1).size() == 2);
-        REQUIRE(storage.getNoteInfosByBookID(bookID2).size() == 3);
+        REQUIRE(storage.getBooks().size() == 2);
+        REQUIRE(storage.getNotesByBookID(bookID1).size() == 2);
+        REQUIRE(storage.getNotesByBookID(bookID2).size() == 3);
 
         REQUIRE(storage.removeBook(bookID2) == true);
 
-        REQUIRE(storage.getBookInfos().size() == 1);
-        REQUIRE(storage.getNoteInfosByBookID(bookID1).size() == 2);
-        REQUIRE(storage.getNoteInfosByBookID(bookID2).size() == 0);
+        REQUIRE(storage.getBooks().size() == 1);
+        REQUIRE(storage.getNotesByBookID(bookID1).size() == 2);
+        REQUIRE(storage.getNotesByBookID(bookID2).size() == 0);
     }
 }

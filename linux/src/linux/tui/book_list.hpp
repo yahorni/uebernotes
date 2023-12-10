@@ -26,7 +26,7 @@ private:
     core::Storage* _storage{nullptr};
     EventQueue* _eventQueue{nullptr};
 
-    MenuController<core::BookInfo, core::BooksCache> _menuController;
+    MenuController<core::Book, core::BooksCache> _menuController;
 
     ftxui::Component _bookMenu;
 };

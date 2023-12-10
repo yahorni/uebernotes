@@ -38,7 +38,7 @@ bool CLI::run(const CmdLineArgs& args) {
 }
 
 bool CLI::listBooks() {
-    const auto& books = _storage.getBookInfos();
+    const auto& books = _storage.getBooks();
 
     // TODO: add formatted table printing
     for (const auto& book : books) {
@@ -49,8 +49,8 @@ bool CLI::listBooks() {
 }
 
 bool CLI::printBook(core::BookID bookID) {
-    if (auto book = _storage.loadBookInfo(bookID); book) {
-        const auto& notes = _storage.getNoteInfosByBookID(bookID);
+    if (auto book = _storage.loadBook(bookID); book) {
+        const auto& notes = _storage.getNotesByBookID(bookID);
 
         // TODO: add formatted table printing
         for (const auto& note : notes) {
@@ -66,7 +66,7 @@ bool CLI::printBook(core::BookID bookID) {
 }
 
 bool CLI::printNote(core::NoteID noteID) {
-    if (const auto note = _storage.loadNoteInfo(noteID); note) {
+    if (const auto note = _storage.loadNote(noteID); note) {
         std::cout << note->getContent() << std::endl;
         return true;
     }
@@ -77,9 +77,9 @@ bool CLI::printNote(core::NoteID noteID) {
 
 bool CLI::createBook(std::string&& name) {
     // FIXME: do not accept names with newlines or empty names (add tests)
-    core::BookInfo info{std::move(name)};
+    core::Book book{std::move(name)};
 
-    if (auto bookID = _storage.createBook(std::move(info)); bookID.has_value()) {
+    if (auto bookID = _storage.createBook(std::move(book)); bookID.has_value()) {
         std::clog << std::format("New book ID: {}", bookID.value()) << std::endl;
         return true;
     }
@@ -89,10 +89,10 @@ bool CLI::createBook(std::string&& name) {
 }
 
 bool CLI::createNote(core::BookID bookID, std::string&& content) {
-    core::NoteInfo info{bookID, std::move(content)};
+    core::Note note{bookID, std::move(content)};
 
-    if (auto book = _storage.loadBookInfo(bookID); book) {
-        if (auto noteID = _storage.createNote(std::move(info)); noteID.has_value()) {
+    if (auto book = _storage.loadBook(bookID); book) {
+        if (auto noteID = _storage.createNote(std::move(note)); noteID.has_value()) {
             std::clog << std::format("New note ID: {}", noteID.value()) << std::endl;
             return true;
         }

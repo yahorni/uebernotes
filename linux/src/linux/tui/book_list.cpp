@@ -50,7 +50,7 @@ void BookList::reset() { _menuController.resetIndex(); }
 std::optional<core::BookID> BookList::getSelectedID() const { return _menuController.getSelectedItemID(); }
 
 void BookList::updateItems() {
-    const auto& books = _storage->getBookInfos();
+    const auto& books = _storage->getBooks();
     _menuController.reloadItems(books);
 }
 

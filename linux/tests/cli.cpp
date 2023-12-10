@@ -14,8 +14,8 @@
 LOGGER_STATIC_INIT
 
 core::BookID createBook(core::Storage& storage, std::string name) {
-    core::BookInfo bookInfo{std::move(name)};
-    auto bookID = storage.createBook(std::move(bookInfo));
+    core::Book book{std::move(name)};
+    auto bookID = storage.createBook(std::move(book));
     REQUIRE(bookID.has_value());
     return bookID.value();
 }
@@ -56,7 +56,7 @@ TEST_CASE("cli", "[linux]") {
         runCLI(config, argc, argv);
 
         // check db state
-        auto loadedNotes = storage.getNoteInfosByBookID(bookID);
+        auto loadedNotes = storage.getNotesByBookID(bookID);
         REQUIRE(loadedNotes.size() == 1);
         auto loadedNote = *loadedNotes.begin();
         REQUIRE(loadedNote->content == noteContent);
@@ -82,7 +82,7 @@ TEST_CASE("cli", "[linux]") {
             runCLI(config, argc, argv);
 
             // check db state
-            auto loadedNotes = storage.getNoteInfosByBookID(bookID);
+            auto loadedNotes = storage.getNotesByBookID(bookID);
             REQUIRE(loadedNotes.size() == 1);
             auto loadedNote = *loadedNotes.begin();
             REQUIRE(loadedNote->content == noteContent);
@@ -105,7 +105,7 @@ TEST_CASE("cli", "[linux]") {
         runCLI(config, argc, argv);
 
         // check db state
-        auto loadedBooks = storage.getBookInfos();
+        auto loadedBooks = storage.getBooks();
         REQUIRE(loadedBooks.size() == 4);
     }
 

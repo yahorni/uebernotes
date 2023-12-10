@@ -51,7 +51,7 @@ void NoteList::reset() { _menuController.resetIndex(); }
 
 void NoteList::cacheIndex(core::BookID bookID) { _menuController.cacheIndex(bookID); }
 
-std::shared_ptr<core::NoteInfo> NoteList::getSelectedItem() const { return _menuController.getSelectedItem(); }
+std::shared_ptr<core::Note> NoteList::getSelectedItem() const { return _menuController.getSelectedItem(); }
 
 std::optional<core::NoteID> NoteList::getSelectedID() const { return _menuController.getSelectedItemID(); }
 
@@ -60,7 +60,7 @@ void NoteList::updateItems(core::BookID bookID, bool refresh) {
         _menuController.resetIndex(bookID);
     }
 
-    const auto& notes = _storage->getNoteInfosByBookID(bookID, refresh);
+    const auto& notes = _storage->getNotesByBookID(bookID, refresh);
     _menuController.reloadItems(notes);
 
     if (!refresh) {

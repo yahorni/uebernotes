@@ -16,9 +16,9 @@ void StorageCache::initialize(BooksCache&& books, NotesCache&& notes) {
     _notesCache = std::move(notes);
 }
 
-void StorageCache::addBook(BookInfo&& book) { _booksCache.emplace(std::make_shared<BookInfo>(std::move(book))); }
+void StorageCache::addBook(Book&& book) { _booksCache.emplace(std::make_shared<Book>(std::move(book))); }
 
-void StorageCache::addNote(NoteInfo&& note) { _notesCache.emplace(std::make_shared<NoteInfo>(std::move(note))); }
+void StorageCache::addNote(Note&& note) { _notesCache.emplace(std::make_shared<Note>(std::move(note))); }
 
 void StorageCache::addNotes(const NotesCache& notes) {
     for (const auto& note : notes) {
@@ -96,7 +96,7 @@ void Storage::loadStorage() {
     }
 }
 
-BooksCache Storage::getBookInfos() const {
+BooksCache Storage::getBooks() const {
     if (_cache.isActive) {
         return _cache.getBooks();
     }
@@ -104,7 +104,7 @@ BooksCache Storage::getBookInfos() const {
     return _db->loadBooks();
 }
 
-NotesCache Storage::getNoteInfosByBookID(BookID bookID, bool refreshCache) const {
+NotesCache Storage::getNotesByBookID(BookID bookID, bool refreshCache) const {
     if (_cache.isActive) {
         if (!refreshCache) {
             return _cache.getNotesByBookID(bookID);
@@ -119,7 +119,7 @@ NotesCache Storage::getNoteInfosByBookID(BookID bookID, bool refreshCache) const
     return _db->loadNotesByBookID(bookID);
 }
 
-std::optional<BookID> Storage::createBook(BookInfo&& book) {
+std::optional<BookID> Storage::createBook(Book&& book) {
     auto id = _db->insertBook(book);
     if (!id.has_value()) {
         return std::nullopt;
@@ -132,7 +132,7 @@ std::optional<BookID> Storage::createBook(BookInfo&& book) {
     return *id;
 }
 
-std::optional<NoteID> Storage::createNote(NoteInfo&& note) {
+std::optional<NoteID> Storage::createNote(Note&& note) {
     auto id = _db->insertNote(note);
     if (!id.has_value()) {
         return std::nullopt;
@@ -145,7 +145,7 @@ std::optional<NoteID> Storage::createNote(NoteInfo&& note) {
     return *id;
 }
 
-BookPtr Storage::loadBookInfo(BookID bookID) const {
+BookPtr Storage::loadBook(BookID bookID) const {
     BookPtr bookPtr;
     if (_cache.isActive) {
         bookPtr = _cache.getBook(bookID);
@@ -155,7 +155,7 @@ BookPtr Storage::loadBookInfo(BookID bookID) const {
     return bookPtr;
 }
 
-NotePtr Storage::loadNoteInfo(NoteID noteID) const {
+NotePtr Storage::loadNote(NoteID noteID) const {
     NotePtr notePtr;
     if (_cache.isActive) {
         notePtr = _cache.getNote(noteID);
@@ -166,7 +166,7 @@ NotePtr Storage::loadNoteInfo(NoteID noteID) const {
 }
 
 bool Storage::updateBook(BookID bookID, std::string&& name) {
-    if (auto bookPtr = loadBookInfo(bookID); bookPtr && _db->updateBook(bookID, name)) {
+    if (auto bookPtr = loadBook(bookID); bookPtr && _db->updateBook(bookID, name)) {
         bookPtr->name = std::move(name);
         return true;
     }
@@ -174,7 +174,7 @@ bool Storage::updateBook(BookID bookID, std::string&& name) {
 }
 
 bool Storage::updateNote(NoteID noteID, std::string&& content) {
-    if (auto notePtr = loadNoteInfo(noteID); notePtr && _db->updateNote(noteID, content)) {
+    if (auto notePtr = loadNote(noteID); notePtr && _db->updateNote(noteID, content)) {
         notePtr->content = std::move(content);
         return true;
     }
@@ -183,7 +183,7 @@ bool Storage::updateNote(NoteID noteID, std::string&& content) {
 
 bool Storage::removeBook(BookID bookID) {
     // DB removal doesn't return error on non-existant entity
-    if (auto bookPtr = loadBookInfo(bookID); !bookPtr || !_db->removeBook(bookID)) {
+    if (auto bookPtr = loadBook(bookID); !bookPtr || !_db->removeBook(bookID)) {
         return false;
     }
     if (_cache.isActive) {
@@ -194,7 +194,7 @@ bool Storage::removeBook(BookID bookID) {
 
 bool Storage::removeNote(NoteID noteID) {
     // DB removal doesn't return error on non-existant entity
-    if (auto notePtr = loadNoteInfo(noteID); !notePtr || !_db->removeNote(noteID)) {
+    if (auto notePtr = loadNote(noteID); !notePtr || !_db->removeNote(noteID)) {
         return false;
     }
     if (_cache.isActive) {

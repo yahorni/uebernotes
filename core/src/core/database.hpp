@@ -19,13 +19,13 @@ inline auto initStorage(std::string_view _dbName) {
     return sql::make_storage(                                                                       //
         std::string(_dbName),                                                                       //
         sql::make_table("normal_books",                                                             //
-                        sql::make_column("id", &BookInfo::id, sql::primary_key().autoincrement()),  //
-                        sql::make_column("name", &BookInfo::name)),                                 //
+                        sql::make_column("id", &Book::id, sql::primary_key().autoincrement()),  //
+                        sql::make_column("name", &Book::name)),                                 //
         sql::make_table("normal_notes",                                                             //
-                        sql::make_column("id", &NoteInfo::id, sql::primary_key().autoincrement()),  //
-                        sql::make_column("book_id", &NoteInfo::bookID),                             //
-                        sql::make_column("content", &NoteInfo::content),                            //
-                        sql::foreign_key(&NoteInfo::bookID).references(&BookInfo::id).on_delete.cascade()));
+                        sql::make_column("id", &Note::id, sql::primary_key().autoincrement()),  //
+                        sql::make_column("book_id", &Note::bookID),                             //
+                        sql::make_column("content", &Note::content),                            //
+                        sql::foreign_key(&Note::bookID).references(&Book::id).on_delete.cascade()));
 }
 
 class Database {
@@ -37,12 +37,12 @@ public:
     Database(Database&&) = delete;
     Database& operator=(Database&&) = delete;
 
-    std::optional<BookID> insertBook(const BookInfo& book);
+    std::optional<BookID> insertBook(const Book& book);
     BookPtr loadBookByID(BookID bookID);
     bool updateBook(BookID bookID, const std::string& name);
     bool removeBook(BookID bookID);
 
-    std::optional<NoteID> insertNote(const NoteInfo& note);
+    std::optional<NoteID> insertNote(const Note& note);
     NotePtr loadNoteByID(NoteID noteID);
     bool updateNote(NoteID noteID, const std::string& content);
     bool removeNote(NoteID noteID);

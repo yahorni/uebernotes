@@ -23,8 +23,8 @@ public:
 
     void initialize(BooksCache&& books, NotesCache&& notes);
 
-    void addBook(BookInfo&& book);
-    void addNote(NoteInfo&& note);
+    void addBook(Book&& book);
+    void addNote(Note&& note);
     void addNotes(const NotesCache& notes);
 
     const BooksCache& getBooks() const;
@@ -57,16 +57,16 @@ public:
     Storage(Storage&&) = delete;
     Storage& operator=(Storage&&) = delete;
 
-    BooksCache getBookInfos() const;
-    NotesCache getNoteInfosByBookID(BookID bookID, bool refreshCache = false) const;
+    BooksCache getBooks() const;
+    NotesCache getNotesByBookID(BookID bookID, bool refreshCache = false) const;
 
-    std::optional<BookID> createBook(BookInfo&& book);
-    BookPtr loadBookInfo(BookID bookID) const;
+    std::optional<BookID> createBook(Book&& book);
+    BookPtr loadBook(BookID bookID) const;
     bool updateBook(BookID bookID, std::string&& name);
     bool removeBook(BookID bookID);
 
-    std::optional<NoteID> createNote(NoteInfo&& note);
-    NotePtr loadNoteInfo(NoteID noteID) const;
+    std::optional<NoteID> createNote(Note&& note);
+    NotePtr loadNote(NoteID noteID) const;
     bool updateNote(NoteID noteID, std::string&& content);
     bool removeNote(NoteID noteID);
 

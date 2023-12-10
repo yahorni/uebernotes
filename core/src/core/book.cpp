@@ -2,13 +2,13 @@
 
 namespace core {
 
-BookInfo::BookInfo(std::string&& name)
-    : BookInfo(0, std::move(name)) {}
+Book::Book(std::string&& name)
+    : Book(0, std::move(name)) {}
 
-BookInfo::BookInfo(BookID id, std::string&& name)
+Book::Book(BookID id, std::string&& name)
     : id(id),
       name(std::move(name)) {}
 
-const std::string& BookInfo::getName() const { return name; }
+const std::string& Book::getName() const { return name; }
 
 }  // namespace core
