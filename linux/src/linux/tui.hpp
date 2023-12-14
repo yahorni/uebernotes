@@ -1,10 +1,10 @@
 #pragma once
 
 #include "linux/tui/book_list.hpp"
+#include "linux/tui/bottom_line.hpp"
 #include "linux/tui/event_queue.hpp"
 #include "linux/tui/note_list.hpp"
 #include "linux/tui/preview_pane.hpp"
-#include "linux/tui/status_line.hpp"
 
 #include <core/config.hpp>
 #include <core/storage.hpp>
@@ -26,7 +26,7 @@ private:
     tui::BookList _bookList;
     tui::NoteList _noteList;
     tui::PreviewPane _previewPane;
-    tui::StatusLine _statusLine;
+    tui::BottomLine _bottomLine;
 
     void initComponents();
     void updateNotesAndPreview(bool useCached = true);

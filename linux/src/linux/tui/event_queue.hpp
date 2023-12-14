@@ -16,9 +16,11 @@ enum class Event {
 
     // Commands
     /* set new message to status line */
-    UpdateStatusLine,
+    UpdateStatus,
     /* send UI event to screen to emulate screen event */
     PostScreenEvent,
+    /* input entered in the bottom line */
+    InputEntered,
 
     /* redraw books list, notes list and preview */
     RedrawBooks,
