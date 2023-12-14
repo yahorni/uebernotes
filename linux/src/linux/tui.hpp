@@ -28,9 +28,9 @@ private:
     tui::PreviewPane _previewPane;
     tui::StatusLine _statusLine;
 
-    void updateComponents();
-    bool updateNoteComponents(bool refresh = false);
-    bool updateNotePreview(core::BookID bookID);
+    void initComponents();
+    void updateNotesAndPreview(bool useCached = true);
+    void redrawNotePreview();
 
     void handleCommands(ftxui::ScreenInteractive& screen);
 };

@@ -23,6 +23,6 @@ struct Book {
 
 using BookPtr = std::shared_ptr<Book>;
 
-using BooksCache = std::unordered_set<BookPtr, SharedPtrExtension::HashID, SharedPtrExtension::CompareID>;
+using BooksCache = std::unordered_set<BookPtr, SharedPtrExtension::HashID, SharedPtrExtension::CompareID<>>;
 
 };  // namespace core

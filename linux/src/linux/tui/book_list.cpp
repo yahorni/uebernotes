@@ -12,8 +12,10 @@ BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
     auto bookMenuOption = ftxui::MenuOption::Vertical();
 
     // set events
-    bookMenuOption.on_change = [&]() { _eventQueue->push(Event::BookChanged); };
-    bookMenuOption.on_enter = [&]() { _eventQueue->push(Event::PostScreenEvent, ftxui::Event::ArrowRight); };
+    bookMenuOption.on_change = [&]() {
+        _eventQueue->push(Event::BookChanged, std::format("Selected book: {}", *_menuController.getSelectedItemID()));
+    };
+    bookMenuOption.on_enter = [&]() { _eventQueue->push(Event::PostScreenEvent, "", ftxui::Event::ArrowRight); };
 
     // set component
     _bookMenu = _menuController.createMenu(bookMenuOption);
@@ -26,23 +28,25 @@ BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
             _eventQueue->push(Event::RefreshBook);
             return true;
         } else if (event == ftxui::Event::Character('s')) {
-            if (_menuController.setSortType(SortType::Ascending)) {
-                _eventQueue->push(Event::RefreshAll);
+            if (_menuController.setSortType(SortField::Name)) {
+                _menuController.sortItems();
+                _eventQueue->push(Event::BookListUpdated, "Sort books by name");
             }
             return true;
         } else if (event == ftxui::Event::Character('S')) {
-            if (_menuController.setSortType(SortType::Descending)) {
-                _eventQueue->push(Event::RefreshAll);
+            if (_menuController.setSortType(SortField::CreationTime)) {
+                _menuController.sortItems();
+                _eventQueue->push(Event::BookListUpdated, "Sort books by date");
             }
             return true;
         } else if (event == ftxui::Event::Character('t')) {
-            if (_menuController.setSortType(SortType::CreationTime)) {
-                _eventQueue->push(Event::RefreshAll);
-            }
+            bool ascending = _menuController.toggleSortOrder();
+            _menuController.sortItems();
+            _eventQueue->push(Event::BookListUpdated, std::format("Ascending books sort order: {}", ascending));
             return true;
         } else if (event == ftxui::Event::Character('i')) {
             bool enabled = _menuController.toggleShowID();
-            _eventQueue->push(Event::ToggleShowBookID, enabled);
+            _eventQueue->push(Event::BookListUpdated, std::format("Toggle books ID showing", enabled));
             return true;
         }
         return false;
@@ -56,10 +60,6 @@ std::optional<core::BookID> BookList::getSelectedID() const { return _menuContro
 void BookList::reloadItems() {
     const auto& books = _storage->getBooks();
     _menuController.setItems(books);
-}
-
-void BookList::updateItems() {
-    _menuController.updateNames();
 }
 
 const ftxui::Component& BookList::getComponent() const { return _bookMenu; }

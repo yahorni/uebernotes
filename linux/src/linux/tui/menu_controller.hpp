@@ -1,11 +1,13 @@
 #pragma once
 
+#include "linux/tui/event_queue.hpp"
 #include <core/comparator.hpp>
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_options.hpp>
 
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -13,10 +15,12 @@
 
 namespace linux::tui {
 
-enum class SortType {
-    Ascending,
-    Descending,
-    CreationTime  // TODO: make it sort by time, not ID
+enum class SortField {
+    // TODO: make it sort by time, not ID
+    CreationTime,
+    // TODO: implement
+    UpdateTime,
+    Name,
 };
 
 template<typename Entity, typename Container, typename CacheKey = int>
@@ -32,35 +36,36 @@ public:
         // to select focused item immediately
         // FIXME: allow select without focusing
         menuOption.focused_entry = &_selectedIndex;
-        return ftxui::Menu(&_itemNames, &_selectedIndex, menuOption);
+
+        // return ftxui::Menu(&_itemNames, &_selectedIndex, menuOption);
+        ftxui::Component menu = ftxui::Menu(&_itemNames, &_selectedIndex, menuOption);
+        // FIXME: _selectedIndex assignment is not generating on_change event
+        menu |= ftxui::CatchEvent([this](ftxui::Event event) {
+            if (event == ftxui::Event::Character('g')) {
+                _selectedIndex = 0;
+                return true;
+            } else if (event == ftxui::Event::Character('G')) {
+                // TODO: remove random huge value
+                _selectedIndex = 99999;
+                return true;
+            }
+            return false;
+        });
+        return menu;
     }
 
     std::optional<decltype(Entity::id)> getSelectedItemID() const {
-        if (_sortedItems.size()) {
-            return _sortedItems.at(_selectedIndex)->id;
+        if (_items.size()) {
+            return _items.at(_selectedIndex)->id;
         }
         return std::nullopt;
     }
 
     EntityPtr getSelectedItem() const {
-        if (_sortedItems.size()) {
-            return _sortedItems.at(_selectedIndex);
+        if (_items.size()) {
+            return _items.at(_selectedIndex);
         }
         return {};
-    }
-
-    bool setSortType(SortType sortType) {
-        if (sortType == _sortType) {
-            return false;
-        }
-
-        _sortType = sortType;
-        return true;
-    }
-
-    bool toggleShowID() {
-        _showID = !_showID;
-        return _showID;
     }
 
     void resetIndex(std::optional<CacheKey> keyToReset = std::nullopt) {
@@ -78,33 +83,64 @@ public:
 
     void useCachedIndex(CacheKey key) { _selectedIndex = _indecesCache.count(key) ? _indecesCache.at(key) : 0; }
 
-    void setItems(const Container& items) {
-        // TODO: get rid of index resetting here or in resetIndex()
-        _selectedIndex = 0;
+    bool setSortType(SortField sortField) {
+        if (_sortField == sortField) {
+            return false;
+        }
 
-        _sortedItems.clear();
-        _sortedItems = std::vector<EntityPtr>{items.begin(), items.end()};
+        _sortField = sortField;
+        return true;
+    }
 
-        switch (_sortType) {
-        case SortType::CreationTime: {
-            std::sort(_sortedItems.begin(), _sortedItems.end(), core::SharedPtrExtension::CompareID());
+    bool toggleSortOrder() {
+        _ascendingOrder = !_ascendingOrder;
+        return _ascendingOrder;
+    }
+
+    void sortItems() {
+        switch (_sortField) {
+        case SortField::CreationTime:
+        case SortField::UpdateTime: {
+            if (_ascendingOrder) {
+                std::sort(_items.begin(), _items.end(), core::SharedPtrExtension::CompareID<>());
+            } else {
+                std::sort(_items.begin(), _items.end(), core::SharedPtrExtension::CompareID<std::greater<void>>());
+            }
         } break;
-        case SortType::Descending: {
-            std::sort(_sortedItems.begin(), _sortedItems.end(), core::SharedPtrExtension::CompareNameAsc());
-        } break;
-        case SortType::Ascending:
+        case SortField::Name:
         default: {
-            std::sort(_sortedItems.begin(), _sortedItems.end(), core::SharedPtrExtension::CompareNameDesc());
+            if (_ascendingOrder) {
+                std::sort(_items.begin(), _items.end(), core::SharedPtrExtension::CompareName<>());
+            } else {
+                std::sort(_items.begin(), _items.end(), core::SharedPtrExtension::CompareName<std::greater<void>>());
+            }
         } break;
         }
 
         updateNames();
     }
 
+    void setItems(const Container& items) {
+        // TODO: get rid of index resetting here or in resetIndex()
+        _selectedIndex = 0;
+
+        _items.clear();
+        _items = std::vector<EntityPtr>{items.begin(), items.end()};
+
+        sortItems();
+    }
+
+    bool toggleShowID() {
+        _showID = !_showID;
+        updateNames();
+        return _showID;
+    }
+
+private:
     void updateNames() {
         _itemNames.clear();
-        _itemNames.reserve(_sortedItems.size());
-        for (const auto& item : _sortedItems) {
+        _itemNames.reserve(_items.size());
+        for (const auto& item : _items) {
             if (_showID) {
                 _itemNames.emplace_back(std::format("[{}] {}", item->id, item->getName()));
             } else {
@@ -113,12 +149,12 @@ public:
         }
     }
 
-private:
-    SortType _sortType = SortType::Ascending;
+    SortField _sortField = SortField::CreationTime;
+    bool _ascendingOrder = true;
     bool _showID = false;
 
     Index _selectedIndex = 0;
-    std::vector<EntityPtr> _sortedItems;
+    std::vector<EntityPtr> _items;
     std::vector<std::string> _itemNames;
 
     bool _useIndexCache = false;

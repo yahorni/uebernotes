@@ -16,7 +16,6 @@ public:
 
     std::optional<core::BookID> getSelectedID() const;
     void reloadItems();
-    void updateItems();
     void reset();
 
     // UI

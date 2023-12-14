@@ -1,5 +1,8 @@
 #pragma once
 
+#include "core/logger.hpp"
+
+#include <functional>
 #include <memory>
 
 namespace core {
@@ -16,29 +19,24 @@ struct SharedPtrExtension {
     struct HashID {
         template<typename T>
             requires HasFieldID<T>
-        std::size_t operator()(std::shared_ptr<T> const& p) const {
+        std::size_t operator()(const std::shared_ptr<T>& p) const {
             return std::hash<decltype(p->id)>()(p->id);
         }
     };
+    template<typename Op = std::less<void>>
     struct CompareID {
         template<typename T>
             requires HasFieldID<T>
         bool operator()(const std::shared_ptr<T>& lhs, const std::shared_ptr<T>& rhs) const {
-            return lhs->id < rhs->id;
+            return Op{}(lhs->id, rhs->id);
         }
     };
-    struct CompareNameAsc {
+    template<typename Op = std::less<void>>
+    struct CompareName {
         template<typename T>
             requires HasMethodGetName<T>
         bool operator()(const std::shared_ptr<T>& lhs, const std::shared_ptr<T>& rhs) const {
-            return lhs->getName() < rhs->getName();
-        }
-    };
-    struct CompareNameDesc {
-        template<typename T>
-            requires HasMethodGetName<T>
-        bool operator()(const std::shared_ptr<T>& lhs, const std::shared_ptr<T>& rhs) const {
-            return lhs->getName() > rhs->getName();
+            return Op{}(lhs->getName(), rhs->getName());
         }
     };
 };

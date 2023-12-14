@@ -29,6 +29,6 @@ struct Note {
 using NotePtr = std::shared_ptr<Note>;
 
 // TODO: later add sorting by creation time
-using NotesCache = std::unordered_set<NotePtr, SharedPtrExtension::HashID, SharedPtrExtension::CompareID>;
+using NotesCache = std::unordered_set<NotePtr, SharedPtrExtension::HashID, SharedPtrExtension::CompareID<>>;
 
 }  // namespace core

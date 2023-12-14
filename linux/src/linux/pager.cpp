@@ -80,7 +80,8 @@ private:
             _shift = 0;
             return true;
         } else if (event == Event::Character('G')) {
-            _shift = 99999;  // TODO: remove random huge value
+            // TODO: remove random huge value
+            _shift = 99999;
             return true;
         }
         return false;

@@ -17,8 +17,7 @@ public:
 
     std::shared_ptr<core::Note> getSelectedItem() const;
     std::optional<core::NoteID> getSelectedID() const;
-    void reloadItems(core::BookID bookID, bool force = false);
-    void updateItems();
+    void reloadItems(core::BookID bookID, bool useCached = true);
     void cacheIndex(core::BookID bookID);
     void reset();
 

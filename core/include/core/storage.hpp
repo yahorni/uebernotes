@@ -58,7 +58,7 @@ public:
     Storage& operator=(Storage&&) = delete;
 
     BooksCache getBooks() const;
-    NotesCache getNotesByBookID(BookID bookID, bool refreshCache = false) const;
+    NotesCache getNotesByBookID(BookID bookID, bool useCached = false) const;
 
     std::optional<BookID> createBook(Book&& book);
     BookPtr loadBook(BookID bookID) const;

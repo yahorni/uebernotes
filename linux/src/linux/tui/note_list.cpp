@@ -14,8 +14,12 @@ NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
     auto noteMenuOption = ftxui::MenuOption::Vertical();
 
     // set events
-    noteMenuOption.on_enter = [&]() { _eventQueue->push(Event::OpenEditor, _menuController.getSelectedItemID()); };
-    noteMenuOption.on_change = [&]() { _eventQueue->push(Event::NoteChanged, _menuController.getSelectedItemID()); };
+    noteMenuOption.on_change = [&]() {
+        _eventQueue->push(Event::NoteChanged, std::format("Selected note: {}", *_menuController.getSelectedItemID()));
+    };
+    noteMenuOption.on_enter = [&]() {
+        _eventQueue->push(Event::OpenEditor, "TODO: Open editor", _menuController.getSelectedItemID());
+    };
 
     // set component
     _noteMenu = _menuController.createMenu(noteMenuOption);
@@ -28,23 +32,25 @@ NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
             _eventQueue->push(Event::RefreshNote);
             return true;
         } else if (event == ftxui::Event::Character('s')) {
-            if (_menuController.setSortType(SortType::Ascending)) {
-                _eventQueue->push(Event::RefreshBook);
+            if (_menuController.setSortType(SortField::Name)) {
+                _menuController.sortItems();
+                _eventQueue->push(Event::NoteListUpdated, "Sort notes by name");
             }
             return true;
         } else if (event == ftxui::Event::Character('S')) {
-            if (_menuController.setSortType(SortType::Descending)) {
-                _eventQueue->push(Event::RefreshBook);
+            if (_menuController.setSortType(SortField::CreationTime)) {
+                _menuController.sortItems();
+                _eventQueue->push(Event::NoteListUpdated, "Sort notes by date");
             }
             return true;
         } else if (event == ftxui::Event::Character('t')) {
-            if (_menuController.setSortType(SortType::CreationTime)) {
-                _eventQueue->push(Event::RefreshBook);
-            }
+            bool ascending = _menuController.toggleSortOrder();
+            _menuController.sortItems();
+            _eventQueue->push(Event::NoteListUpdated, std::format("Ascending notes sort order: {}", ascending));
             return true;
         } else if (event == ftxui::Event::Character('i')) {
             bool enabled = _menuController.toggleShowID();
-            _eventQueue->push(Event::ToggleShowNoteID, enabled);
+            _eventQueue->push(Event::NoteListUpdated, std::format("Show notes ID: {}", enabled));
             return true;
         }
         return false;
@@ -59,21 +65,17 @@ std::shared_ptr<core::Note> NoteList::getSelectedItem() const { return _menuCont
 
 std::optional<core::NoteID> NoteList::getSelectedID() const { return _menuController.getSelectedItemID(); }
 
-void NoteList::reloadItems(core::BookID bookID, bool force) {
-    if (force) {
+void NoteList::reloadItems(core::BookID bookID, bool useCached) {
+    if (!useCached) {
         _menuController.resetIndex(bookID);
     }
 
-    const auto& notes = _storage->getNotesByBookID(bookID, force);
+    const auto& notes = _storage->getNotesByBookID(bookID, useCached);
     _menuController.setItems(notes);
 
-    if (!force) {
+    if (useCached) {
         _menuController.useCachedIndex(bookID);
     }
-}
-
-void NoteList::updateItems() {
-    _menuController.updateNames();
 }
 
 const ftxui::Component& NoteList::getComponent() const { return _noteMenu; }

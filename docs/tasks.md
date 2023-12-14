@@ -82,6 +82,7 @@
     + implement sorting [ok]
       + add sorting in panes [ok]
       + add possibility to show ID in the lists [ok]
+    + add mouse support for choosing book/note
     + status line last log [...]
       + bind: search button with '/' (mock search)
       + bind: command input with ':' (mock commands)

@@ -77,7 +77,7 @@ TEST_CASE("books", "[core.storage.cache]") {
         const auto& books = storage.getBooks();
         REQUIRE(books.size() == booksAmount);
 
-        std::set<core::BookPtr, core::SharedPtrExtension::CompareID> sortedBooks{books.begin(), books.end()};
+        std::set<core::BookPtr, core::SharedPtrExtension::CompareID<>> sortedBooks{books.begin(), books.end()};
         size_t notesAmount = 0;
         for (const auto& book : sortedBooks) {
             notesAmount++;

@@ -104,9 +104,9 @@ BooksCache Storage::getBooks() const {
     return _db->loadBooks();
 }
 
-NotesCache Storage::getNotesByBookID(BookID bookID, bool refreshCache) const {
+NotesCache Storage::getNotesByBookID(BookID bookID, bool useCached) const {
     if (_cache.isActive) {
-        if (!refreshCache) {
+        if (useCached) {
             return _cache.getNotesByBookID(bookID);
         }
 
