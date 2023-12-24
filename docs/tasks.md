@@ -84,10 +84,14 @@
       + add possibility to show ID in the lists [ok]
     + add mouse support for choosing book/note
     + status line last log [...]
-      + bind: search button with '/' (mock search)
-      + bind: command input with ':' (mock commands)
+      + bind: search button with '/' (mock search) [ok]
+      + bind: command input with ':' (mock commands) [ok]
       + bind: ESC to cancel status line input (both search and command)
-    + toggle panel with logs
+    + messages panel [...]
+      + modify pager for panel [ok]
+      + add toggling for line numbers
+      + messages storing
+      + toggle panel with logs
     + floating window with help on keybindings
       + bind: help message with '?' (mock floating window, implement later)
     + status-line commands:

@@ -6,12 +6,18 @@
 
 #include <core/types.hpp>
 
+#include <string>
+#include <utility>
+
 namespace linux::tui {
 
 NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
     : _storage(storage),
       _eventQueue(eventQueue) {
     auto noteMenuOption = ftxui::MenuOption::Vertical();
+    noteMenuOption.elements_postfix = [this] {
+        return _menuController.getItemsAmount() ? ftxui::linefiller('-') : ftxui::emptyElement();
+    };
 
     // set events
     noteMenuOption.on_change = [&]() {
@@ -29,7 +35,13 @@ NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
     _noteMenu |= ignoreTabDecorator;
     _noteMenu |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Character('r')) {
-            _eventQueue->push(Event::RefreshNote);
+            std::string message;
+            if (auto noteID = getSelectedID(); noteID) {
+                message = std::format("Refreshed note: {}", *noteID);
+            } else {
+                message = "No note to refresh";
+            }
+            _eventQueue->push(Event::RefreshNote, std::move(message));
             return true;
         } else if (event == ftxui::Event::Character('s')) {
             if (_menuController.setSortType(SortField::Name)) {
@@ -43,7 +55,7 @@ NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
                 _eventQueue->push(Event::NoteListUpdated, "Sort notes by date");
             }
             return true;
-        } else if (event == ftxui::Event::Character('t')) {
+        } else if (event == ftxui::Event::Character('o')) {
             bool ascending = _menuController.toggleSortOrder();
             _menuController.sortItems();
             _eventQueue->push(Event::NoteListUpdated, std::format("Ascending notes sort order: {}", ascending));

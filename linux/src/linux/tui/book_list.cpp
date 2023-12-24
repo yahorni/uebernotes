@@ -4,6 +4,9 @@
 #include "linux/tui/common.hpp"
 #include "linux/tui/event_queue.hpp"
 
+#include <string>
+#include <utility>
+
 namespace linux::tui {
 
 BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
@@ -25,7 +28,13 @@ BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
     _bookMenu |= ignoreTabDecorator;
     _bookMenu |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Character('r')) {
-            _eventQueue->push(Event::RefreshBook);
+            std::string message;
+            if (auto bookID = getSelectedID(); bookID) {
+                message = std::format("Refreshed book: {}", *bookID);
+            } else {
+                message = "No book to refresh";
+            }
+            _eventQueue->push(Event::RefreshBook, std::move(message));
             return true;
         } else if (event == ftxui::Event::Character('s')) {
             if (_menuController.setSortType(SortField::Name)) {
@@ -39,7 +48,7 @@ BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
                 _eventQueue->push(Event::BookListUpdated, "Sort books by date");
             }
             return true;
-        } else if (event == ftxui::Event::Character('t')) {
+        } else if (event == ftxui::Event::Character('o')) {
             bool ascending = _menuController.toggleSortOrder();
             _menuController.sortItems();
             _eventQueue->push(Event::BookListUpdated, std::format("Ascending books sort order: {}", ascending));

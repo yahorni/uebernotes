@@ -16,7 +16,7 @@ class PreviewPane {
 public:
     explicit PreviewPane(EventQueue* eventQueue)
         : _eventQueue(eventQueue) {
-        _notePreview = ftxui::Pager(_previewShift, _noteContent);
+        _notePreview = ftxui::Pager(_noteContent, _previewShift, _wrapLines);
     }
 
     void reset() {
@@ -45,6 +45,7 @@ private:
     EventQueue* _eventQueue{nullptr};
 
     int _previewShift = 0;
+    bool _wrapLines = true;
 
     std::string _noteContent;  // TODO: optimize copying
     ftxui::Component _notePreview;

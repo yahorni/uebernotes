@@ -21,30 +21,54 @@ TEST_CASE("manual-tui", "[.]") {
     linux::Log::info("=== TEST STARTED ===");
 
     SECTION("scroll") {
-        std::string fillerText = "0 ==> FIRST ENTRY <==\n";
-        size_t amount = 64;
-        for (size_t i = 0; i < amount; ++i) {
-            fillerText += std::to_string(i + 1) + " ==> " + lorem + "\n";
-        }
-        fillerText += std::to_string(amount + 1) + " ==> LAST ENTRY <==\n";
+        size_t linesAmount = 100;
 
-        int shift = 0;
-        auto notePreview = Pager(shift, fillerText);
+        std::string testString = "0 ==> FIRST ENTRY <==\n==> with second line <==\n";
+        for (size_t i = 0; i < linesAmount; ++i) {
+            testString += std::to_string(i + 1) + " ==> " + lorem + "\n";
+        }
+        testString += std::to_string(linesAmount + 1) + " ==> LAST ENTRY <==\n";
+
+        int shift1 = 0;
+        bool wrap1 = true;
+        auto notePreview1 = Pager(testString, shift1, wrap1);
+
+        std::vector<std::string> testLines;
+        testLines.emplace_back("0 ==> FIRST ENTRY <==\n==> with second line <==");
+        for (size_t i = 0; i < linesAmount; ++i) {
+            testLines.emplace_back(std::to_string(i + 1) + " ==> " + lorem);
+        }
+        testLines.emplace_back(std::to_string(linesAmount + 1) + " ==> LAST ENTRY <==\n");
+
+        int shift2 = 0;
+        bool wrap2 = true;
+        auto notePreview2 = Pager(testLines, shift2, wrap2);
+
+        auto container = Container::Horizontal({notePreview1, notePreview2});
+
+        int paneSize = Terminal::Size().dimx / 2;
+
         // 1. to receive OnEvent calls Component should be passed as a first argument to Renderer
         // 2. to be visible inside vbox Component should be decorated by *flex decorator
         // 3. to be scrollable Component should be decorated by yframe
-        auto previewPane = Renderer(notePreview, [&] {
-            return vbox({
-                       hcenter(bold(text("Note preview"))),    // consider using "window"
-                       separator(),                            //
-                       notePreview->Render() | flex | yframe,  //
-                   }) |
-                   border;
+        auto layout = Renderer(container, [&] {
+            return hbox({
+                vbox({
+                    hcenter(bold(text(std::format("Note preview with one string ({})", notePreview1->Focused())))),  // consider using "window"
+                    separator(),                                          //
+                    notePreview1->Render() | flex | yframe,               //
+                }) | border | size(WIDTH, EQUAL, paneSize),
+                vbox({
+                    hcenter(bold(text(std::format("Note preview with string vector ({})", notePreview2->Focused())))),  // consider using "window"
+                    separator(),                                             //
+                    notePreview2->Render() | flex | yframe,                  //
+                }) | border | size(WIDTH, EQUAL, paneSize),
+            });
         });
 
         auto screen = ScreenInteractive::Fullscreen();
 
-        auto component = CatchEvent(previewPane, [&](Event event) {
+        auto component = CatchEvent(layout, [&](Event event) {
             if (event == Event::Character('q')) {
                 screen.ExitLoopClosure()();
                 return true;

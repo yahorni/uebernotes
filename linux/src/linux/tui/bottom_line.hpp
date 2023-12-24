@@ -5,6 +5,7 @@
 #include <ftxui/component/component.hpp>
 
 #include <string>
+#include <queue>
 
 namespace linux::tui {
 
@@ -30,7 +31,11 @@ private:
 
     std::string _statusBuffer = "Welcome to uebernotes";
     std::string _inputBuffer;
+    mutable std::string _inputPlaceholder;
     Mode _mode = Mode::Status;
+
+    const std::size_t _maxMessagesAmount = 50;
+    std::queue<std::string> _messageHistory;
 
     ftxui::Component _inputLine;
 };

@@ -136,6 +136,10 @@ public:
         return _showID;
     }
 
+    size_t getItemsAmount() {
+        return _items.size();
+    }
+
 private:
     void updateNames() {
         _itemNames.clear();

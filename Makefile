@@ -39,7 +39,7 @@ linux-tests-tui: build-linux-tests
 	@# focus
 	@# scroll
 	@# switch-with-tab
-	pkg/uebernotes-tests manual-tui -c "switch-with-tab"
+	pkg/uebernotes-tests manual-tui -c "scroll"
 
 ### common
 

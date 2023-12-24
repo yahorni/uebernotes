@@ -13,31 +13,45 @@ BottomLine::BottomLine(EventQueue* eventQueue)
     auto inputOption = ftxui::InputOption();
     inputOption.multiline = false;
     inputOption.on_enter = [&]() {
-        std::string statusPrefix;
-        if (_mode == Mode::Search) {
-            statusPrefix = "Search: ";
-        } else if (_mode == Mode::Command) {
-            statusPrefix = "Command: ";
-        } else {
-            statusPrefix = "Unknown input: ";
+        if (!_inputBuffer.empty()) {
+            std::string statusPrefix;
+            switch (_mode) {
+            case Mode::Search:
+                statusPrefix = "Search: ";
+                break;
+            case Mode::Command:
+                statusPrefix = "Command: ";
+                break;
+            case Mode::Status:
+                Log::error("Input received in Status mode");
+                _inputBuffer.clear();
+                return;
+            }
+
+            _statusBuffer = statusPrefix + _inputBuffer;
+            _eventQueue->push(Event::InputEntered, std::string(_statusBuffer), _inputBuffer);
+            _inputBuffer.clear();
         }
-
-        _statusBuffer = statusPrefix + _inputBuffer;
-
-        _eventQueue->push(Event::InputEntered, std::string(_statusBuffer), _inputBuffer);
-
-        _inputBuffer.clear();
+        // TODO: add messages if input is empty
         _mode = Mode::Status;
     };
 
-    _inputLine = ftxui::Input(&_inputBuffer, "input", inputOption);
+    inputOption.content = &_inputBuffer;
+    inputOption.placeholder = &_inputPlaceholder;
+
+    _inputLine = ftxui::Input(inputOption);
     _inputLine |= ftxui::Maybe([this] { return _mode != Mode::Status; });
     // TODO:
     // 1. handle Escape
-    // 2. disable cursor
+    // 2. disable cursor during typing
 }
 
 void BottomLine::setMessage(std::string message) {
+    _messageHistory.push(message);
+    if (_messageHistory.size() == _maxMessagesAmount) {
+        _messageHistory.pop();
+    }
+
     _statusBuffer = std::move(message);
     Log::info("{}", _statusBuffer);
 }
@@ -50,9 +64,11 @@ ftxui::Element BottomLine::getElement() const {
     using namespace ftxui;
     switch (_mode) {
     case Mode::Search: {
+        _inputPlaceholder = "search";
         return hbox(text("/"), _inputLine->Render());
     } break;
     case Mode::Command: {
+        _inputPlaceholder = "command";
         return hbox(text(":"), _inputLine->Render());
     } break;
     case Mode::Status:
@@ -61,5 +77,4 @@ ftxui::Element BottomLine::getElement() const {
     } break;
     }
 }
-
 }  // namespace linux::tui

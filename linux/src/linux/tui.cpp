@@ -60,7 +60,7 @@ bool TUI::run() {
             screen.ExitLoopClosure()();
             return true;
         } else if (event == Event::Character('R')) {
-            _eventQueue.push(tui::Event::RefreshAll);
+            _eventQueue.push(tui::Event::RefreshAll, "Refreshed books and notes");
             return true;
         } else if (event == Event::Character('/')) {
             _bottomLine.setMode(tui::BottomLine::Mode::Search);
@@ -144,27 +144,17 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
     } break;
 
     case tui::Event::RefreshAll: {
+        _bottomLine.setMessage(message);
         _storage.loadStorage();
         initComponents();
-        _bottomLine.setMessage("Refreshed books and notes");
     } break;
     case tui::Event::RefreshBook: {
-        if (_bookList.getSelectedID()) {
-            updateNotesAndPreview(true);
-            _bottomLine.setMessage(std::format("Refreshed book: {}", *_bookList.getSelectedID()));
-        } else {
-            _bottomLine.setMessage("No book to refresh");
-        }
+        _bottomLine.setMessage(message);
+        updateNotesAndPreview(true);
     } break;
     case tui::Event::RefreshNote: {
-        if (auto bookID = _bookList.getSelectedID(); bookID) {
-            if (_noteList.getSelectedID()) {
-                redrawNotePreview();
-                _bottomLine.setMessage(std::format("Refreshed note: {}", *_noteList.getSelectedID()));
-            } else {
-                _bottomLine.setMessage("No note to refresh");
-            }
-        }
+        _bottomLine.setMessage(message);
+        redrawNotePreview();
     } break;
 
     case tui::Event::OpenEditor: {
