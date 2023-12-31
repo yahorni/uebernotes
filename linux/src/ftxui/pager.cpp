@@ -16,7 +16,9 @@ namespace ftxui {
 template<typename T>
 using OptionalRef = std::optional<std::reference_wrapper<const T>>;
 
-// TODO: add horizontal scroll
+// TODO:
+// add horizontal scroll
+// mouse scroll support
 class PagerArea : public Node {
 public:
     PagerArea(const std::string& content, int& shift, bool& wrap)

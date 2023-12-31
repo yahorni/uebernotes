@@ -1,12 +1,11 @@
 #pragma once
 
-#include "core/logger.hpp"
-
 #include <functional>
 #include <memory>
 
 namespace core {
 
+// TODO: get rid of plain id, add getID()
 template<typename T>
 concept HasFieldID = requires { T::id; };
 

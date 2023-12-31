@@ -82,23 +82,24 @@
     + implement sorting [ok]
       + add sorting in panes [ok]
       + add possibility to show ID in the lists [ok]
-    + add mouse support for choosing book/note
-    + status line last log [...]
+    + status line last log [ok]
       + bind: search button with '/' (mock search) [ok]
       + bind: command input with ':' (mock commands) [ok]
-      + bind: ESC to cancel status line input (both search and command)
-    + messages panel [...]
+      + bind: ESC to cancel status line input (both search and command) [ok]
+    + messages panel [ok]
       + modify pager for panel [ok]
-      + add toggling for line numbers in pager
-      + messages storing
-      + toggle panel with logs
-    + floating window with help on keybindings
-      + bind: help message with '?' (mock floating window, implement later)
-    + status-line commands:
+      + add toggling for line numbers in pager [TODO]
+      + messages storing [ok]
+      + toggle panel with logs [ok]
+    + floating window with help on keybindings [TODO]
+      + bind: help message with '?' (mock floating window, implement later) [TODO]
+    + add mouse support for choosing book/note [TODO]
+    + add book sizes in book list [TODO]
+    + status-line modes [...]
       + search (should know call source to differentiate search)
-      + status (commons stats for all books/notes)
-      + panel (show last logs and commands)
-      + help
+      + status (commons stats for all books/notes) [TODO]
+      + panel (show last logs and commands) [ok]
+      + help [TODO]
     + implement search
       + book titles (vim-like)
       + note titles (vim-like)
@@ -119,7 +120,7 @@
         6. update note in cache/database
         7. unfreeze app
         8. remove temp file
-      + chosen editor should be printed in help
+      + chosen editor should be printed in help [TODO]
   + implement CLI functions in TUI
     + add book
       + bind: 'a' [left pane]
@@ -148,6 +149,8 @@
     + make logger in tests to use cout
     + use EventHandler to properly configure/remap all bindings for elements
     + rewrite Event system, it's confusing on who and when should process events
+    + separate UI logic from controllers logic
+    + get rid of plain usage of IDs
 + common:
   + project level cmake to build lib and linux client
 

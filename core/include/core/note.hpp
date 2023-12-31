@@ -9,8 +9,6 @@
 
 namespace core {
 
-class Storage;
-
 struct Note {
     NoteID id;
     BookID bookID;

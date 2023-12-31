@@ -5,7 +5,6 @@
 #include <ftxui/component/component.hpp>
 
 #include <string>
-#include <queue>
 
 namespace linux::tui {
 

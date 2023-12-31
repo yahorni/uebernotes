@@ -9,8 +9,6 @@
 
 namespace core {
 
-class Storage;
-
 struct Book {
     BookID id;
     std::string name;
