@@ -5,8 +5,10 @@ namespace ftxui {
 class IgnoreEventBase : public ComponentBase {
 public:
     // Constructor.
-    explicit IgnoreEventBase(std::function<bool(Event)> on_event)
-        : on_event_(std::move(on_event)) {}
+    explicit IgnoreEventBase(Component child, std::function<bool(Event)> on_event)
+        : on_event_(std::move(on_event)) {
+        Add(std::move(child));
+    }
 
     // Component implementation.
     bool OnEvent(Event event) override {
@@ -22,15 +24,24 @@ protected:
 };
 
 Component IgnoreEvent(Component child, std::function<bool(Event event)> on_event) {
-    auto out = Make<IgnoreEventBase>(std::move(on_event));
-    out->Add(std::move(child));
-    return out;
+    return Make<IgnoreEventBase>(std::move(child), std::move(on_event));
 }
 
 ComponentDecorator IgnoreEvent(std::function<bool(Event)> on_event) {
     return [on_event = std::move(on_event)](Component child) {
         return IgnoreEvent(std::move(child), [on_event = on_event](Event event) { return on_event(std::move(event)); });
     };
+}
+
+ComponentDecorator IgnoreEvents(const std::vector<Event>& events) {
+    return IgnoreEvent([events](ftxui::Event event) {
+        for (const auto& ignored : events) {
+            if (event == ignored) {
+                return true;
+            }
+        }
+        return false;
+    });
 }
 
 }  // namespace ftxui

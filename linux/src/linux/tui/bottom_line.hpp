@@ -20,6 +20,7 @@ public:
     explicit BottomLine(EventQueue* eventQueue);
 
     void setMessage(std::string message);
+    bool isInputActive() const;
     void setMode(BottomLine::Mode mode);
 
     // UI
@@ -33,9 +34,6 @@ private:
     std::string _inputBuffer;
     mutable std::string _inputPlaceholder;
     Mode _mode = Mode::Status;
-
-    const std::size_t _maxMessagesAmount = 50;
-    std::queue<std::string> _messageHistory;
 
     ftxui::Component _inputLine;
 };

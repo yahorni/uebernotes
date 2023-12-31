@@ -1,7 +1,6 @@
 #include "linux/tui/note_list.hpp"
 
 #include "ftxui/component.hpp"
-#include "linux/tui/common.hpp"
 #include "linux/tui/event_queue.hpp"
 
 #include <core/types.hpp>
@@ -13,7 +12,8 @@ namespace linux::tui {
 
 NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
     : _storage(storage),
-      _eventQueue(eventQueue) {
+      _eventQueue(eventQueue),
+      _menuController(eventQueue, true) {
     auto noteMenuOption = ftxui::MenuOption::Vertical();
     noteMenuOption.elements_postfix = [this] {
         return _menuController.getItemsAmount() ? ftxui::linefiller('-') : ftxui::emptyElement();
@@ -32,7 +32,7 @@ NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
     _noteMenu |= ftxui::FocusableWrapper();
 
     // set keys
-    _noteMenu |= ignoreTabDecorator;
+    _noteMenu |= ftxui::IgnoreEvents({ftxui::Event::Tab, ftxui::Event::TabReverse});
     _noteMenu |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Character('r')) {
             std::string message;
@@ -67,6 +67,8 @@ NoteList::NoteList(core::Storage* storage, EventQueue* eventQueue)
         }
         return false;
     });
+
+    _noteMenu |= ftxui::EventHandler({ftxui::Event::Character('j')});
 }
 
 void NoteList::reset() { _menuController.resetIndex(); }
@@ -92,14 +94,14 @@ void NoteList::reloadItems(core::BookID bookID, bool useCached) {
 
 const ftxui::Component& NoteList::getComponent() const { return _noteMenu; }
 
-ftxui::Element NoteList::getElement() const {
+ftxui::Element NoteList::getElement(int paneSize) const {
     using namespace ftxui;
     return vbox({
                hcenter(bold(text("Notes"))),  // consider using "window"
                separator(),                   //
                _noteMenu->Render(),           //
            }) |
-           borderDecorator(_noteMenu->Focused());
+           borderDecorator(_noteMenu->Focused()) | size(WIDTH, EQUAL, paneSize);
 }
 
 }  // namespace linux::tui

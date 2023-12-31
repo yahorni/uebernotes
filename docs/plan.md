@@ -71,8 +71,9 @@
     + with local WebDAV server mock
     + script with CLI
 + other TODOs:
-  + enable unicode for sqlite(_orm), cxxopts
+  + enable unicode for sqlite_orm, cxxopts
   + make cxxopts as precompiled header
+  + switch to SQLiteCpp instead of sqlite_orm
 
 ## linux client
 
@@ -134,3 +135,4 @@ Android app will take some significant time to develop. To start using notes ear
 + android screening: <https://github.com/Genymobile/scrcpy>
 + json: <https://github.com/stephenberry/glaze>
 + python tests: <https://tox.wiki/en/4.11.4/>
++ SQLiteCpp: <https://github.com/SRombauts/SQLiteCpp>

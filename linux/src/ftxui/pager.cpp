@@ -63,12 +63,6 @@ public:
                     }
                 }
 
-                if (it == "\n") {
-                    y++;
-                    x = box_.x_min;
-                    continue;
-                }
-
                 screen.PixelAt(x, y).character = it;
                 x++;
             }

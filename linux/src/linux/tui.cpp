@@ -9,6 +9,7 @@
 #include <ftxui/screen/string.hpp>
 
 #include <string>
+#include <utility>
 
 // ftxui/dom/elements.hpp - list of elements to create layouts
 // ftxui/dom/component.hpp - interactive components to respond to events
@@ -36,7 +37,7 @@ bool TUI::run() {
                                               _noteList.getComponent(),
                                               _previewPane.getComponent(),
                                           }),
-                                          _bottomLine.getComponent()});
+                                          _historyPanel.getComponent(), _bottomLine.getComponent()});
 
     initComponents();
 
@@ -44,18 +45,28 @@ bool TUI::run() {
         Log::debug("render, events: {}", _eventQueue.size());
         handleCommands(screen);
 
-        int paneSize = Terminal::Size().dimx / 4;
+        int listPaneSize = Terminal::Size().dimx / 4;
+        int historyPanelSize = Terminal::Size().dimy / 4;
         return vbox({
             hbox({
-                _bookList.getElement() | size(WIDTH, EQUAL, paneSize),  //
-                _noteList.getElement() | size(WIDTH, EQUAL, paneSize),  //
-                _previewPane.getElement(),                              //
+                _bookList.getElement(listPaneSize),  //
+                _noteList.getElement(listPaneSize),  //
+                _previewPane.getElement(),           //
             }) | yflex,
-            _bottomLine.getElement() | size(HEIGHT, EQUAL, 1),
+            _historyPanel.getElement(historyPanelSize),
+            _bottomLine.getElement(),
         });
     });
 
     auto component = CatchEvent(renderer, [&](Event event) {
+        if (_bottomLine.isInputActive()) {
+            if (event == Event::Escape) {
+                _bottomLine.setMode(tui::BottomLine::Mode::Status);
+                return true;
+            }
+            return false;
+        }
+
         if (event == Event::Character('q')) {
             screen.ExitLoopClosure()();
             return true;
@@ -69,6 +80,9 @@ bool TUI::run() {
         } else if (event == Event::Character(':')) {
             _bottomLine.setMode(tui::BottomLine::Mode::Command);
             _bottomLine.getComponent()->TakeFocus();
+            return true;
+        } else if (event == Event::Character('t')) {
+            _historyPanel.toggle();
             return true;
         }
         return false;
@@ -99,6 +113,13 @@ void TUI::redrawNotePreview() {
     } else {
         _previewPane.reset();
     }
+}
+
+void TUI::handleMessage(const std::string& message) {
+    // TODO: resolve problem with setting same string in _bottomLine after InputEntered
+    _bottomLine.setMessage(message);
+    _historyPanel.addMessage(std::string(message));
+    Log::info("{}", message);
 }
 
 void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
@@ -132,7 +153,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
 
     case tui::Event::UpdateStatus: {
         auto message{std::any_cast<std::string>(data)};
-        _bottomLine.setMessage(message);
+        handleMessage(message);
     } break;
     case tui::Event::PostScreenEvent: {
         auto screenEvent{std::any_cast<ftxui::Event>(data)};
@@ -140,25 +161,27 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
     } break;
     case tui::Event::InputEntered: {
         // TODO: handle input
+        auto input{std::any_cast<std::string>(data)};
+        _historyPanel.addMessage(std::move(message));
         _bookList.getComponent()->TakeFocus();
     } break;
 
     case tui::Event::RefreshAll: {
-        _bottomLine.setMessage(message);
+        handleMessage(message);
         _storage.loadStorage();
         initComponents();
     } break;
     case tui::Event::RefreshBook: {
-        _bottomLine.setMessage(message);
+        handleMessage(message);
         updateNotesAndPreview(true);
     } break;
     case tui::Event::RefreshNote: {
-        _bottomLine.setMessage(message);
+        handleMessage(message);
         redrawNotePreview();
     } break;
 
     case tui::Event::OpenEditor: {
-        _bottomLine.setMessage(message);
+        handleMessage(message);
     } break;
 
     default: {

@@ -21,11 +21,21 @@ Component Pager(const std::vector<std::string>& lines, int& shift, bool& wrap);
  * to ignore some event which are implemented for Component */
 Component IgnoreEvent(Component child, std::function<bool(Event event)> on_event);
 ComponentDecorator IgnoreEvent(std::function<bool(Event)> on_event);
+ComponentDecorator IgnoreEvents(const std::vector<Event>& events);
 
 /* To make focusable component, which are not focusable by default */
 Component FocusableWrapper(Component child);
 ComponentDecorator FocusableWrapper();
 
+/* Fulfill all available space in line */
 Element linefiller(char c);
+
+/* Set heavy border if element focused, light otherwise */
+Decorator borderDecorator(bool focused);
+
+/* Handler for key mappings */
+// TODO: handle all key mappings through it
+Component EventHandler(Component child);
+ComponentDecorator EventHandler(const std::vector<Event>& events);
 
 }  // namespace ftxui

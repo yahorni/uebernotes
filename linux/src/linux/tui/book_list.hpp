@@ -20,7 +20,7 @@ public:
 
     // UI
     const ftxui::Component& getComponent() const;
-    ftxui::Element getElement() const;
+    ftxui::Element getElement(int paneSize) const;
 
 private:
     core::Storage* _storage{nullptr};

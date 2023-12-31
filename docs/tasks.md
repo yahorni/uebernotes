@@ -89,7 +89,7 @@
       + bind: ESC to cancel status line input (both search and command)
     + messages panel [...]
       + modify pager for panel [ok]
-      + add toggling for line numbers
+      + add toggling for line numbers in pager
       + messages storing
       + toggle panel with logs
     + floating window with help on keybindings
@@ -111,14 +111,14 @@
       + configurable through cli (like "database")
       + bind: Enter in middle/right panel to open the note (remember: book may be empty)
       + algorithm:
-                1. create temp file
-                2. dump note content to it
-                3. freeze app keys handling
-                4. open with editor in separated process or thread (need to think)
-                5. read temp file content
-                6. update note in cache/database
-                7. unfreeze app
-                8. remove temp file
+        1. create temp file
+        2. dump note content to it
+        3. freeze app keys handling
+        4. open with editor in separated process or thread (need to think)
+        5. read temp file content
+        6. update note in cache/database
+        7. unfreeze app
+        8. remove temp file
       + chosen editor should be printed in help
   + implement CLI functions in TUI
     + add book

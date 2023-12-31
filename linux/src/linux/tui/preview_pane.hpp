@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ftxui/component.hpp"
-#include "linux/tui/common.hpp"
 #include "linux/tui/event_queue.hpp"
 
 #include <core/note.hpp>
@@ -47,7 +46,7 @@ private:
     int _previewShift = 0;
     bool _wrapLines = true;
 
-    std::string _noteContent;  // TODO: optimize copying
+    std::string _noteContent;
     ftxui::Component _notePreview;
 };
 

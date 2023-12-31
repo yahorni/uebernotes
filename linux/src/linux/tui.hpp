@@ -5,11 +5,14 @@
 #include "linux/tui/event_queue.hpp"
 #include "linux/tui/note_list.hpp"
 #include "linux/tui/preview_pane.hpp"
+#include "linux/tui/history_panel.hpp"
 
 #include <core/config.hpp>
 #include <core/storage.hpp>
 
 #include <ftxui/screen/screen.hpp>
+
+#include <string>
 
 namespace linux {
 
@@ -26,6 +29,7 @@ private:
     tui::BookList _bookList;
     tui::NoteList _noteList;
     tui::PreviewPane _previewPane;
+    tui::HistoryPanel _historyPanel;
     tui::BottomLine _bottomLine;
 
     void initComponents();
@@ -33,6 +37,7 @@ private:
     void redrawNotePreview();
 
     void handleCommands(ftxui::ScreenInteractive& screen);
+    void handleMessage(const std::string& message);
 };
 
 }  // namespace linux

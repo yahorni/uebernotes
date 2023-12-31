@@ -1,7 +1,6 @@
 #include "linux/tui/book_list.hpp"
 
 #include "ftxui/component.hpp"
-#include "linux/tui/common.hpp"
 #include "linux/tui/event_queue.hpp"
 
 #include <string>
@@ -11,7 +10,8 @@ namespace linux::tui {
 
 BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
     : _storage(storage),
-      _eventQueue(eventQueue) {
+      _eventQueue(eventQueue),
+      _menuController(eventQueue) {
     auto bookMenuOption = ftxui::MenuOption::Vertical();
 
     // set events
@@ -25,7 +25,7 @@ BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
     _bookMenu |= ftxui::FocusableWrapper();
 
     // set keys
-    _bookMenu |= ignoreTabDecorator;
+    _bookMenu |= ftxui::IgnoreEvents({ftxui::Event::Tab, ftxui::Event::TabReverse});
     _bookMenu |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Character('r')) {
             std::string message;
@@ -60,6 +60,9 @@ BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
         }
         return false;
     });
+
+
+    _bookMenu |= ftxui::EventHandler({ftxui::Event::Character('j')});
 }
 
 void BookList::reset() { _menuController.resetIndex(); }
@@ -73,14 +76,14 @@ void BookList::reloadItems() {
 
 const ftxui::Component& BookList::getComponent() const { return _bookMenu; }
 
-ftxui::Element BookList::getElement() const {
+ftxui::Element BookList::getElement(int paneSize) const {
     using namespace ftxui;
     return vbox({
                hcenter(bold(text("Books"))),  // consider using "window"
                separator(),                   //
                _bookMenu->Render(),           //
            }) |
-           borderDecorator(_bookMenu->Focused());
+           borderDecorator(_bookMenu->Focused()) | size(WIDTH, EQUAL, paneSize);
 }
 
 }  // namespace linux::tui

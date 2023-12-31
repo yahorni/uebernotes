@@ -47,14 +47,10 @@ BottomLine::BottomLine(EventQueue* eventQueue)
 }
 
 void BottomLine::setMessage(std::string message) {
-    _messageHistory.push(message);
-    if (_messageHistory.size() == _maxMessagesAmount) {
-        _messageHistory.pop();
-    }
-
     _statusBuffer = std::move(message);
-    Log::info("{}", _statusBuffer);
 }
+
+bool BottomLine::isInputActive() const { return _mode == Mode::Search || _mode == Mode::Command; }
 
 void BottomLine::setMode(BottomLine::Mode mode) { _mode = mode; }
 
@@ -62,19 +58,23 @@ const ftxui::Component& BottomLine::getComponent() const { return _inputLine; }
 
 ftxui::Element BottomLine::getElement() const {
     using namespace ftxui;
+
+    Element line;
     switch (_mode) {
     case Mode::Search: {
         _inputPlaceholder = "search";
-        return hbox(text("/"), _inputLine->Render());
+        line = hbox(text("/"), _inputLine->Render());
     } break;
     case Mode::Command: {
         _inputPlaceholder = "command";
-        return hbox(text(":"), _inputLine->Render());
+        line = hbox(text(":"), _inputLine->Render());
     } break;
     case Mode::Status:
     default: {
-        return text(_statusBuffer.c_str());
+        line = text(_statusBuffer.c_str());
     } break;
     }
+
+    return line | size(HEIGHT, EQUAL, 1);
 }
 }  // namespace linux::tui

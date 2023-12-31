@@ -29,28 +29,28 @@ public:
     using EntityPtr = std::shared_ptr<Entity>;
     using Index = int;
 
-    explicit MenuController(bool useIndexCache = false)
-        : _useIndexCache(useIndexCache) {}
+    explicit MenuController(EventQueue* eventQueue, bool useIndexCache = false)
+        : _eventQueue(eventQueue),
+          _useIndexCache(useIndexCache) {}
 
     ftxui::Component createMenu(ftxui::MenuOption& menuOption) {
         // to select focused item immediately
         // FIXME: allow select without focusing
         menuOption.focused_entry = &_selectedIndex;
 
-        // return ftxui::Menu(&_itemNames, &_selectedIndex, menuOption);
         ftxui::Component menu = ftxui::Menu(&_itemNames, &_selectedIndex, menuOption);
-        // FIXME: _selectedIndex assignment is not generating on_change event
+
         menu |= ftxui::CatchEvent([this](ftxui::Event event) {
             if (event == ftxui::Event::Character('g')) {
-                _selectedIndex = 0;
+                _eventQueue->push(Event::PostScreenEvent, "", ftxui::Event::Home);
                 return true;
             } else if (event == ftxui::Event::Character('G')) {
-                // TODO: remove random huge value
-                _selectedIndex = 99999;
+                _eventQueue->push(Event::PostScreenEvent, "", ftxui::Event::End);
                 return true;
             }
             return false;
         });
+
         return menu;
     }
 
@@ -136,9 +136,7 @@ public:
         return _showID;
     }
 
-    size_t getItemsAmount() {
-        return _items.size();
-    }
+    size_t getItemsAmount() { return _items.size(); }
 
 private:
     void updateNames() {
@@ -152,6 +150,8 @@ private:
             }
         }
     }
+
+    EventQueue* _eventQueue{nullptr};
 
     SortField _sortField = SortField::CreationTime;
     bool _ascendingOrder = true;

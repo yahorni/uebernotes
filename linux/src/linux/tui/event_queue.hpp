@@ -13,6 +13,7 @@ enum class Event {
     NoteChanged,
     BookListUpdated,
     NoteListUpdated,
+    StatusChanged,
 
     // Commands
     /* set new message to status line */
