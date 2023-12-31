@@ -22,7 +22,7 @@ void HistoryPanel::addMessage(std::string&& message) {
     _messageHistory.push_back(std::move(message));
 }
 
-void HistoryPanel::toggle() { _enabled = !_enabled; }
+bool HistoryPanel::toggle() { _enabled = !_enabled; return _enabled; }
 
 const ftxui::Component& HistoryPanel::getComponent() const { return _historyPager; }
 

@@ -146,6 +146,8 @@
     + properly configure segfault handling
     + when UI crashes during initialization the logs aren't written in file
     + make logger in tests to use cout
+    + use EventHandler to properly configure/remap all bindings for elements
+    + rewrite Event system, it's confusing on who and when should process events
 + common:
   + project level cmake to build lib and linux client
 

@@ -22,6 +22,8 @@ enum class Event {
     PostScreenEvent,
     /* input entered in the bottom line */
     InputEntered,
+    /* input canceled in the bottom line */
+    InputCanceled,
 
     /* redraw books list, notes list and preview */
     RedrawBooks,

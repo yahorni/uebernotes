@@ -35,6 +35,7 @@ private:
     void initComponents();
     void updateNotesAndPreview(bool useCached = true);
     void redrawNotePreview();
+    void resetFocus();
 
     void handleCommands(ftxui::ScreenInteractive& screen);
     void handleMessage(const std::string& message);

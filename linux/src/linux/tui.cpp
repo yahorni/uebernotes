@@ -30,43 +30,16 @@ bool TUI::run() {
     using namespace ftxui;
 
     auto screen{ScreenInteractive::Fullscreen()};
-    // TODO: set minimal requirement for screen size
+    ftxui::Dimensions minWinSize{80, 20};
 
-    auto container = Container::Vertical({Container::Horizontal({
-                                              _bookList.getComponent(),
-                                              _noteList.getComponent(),
-                                              _previewPane.getComponent(),
-                                          }),
-                                          _historyPanel.getComponent(), _bottomLine.getComponent()});
+    auto panesContainer = Container::Vertical({Container::Horizontal({
+                                                   _bookList.getComponent(),
+                                                   _noteList.getComponent(),
+                                                   _previewPane.getComponent(),
+                                               }),
+                                               _historyPanel.getComponent()});
 
-    initComponents();
-
-    auto renderer = Renderer(container, [&] {
-        Log::debug("render, events: {}", _eventQueue.size());
-        handleCommands(screen);
-
-        int listPaneSize = Terminal::Size().dimx / 4;
-        int historyPanelSize = Terminal::Size().dimy / 4;
-        return vbox({
-            hbox({
-                _bookList.getElement(listPaneSize),  //
-                _noteList.getElement(listPaneSize),  //
-                _previewPane.getElement(),           //
-            }) | yflex,
-            _historyPanel.getElement(historyPanelSize),
-            _bottomLine.getElement(),
-        });
-    });
-
-    auto component = CatchEvent(renderer, [&](Event event) {
-        if (_bottomLine.isInputActive()) {
-            if (event == Event::Escape) {
-                _bottomLine.setMode(tui::BottomLine::Mode::Status);
-                return true;
-            }
-            return false;
-        }
-
+    auto panesContainerWithEvents = CatchEvent(panesContainer, [&](Event event) {
         if (event == Event::Character('q')) {
             screen.ExitLoopClosure()();
             return true;
@@ -82,13 +55,51 @@ bool TUI::run() {
             _bottomLine.getComponent()->TakeFocus();
             return true;
         } else if (event == Event::Character('t')) {
-            _historyPanel.toggle();
+            if (!_historyPanel.toggle()) {
+                // TODO: autoreset focus without manual
+                resetFocus();
+            }
+            return true;
+        } else if (event == Event::Character('T')) {
+            auto& historyComponent = *_historyPanel.getComponent();
+            if (historyComponent.Focused()) {
+                resetFocus();
+            } else if (historyComponent.Focusable())  {
+                historyComponent.TakeFocus();
+            }
             return true;
         }
         return false;
     });
 
-    screen.Loop(component);
+    auto container = Container::Vertical({panesContainerWithEvents, _bottomLine.getComponent()});
+
+    initComponents();
+
+    auto renderer = Renderer(container, [&] {
+        Log::debug("render, events: {}", _eventQueue.size());
+
+        auto winSize = Terminal::Size();
+        if (winSize.dimx < minWinSize.dimx || winSize.dimy < minWinSize.dimy) {
+            return paragraph(std::format("too small window: {}x{}", winSize.dimx, winSize.dimy));
+        }
+
+        handleCommands(screen);
+
+        int listPaneSize = winSize.dimx / 4;
+        int historyPanelSize = winSize.dimy / 4;
+        return vbox({
+            hbox({
+                _bookList.getElement(listPaneSize),  //
+                _noteList.getElement(listPaneSize),  //
+                _previewPane.getElement(),           //
+            }) | yflex,
+            _historyPanel.getElement(historyPanelSize),
+            _bottomLine.getElement(),
+        });
+    });
+
+    screen.Loop(renderer);
     return true;
 }
 
@@ -114,6 +125,8 @@ void TUI::redrawNotePreview() {
         _previewPane.reset();
     }
 }
+
+void TUI::resetFocus() { _bookList.getComponent()->TakeFocus(); }
 
 void TUI::handleMessage(const std::string& message) {
     // TODO: resolve problem with setting same string in _bottomLine after InputEntered
@@ -163,7 +176,10 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         // TODO: handle input
         auto input{std::any_cast<std::string>(data)};
         _historyPanel.addMessage(std::move(message));
-        _bookList.getComponent()->TakeFocus();
+        resetFocus();
+    } break;
+    case tui::Event::InputCanceled: {
+        resetFocus();
     } break;
 
     case tui::Event::RefreshAll: {

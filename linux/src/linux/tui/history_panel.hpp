@@ -12,7 +12,7 @@ public:
     HistoryPanel();
 
     void addMessage(std::string&& message);
-    void toggle();
+    bool toggle();
 
     // UI
     const ftxui::Component& getComponent() const;

@@ -40,10 +40,18 @@ BottomLine::BottomLine(EventQueue* eventQueue)
     inputOption.placeholder = &_inputPlaceholder;
 
     _inputLine = ftxui::Input(inputOption);
+    _inputLine |= ftxui::CatchEvent([this](ftxui::Event event) {
+        if (event == ftxui::Event::Escape) {
+            setMode(Mode::Status);
+            _inputBuffer.clear();
+            _eventQueue->push(Event::InputCanceled, "Canceled input");
+            return true;
+        }
+        return false;
+    });
     _inputLine |= ftxui::Maybe([this] { return _mode != Mode::Status; });
-    // TODO:
-    // 1. handle Escape
-    // 2. disable cursor during typing
+
+    // TODO: disable cursor during typing
 }
 
 void BottomLine::setMessage(std::string message) {
