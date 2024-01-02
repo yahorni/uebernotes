@@ -19,21 +19,22 @@
 namespace linux {
 
 TUI::TUI(const core::Config& config)
-    : _storage(config),
-      _eventQueue{},
-      _bookList(&_storage, &_eventQueue),
-      _noteList(&_storage, &_eventQueue),
-      _previewPane(&_eventQueue),
-      _bottomLine(&_eventQueue) {}
+    : _storage{config},
+      _bookController{&_eventQueue, _bookModel, _bookView},
+      _noteList{&_storage, &_eventQueue},
+      _previewPane{&_eventQueue},
+      _bottomLine(&_eventQueue) {
+    _bookController.createComponent();
+}
 
 bool TUI::run() {
-    using namespace ftxui;
+    using namespace ftxui;  // NOLINT
 
     auto screen{ScreenInteractive::Fullscreen()};
     ftxui::Dimensions minWinSize{80, 20};
 
     auto panesContainer = Container::Vertical({Container::Horizontal({
-                                                   _bookList.getComponent(),
+                                                   _bookModel.getComponent(),
                                                    _noteList.getComponent(),
                                                    _previewPane.getComponent(),
                                                }),
@@ -64,7 +65,7 @@ bool TUI::run() {
             auto& historyComponent = *_historyPanel.getComponent();
             if (historyComponent.Focused()) {
                 resetFocus();
-            } else if (historyComponent.Focusable())  {
+            } else if (historyComponent.Focusable()) {
                 historyComponent.TakeFocus();
             }
             return true;
@@ -90,9 +91,9 @@ bool TUI::run() {
         int historyPanelSize = winSize.dimy / 4;
         return vbox({
             hbox({
-                _bookList.getElement(listPaneSize),  //
-                _noteList.getElement(listPaneSize),  //
-                _previewPane.getElement(),           //
+                _bookView.getElement(_bookModel.getComponent(), listPaneSize),  //
+                _noteList.getElement(listPaneSize),                             //
+                _previewPane.getElement(),                                      //
             }) | yflex,
             _historyPanel.getElement(historyPanelSize),
             _bottomLine.getElement(),
@@ -104,16 +105,16 @@ bool TUI::run() {
 }
 
 void TUI::initComponents() {
-    _bookList.reset();
+    _bookView.resetIndex();
     _noteList.reset();
     _previewPane.reset();
 
-    _bookList.reloadItems();
+    _bookController.setItems(_storage.getBooks());
     updateNotesAndPreview();
 }
 
 void TUI::updateNotesAndPreview(bool useCached) {
-    auto bookID = _bookList.getSelectedID();
+    auto bookID = _bookController.getSelectedItemID();
     _noteList.reloadItems(*bookID, useCached);
     redrawNotePreview();
 }
@@ -126,7 +127,7 @@ void TUI::redrawNotePreview() {
     }
 }
 
-void TUI::resetFocus() { _bookList.getComponent()->TakeFocus(); }
+void TUI::resetFocus() { _bookModel.getComponent()->TakeFocus(); }
 
 void TUI::handleMessage(const std::string& message) {
     // TODO: resolve problem with setting same string in _bottomLine after InputEntered
@@ -151,7 +152,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         updateNotesAndPreview();
     } break;
     case tui::Event::NoteChanged: {
-        if (auto bookID = _bookList.getSelectedID(); bookID) {
+        if (auto bookID = _bookController.getSelectedItemID(); bookID) {
             _noteList.cacheIndex(*bookID);
             redrawNotePreview();
         }

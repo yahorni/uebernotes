@@ -6,30 +6,35 @@
 #include <string>
 #include <utility>
 
-namespace linux::tui {
+namespace linux::tui::book {
 
-BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
-    : _storage(storage),
-      _eventQueue(eventQueue),
-      _menuController(eventQueue) {
-    auto bookMenuOption = ftxui::MenuOption::Vertical();
+ftxui::Element View::getElement(ftxui::Component& menu, int paneSize) const {
+    using namespace ftxui;  // NOLINT
+    return vbox({
+               hcenter(bold(text("Books"))),  // consider using "window"
+               separator(),                   //
+               menu->Render(),                //
+           }) |
+           borderDecorator(menu->Focused()) | size(WIDTH, EQUAL, paneSize);
+}
 
-    // set events
-    bookMenuOption.on_change = [&]() {
-        _eventQueue->push(Event::BookChanged, std::format("Selected book: {}", *_menuController.getSelectedItemID()));
+void Controller::configureComponentOption(ftxui::MenuOption& option) {
+    option.on_change = [&]() {
+        _eventQueue->push(Event::BookChanged, std::format("Selected book: {}", *getSelectedItemID()));
     };
-    bookMenuOption.on_enter = [&]() { _eventQueue->push(Event::PostScreenEvent, "", ftxui::Event::ArrowRight); };
+    option.on_enter = [&]() { _eventQueue->push(Event::PostScreenEvent, "", ftxui::Event::ArrowRight); };
+}
 
-    // set component
-    _bookMenu = _menuController.createMenu(bookMenuOption);
-    _bookMenu |= ftxui::FocusableWrapper();
+void Controller::configureComponent(ftxui::Component& menu) {
+    // make always focusable
+    menu |= ftxui::FocusableWrapper();
 
     // set keys
-    _bookMenu |= ftxui::IgnoreEvents({ftxui::Event::Tab, ftxui::Event::TabReverse});
-    _bookMenu |= ftxui::CatchEvent([&](ftxui::Event event) {
+    menu |= ftxui::IgnoreEvents({ftxui::Event::Tab, ftxui::Event::TabReverse});
+    menu |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Character('r')) {
             std::string message;
-            if (auto bookID = getSelectedID(); bookID) {
+            if (auto bookID = getSelectedItemID(); bookID) {
                 message = std::format("Refreshed book: {}", *bookID);
             } else {
                 message = "No book to refresh";
@@ -37,53 +42,29 @@ BookList::BookList(core::Storage* storage, EventQueue* eventQueue)
             _eventQueue->push(Event::RefreshBook, std::move(message));
             return true;
         } else if (event == ftxui::Event::Character('s')) {
-            if (_menuController.setSortType(SortField::Name)) {
-                _menuController.sortItems();
+            if (sortByField(SortOptions::Field::Name)) {
                 _eventQueue->push(Event::BookListUpdated, "Sort books by name");
             }
             return true;
         } else if (event == ftxui::Event::Character('S')) {
-            if (_menuController.setSortType(SortField::CreationTime)) {
-                _menuController.sortItems();
+            if (sortByField(SortOptions::Field::CreationTime)) {
                 _eventQueue->push(Event::BookListUpdated, "Sort books by date");
             }
             return true;
         } else if (event == ftxui::Event::Character('o')) {
-            bool ascending = _menuController.toggleSortOrder();
-            _menuController.sortItems();
-            _eventQueue->push(Event::BookListUpdated, std::format("Ascending books sort order: {}", ascending));
+            bool isAscending = toggleSortOrder();
+            _eventQueue->push(Event::BookListUpdated, std::format("Ascending books sort order: {}", isAscending));
             return true;
         } else if (event == ftxui::Event::Character('i')) {
-            bool enabled = _menuController.toggleShowID();
+            bool enabled = toggleShowID();
             _eventQueue->push(Event::BookListUpdated, std::format("Toggle books ID showing", enabled));
             return true;
         }
         return false;
     });
 
-
-    _bookMenu |= ftxui::EventHandler({ftxui::Event::Character('j')});
+    menu |= ftxui::EventHandler({ftxui::Event::Character('j')});
+    setComponent(menu);
 }
 
-void BookList::reset() { _menuController.resetIndex(); }
-
-std::optional<core::BookID> BookList::getSelectedID() const { return _menuController.getSelectedItemID(); }
-
-void BookList::reloadItems() {
-    const auto& books = _storage->getBooks();
-    _menuController.setItems(books);
-}
-
-const ftxui::Component& BookList::getComponent() const { return _bookMenu; }
-
-ftxui::Element BookList::getElement(int paneSize) const {
-    using namespace ftxui;
-    return vbox({
-               hcenter(bold(text("Books"))),  // consider using "window"
-               separator(),                   //
-               _bookMenu->Render(),           //
-           }) |
-           borderDecorator(_bookMenu->Focused()) | size(WIDTH, EQUAL, paneSize);
-}
-
-}  // namespace linux::tui
+}  // namespace linux::tui::book

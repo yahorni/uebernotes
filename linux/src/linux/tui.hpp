@@ -26,7 +26,10 @@ private:
 
     tui::EventQueue _eventQueue;
 
-    tui::BookList _bookList;
+    tui::book::View _bookView;
+    tui::book::Model _bookModel;
+    tui::book::Controller _bookController;
+
     tui::NoteList _noteList;
     tui::PreviewPane _previewPane;
     tui::HistoryPanel _historyPanel;

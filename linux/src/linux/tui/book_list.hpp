@@ -1,34 +1,31 @@
 #pragma once
 
-#include "linux/tui/event_queue.hpp"
-#include "linux/tui/menu_controller.hpp"
+#include "linux/tui/menu_mvc.hpp"
 
-#include <core/comparator.hpp>
-#include <core/storage.hpp>
+#include <core/book.hpp>
 
 #include <ftxui/component/component.hpp>
 
-namespace linux::tui {
+namespace linux::tui::book {
 
-class BookList {
+using Model = menu::Model<core::Book, core::BooksCache>;
+using ViewBase = menu::View<>;
+
+class View : public ViewBase {
 public:
-    BookList(core::Storage* storage, EventQueue* eventQueue);
+    using ViewBase::View;
 
-    std::optional<core::BookID> getSelectedID() const;
-    void reloadItems();
-    void reset();
-
-    // UI
-    const ftxui::Component& getComponent() const;
-    ftxui::Element getElement(int paneSize) const;
-
-private:
-    core::Storage* _storage{nullptr};
-    EventQueue* _eventQueue{nullptr};
-
-    MenuController<core::Book, core::BooksCache> _menuController;
-
-    ftxui::Component _bookMenu;
+    ftxui::Element getElement(ftxui::Component& menu, int paneSize) const override;
 };
 
-}  // namespace linux::tui
+using ControllerBase = menu::Controller<Model, View>;
+
+class Controller : public ControllerBase {
+public:
+    using ControllerBase::Controller;
+
+    void configureComponentOption(ftxui::MenuOption& option) override;
+    void configureComponent(ftxui::Component& menu) override;
+};
+
+}  // namespace linux::tui::book
