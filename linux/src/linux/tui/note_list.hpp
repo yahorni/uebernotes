@@ -1,37 +1,31 @@
 #pragma once
 
-#include "linux/tui/event_queue.hpp"
-#include "linux/tui/menu_controller.hpp"
+#include "linux/tui/menu_mvc.hpp"
 
-#include <core/storage.hpp>
+#include <core/note.hpp>
 
 #include <ftxui/component/component.hpp>
 
-#include <memory>
+namespace linux::tui::note {
 
-namespace linux::tui {
+using Model = menu::Model<core::Note, core::NotesCache>;
+using ViewBase = menu::View<true, core::BookID>;
 
-class NoteList {
+class View : public ViewBase {
 public:
-    NoteList(core::Storage* storage, EventQueue* eventQueue);
+    using ViewBase::View;
 
-    std::shared_ptr<core::Note> getSelectedItem() const;
-    std::optional<core::NoteID> getSelectedID() const;
-    void reloadItems(core::BookID bookID, bool useCached = true);
-    void cacheIndex(core::BookID bookID);
-    void reset();
-
-    // UI
-    const ftxui::Component& getComponent() const;
-    ftxui::Element getElement(int paneSize) const;
-
-private:
-    core::Storage* _storage{nullptr};
-    EventQueue* _eventQueue{nullptr};
-
-    MenuController<core::Note, core::NotesCache> _menuController;
-
-    ftxui::Component _noteMenu;
+    ftxui::Element getElement(ftxui::Component& menu, int paneSize) const override;
 };
 
-}  // namespace linux::tui
+using ControllerBase = menu::Controller<Model, View>;
+
+class Controller : public ControllerBase {
+public:
+    using ControllerBase::Controller;
+
+    void configureComponentOption(ftxui::MenuOption& option) override;
+    void configureComponent(ftxui::Component& menu) override;
+};
+
+}  // namespace linux::tui::note

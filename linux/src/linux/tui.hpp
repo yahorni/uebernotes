@@ -3,9 +3,9 @@
 #include "linux/tui/book_list.hpp"
 #include "linux/tui/bottom_line.hpp"
 #include "linux/tui/event_queue.hpp"
+#include "linux/tui/history_panel.hpp"
 #include "linux/tui/note_list.hpp"
 #include "linux/tui/preview_pane.hpp"
-#include "linux/tui/history_panel.hpp"
 
 #include <core/config.hpp>
 #include <core/storage.hpp>
@@ -26,11 +26,14 @@ private:
 
     tui::EventQueue _eventQueue;
 
-    tui::book::View _bookView;
     tui::book::Model _bookModel;
+    tui::book::View _bookView;
     tui::book::Controller _bookController;
 
-    tui::NoteList _noteList;
+    tui::note::Model _noteModel;
+    tui::note::View _noteView;
+    tui::note::Controller _noteController;
+
     tui::PreviewPane _previewPane;
     tui::HistoryPanel _historyPanel;
     tui::BottomLine _bottomLine;

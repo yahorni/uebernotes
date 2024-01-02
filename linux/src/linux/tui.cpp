@@ -21,10 +21,11 @@ namespace linux {
 TUI::TUI(const core::Config& config)
     : _storage{config},
       _bookController{&_eventQueue, _bookModel, _bookView},
-      _noteList{&_storage, &_eventQueue},
+      _noteController{&_eventQueue, _noteModel, _noteView},
       _previewPane{&_eventQueue},
       _bottomLine(&_eventQueue) {
     _bookController.createComponent();
+    _noteController.createComponent();
 }
 
 bool TUI::run() {
@@ -35,7 +36,7 @@ bool TUI::run() {
 
     auto panesContainer = Container::Vertical({Container::Horizontal({
                                                    _bookModel.getComponent(),
-                                                   _noteList.getComponent(),
+                                                   _noteModel.getComponent(),
                                                    _previewPane.getComponent(),
                                                }),
                                                _historyPanel.getComponent()});
@@ -92,7 +93,7 @@ bool TUI::run() {
         return vbox({
             hbox({
                 _bookView.getElement(_bookModel.getComponent(), listPaneSize),  //
-                _noteList.getElement(listPaneSize),                             //
+                _noteView.getElement(_noteModel.getComponent(), listPaneSize),  //
                 _previewPane.getElement(),                                      //
             }) | yflex,
             _historyPanel.getElement(historyPanelSize),
@@ -106,21 +107,33 @@ bool TUI::run() {
 
 void TUI::initComponents() {
     _bookView.resetIndex();
-    _noteList.reset();
+    _noteView.resetIndex();
     _previewPane.reset();
 
     _bookController.setItems(_storage.getBooks());
+
     updateNotesAndPreview();
 }
 
 void TUI::updateNotesAndPreview(bool useCached) {
     auto bookID = _bookController.getSelectedItemID();
-    _noteList.reloadItems(*bookID, useCached);
+
+    if (!useCached) {
+        _noteView.resetIndex(bookID);
+    }
+
+    const auto& notes = _storage.getNotesByBookID(*bookID, useCached);
+    _noteController.setItems(notes);
+
+    if (useCached) {
+        _noteView.restoreIndex(bookID);
+    }
+
     redrawNotePreview();
 }
 
 void TUI::redrawNotePreview() {
-    if (auto notePtr = _noteList.getSelectedItem(); notePtr) {
+    if (auto notePtr = _noteController.getSelectedItem(); notePtr) {
         _previewPane.setContent(notePtr->content);
     } else {
         _previewPane.reset();
@@ -153,7 +166,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
     } break;
     case tui::Event::NoteChanged: {
         if (auto bookID = _bookController.getSelectedItemID(); bookID) {
-            _noteList.cacheIndex(*bookID);
+            _noteView.cacheIndex(*bookID);
             redrawNotePreview();
         }
     } break;

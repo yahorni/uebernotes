@@ -19,18 +19,13 @@ ftxui::Element View::getElement(ftxui::Component& menu, int paneSize) const {
 }
 
 void Controller::configureComponentOption(ftxui::MenuOption& option) {
-    option.on_change = [&]() {
+    option.on_change = [this]() {
         _eventQueue->push(Event::BookChanged, std::format("Selected book: {}", *getSelectedItemID()));
     };
-    option.on_enter = [&]() { _eventQueue->push(Event::PostScreenEvent, "", ftxui::Event::ArrowRight); };
+    option.on_enter = [this]() { _eventQueue->push(Event::PostScreenEvent, "", ftxui::Event::ArrowRight); };
 }
 
 void Controller::configureComponent(ftxui::Component& menu) {
-    // make always focusable
-    menu |= ftxui::FocusableWrapper();
-
-    // set keys
-    menu |= ftxui::IgnoreEvents({ftxui::Event::Tab, ftxui::Event::TabReverse});
     menu |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Character('r')) {
             std::string message;
@@ -42,12 +37,12 @@ void Controller::configureComponent(ftxui::Component& menu) {
             _eventQueue->push(Event::RefreshBook, std::move(message));
             return true;
         } else if (event == ftxui::Event::Character('s')) {
-            if (sortByField(SortOptions::Field::Name)) {
+            if (sortByField(Sorter::Field::Name)) {
                 _eventQueue->push(Event::BookListUpdated, "Sort books by name");
             }
             return true;
         } else if (event == ftxui::Event::Character('S')) {
-            if (sortByField(SortOptions::Field::CreationTime)) {
+            if (sortByField(Sorter::Field::CreationTime)) {
                 _eventQueue->push(Event::BookListUpdated, "Sort books by date");
             }
             return true;
@@ -62,9 +57,6 @@ void Controller::configureComponent(ftxui::Component& menu) {
         }
         return false;
     });
-
-    menu |= ftxui::EventHandler({ftxui::Event::Character('j')});
-    setComponent(menu);
 }
 
 }  // namespace linux::tui::book

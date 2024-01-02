@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ftxui/component.hpp"
 #include "linux/tui/event_queue.hpp"
 
 #include <core/comparator.hpp>
@@ -24,7 +25,7 @@
 
 namespace linux::tui {
 
-class SortOptions {
+class Sorter {
 public:
     enum class Field {
         CreationTime,  // TODO: make it sort by time, not ID
@@ -55,17 +56,17 @@ public:
     void toggleOrder() { _isAscending = !_isAscending; }
 
     template<class EntityPtr>
-    bool sortItems(std::vector<EntityPtr>& items) {
+    bool sort(std::vector<EntityPtr>& items) {
         switch (_field) {
-        case SortOptions::Field::CreationTime:
-        case SortOptions::Field::UpdateTime: {
+        case Sorter::Field::CreationTime:
+        case Sorter::Field::UpdateTime: {
             if (_isAscending) {
                 std::sort(items.begin(), items.end(), core::SharedPtrExtension::CompareID<>());
             } else {
                 std::sort(items.begin(), items.end(), core::SharedPtrExtension::CompareID<std::greater<void>>());
             }
         } break;
-        case SortOptions::Field::Name:
+        case Sorter::Field::Name:
         default: {
             if (_isAscending) {
                 std::sort(items.begin(), items.end(), core::SharedPtrExtension::CompareName<>());
@@ -88,8 +89,10 @@ namespace menu {
 template<typename Entity, typename Container>
 class Model {
 public:
+    using EntityID = decltype(Entity::id);
     using EntityPtr = std::shared_ptr<Entity>;
     using ContainerType = Container;
+    using ItemsType = std::vector<EntityPtr>;
 
     Model() = default;
     Model(const Model&) = delete;
@@ -102,7 +105,7 @@ public:
     void setComponent(ftxui::Component menu) { _menu = menu; }
 
     // items
-    std::optional<decltype(Entity::id)> getItemID(int index) const {
+    std::optional<EntityID> getItemID(int index) const {
         if (_items.size()) {
             return _items.at(index)->id;
         }
@@ -116,38 +119,36 @@ public:
         return nullptr;
     }
 
-    const std::vector<EntityPtr>& getItems() const { return _items; }
+    const ItemsType& getItems() const { return _items; }
 
     void setItems(const Container& items) {
         _items.clear();
         _items = std::vector<EntityPtr>{items.begin(), items.end()};
-        _sortOptions.sortItems<EntityPtr>(_items);
+        _sorter.sort<EntityPtr>(_items);
     }
 
     // sorting
-    const SortOptions& getSortOptions() const { return _sortOptions; }
-
-    bool sortByField(SortOptions::Field field) {
-        if (!_sortOptions.setField(field)) {
+    bool sortByField(Sorter::Field field) {
+        if (!_sorter.setField(field)) {
             return false;
         }
-        _sortOptions.sortItems<EntityPtr>(_items);
+        _sorter.sort<EntityPtr>(_items);
         return true;
     }
 
     bool toggleSortOrder() {
-        _sortOptions.toggleOrder();
-        _sortOptions.sortItems<EntityPtr>(_items);
-        return _sortOptions.getOrder();
+        _sorter.toggleOrder();
+        _sorter.sort<EntityPtr>(_items);
+        return _sorter.getOrder();
     }
 
 private:
-    std::vector<EntityPtr> _items;
-    SortOptions _sortOptions;
+    ItemsType _items;
+    Sorter _sorter;
     ftxui::Component _menu;
 };
 
-template<typename CacheKey = int, bool UseIndexCache = false>
+template<bool UseIndexCache = false, typename CacheKey = int>
 class View {
 public:
     View() = default;
@@ -170,7 +171,7 @@ public:
 
     void clear() { _options.clear(); }
 
-    void addItem(std::string id, std::string name) {
+    void addItem(std::string_view id, std::string_view name) {
         if (_showID) {
             _options.emplace_back(std::format("[{}] {}", id, name));
         } else {
@@ -186,7 +187,9 @@ public:
 
     void cacheIndex(CacheKey key) { _indecesCache[key] = _selectedIndex; }
 
-    void restoreIndex(CacheKey key) { _selectedIndex = _indecesCache.count(key) ? _indecesCache.at(key) : 0; }
+    void restoreIndex(std::optional<CacheKey> key) {
+        _selectedIndex = (key && _indecesCache.count(*key)) ? _indecesCache.at(*key) : 0;
+    }
 
     void resetIndex(std::optional<CacheKey> keyToReset = std::nullopt) {
         _selectedIndex = 0;
@@ -230,12 +233,24 @@ public:
     Controller& operator=(Controller&&) = delete;
     virtual ~Controller() = default;
 
+    virtual void configureComponentOption(ftxui::MenuOption& option) = 0;
+    virtual void configureComponent(ftxui::Component& menu) = 0;
+
     void createComponent() {
+        // DO NOT move it in constructor, there are virtual functions calls
+
         auto option = ftxui::MenuOption::Vertical();
         configureComponentOption(option);
         auto menu = _view.createComponent(option);
         configureComponent(menu);
 
+        // make always focusable
+        menu |= ftxui::FocusableWrapper();
+
+        // set keys
+        menu |= ftxui::IgnoreEvents({ftxui::Event::Tab, ftxui::Event::TabReverse});
+
+        // add g/G command to scroll begin/end
         menu |= ftxui::CatchEvent([this](ftxui::Event event) {
             if (event == ftxui::Event::Character('g')) {
                 _eventQueue->push(Event::PostScreenEvent, "", ftxui::Event::Home);
@@ -246,15 +261,18 @@ public:
             }
             return false;
         });
+
+        menu |= ftxui::EventHandler({ftxui::Event::Character('j')});
+        _model.setComponent(std::move(menu));
     }
 
-    virtual void configureComponentOption(ftxui::MenuOption& option) = 0;
-    virtual void configureComponent(ftxui::Component& menu) = 0;
-
-    using ModelID = std::result_of_t<decltype (&Model::getItemID)(Model, int)>;
-    ModelID getSelectedItemID() const { return _model.getItemID(_view.getSelectedIndex()); }
+    std::optional<typename Model::EntityID> getSelectedItemID() const {
+        return _model.getItemID(_view.getSelectedIndex());
+    }
 
     Model::EntityPtr getSelectedItem() const { return _model.getItem(_view.getSelectedIndex()); }
+
+    const Model::ItemsType& getItems() const { return _model.getItems(); }
 
     void setItems(const Model::ContainerType& items) {
         _view.resetIndex();
@@ -262,9 +280,7 @@ public:
         updateNames();
     }
 
-    void setComponent(ftxui::Component menu) { _model.setComponent(std::move(menu)); }
-
-    bool sortByField(SortOptions::Field field) {
+    bool sortByField(Sorter::Field field) {
         if (_model.sortByField(field)) {
             updateNames();
             return true;
