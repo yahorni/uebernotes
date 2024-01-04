@@ -1,6 +1,6 @@
 #pragma once
 
-#include "linux/tui/event_queue.hpp"
+#include "linux/tui/communicator.hpp"
 
 #include <ftxui/component/component.hpp>
 
@@ -16,10 +16,11 @@ public:
         Command
     };
 
-    explicit BottomLine(EventQueue* eventQueue);
+    explicit BottomLine(Communicator& eventQueue);
 
     void setMessage(std::string message);
     bool isInputActive() const;
+    const std::string& getLastInput() const;
     void setMode(BottomLine::Mode mode);
 
     // UI
@@ -27,10 +28,9 @@ public:
     ftxui::Element getElement() const;
 
 private:
-    EventQueue* _eventQueue{nullptr};
-
     std::string _statusBuffer = "Welcome to uebernotes";
     std::string _inputBuffer;
+    std::string _lastInput;
     mutable std::string _inputPlaceholder;
     Mode _mode = Mode::Status;
 

@@ -13,12 +13,11 @@
 
 namespace ftxui {
 
-template<typename T>
-using OptionalRef = std::optional<std::reference_wrapper<const T>>;
-
 // TODO:
 // add horizontal scroll
 // mouse scroll support
+// test that it's working not only as a one-time created object
+// and use it without creating a new instance on each Render()
 class PagerArea : public Node {
 public:
     PagerArea(const std::string& content, int& shift, bool& wrap)
@@ -114,7 +113,7 @@ private:
             }
         }
 
-        maxLineLength = maxLength > maxLineLength ? maxLength : maxLineLength;
+        maxLineLength = std::max(maxLength, maxLineLength);
     }
 
     void calculateShift() {
@@ -128,6 +127,9 @@ private:
 
     int& _shift;
     bool& _wrap;
+
+    template<typename T>
+    using OptionalRef = std::optional<std::reference_wrapper<const T>>;
 
     OptionalRef<std::string> _stringContent;
     OptionalRef<std::vector<std::string>> _vectorContent;

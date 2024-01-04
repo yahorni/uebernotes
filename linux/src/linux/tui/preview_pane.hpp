@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ftxui/component.hpp"
-#include "linux/tui/event_queue.hpp"
 
 #include <core/note.hpp>
 
@@ -13,25 +12,27 @@ namespace linux::tui {
 
 class PreviewPane {
 public:
-    explicit PreviewPane(EventQueue* eventQueue)
-        : _eventQueue(eventQueue) {
-        _notePreview = ftxui::Pager(_noteContent, _previewShift, _wrapLines);
+    // TODO: pass note ptr here or through set...() method
+    PreviewPane() { _notePreview = ftxui::Pager(_noteContent, _previewShift, _wrapLines); }
+
+    void resetShift() {
+        _previewShift = 0;
     }
 
-    void reset() {
-        _previewShift = 0;
+    void clearContent() {
+        resetShift();
         _noteContent.clear();
     }
 
     void setContent(const std::string& content) {
-        _previewShift = 0;
+        resetShift();
         _noteContent = content;
     }
 
     // UI
     const ftxui::Component& getComponent() const { return _notePreview; }
     ftxui::Element getElement() const {
-        using namespace ftxui;
+        using namespace ftxui;  // NOLINT
         return vbox({
                    hcenter(bold(text("Preview"))),           // consider using "window"
                    separator(),                              //
@@ -41,8 +42,6 @@ public:
     }
 
 private:
-    EventQueue* _eventQueue{nullptr};
-
     int _previewShift = 0;
     bool _wrapLines = true;
 

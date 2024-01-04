@@ -23,6 +23,8 @@ core-tests: build-test-deps
 
 ### linux
 
+pkg/uebernotes: linux
+
 linux: build-linux-deps
 	cmake -S . -B linux/build
 	cd linux/build && make -j uebernotes
@@ -48,7 +50,7 @@ tests: core-tests linux-tests
 run: pkg/uebernotes
 	@pkg/uebernotes
 
-run-clean: pkg/uebernotes
+run-nodb: pkg/uebernotes
 	rm -rf non-existant-database.sqlite
 	@pkg/uebernotes -d non-existant-database.sqlite
 

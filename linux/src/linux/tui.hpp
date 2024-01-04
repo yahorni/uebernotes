@@ -2,7 +2,7 @@
 
 #include "linux/tui/book_list.hpp"
 #include "linux/tui/bottom_line.hpp"
-#include "linux/tui/event_queue.hpp"
+#include "linux/tui/communicator.hpp"
 #include "linux/tui/history_panel.hpp"
 #include "linux/tui/note_list.hpp"
 #include "linux/tui/preview_pane.hpp"
@@ -11,8 +11,6 @@
 #include <core/storage.hpp>
 
 #include <ftxui/screen/screen.hpp>
-
-#include <string>
 
 namespace linux {
 
@@ -29,7 +27,7 @@ public:
 private:
     core::Storage _storage;
 
-    tui::EventQueue _eventQueue;
+    tui::Communicator _communicator;
 
     tui::book::Model _bookModel;
     tui::book::View _bookView;
@@ -43,13 +41,16 @@ private:
     tui::HistoryPanel _historyPanel;
     tui::BottomLine _bottomLine;
 
-    void initComponents();
-    void updateNotesAndPreview(bool useCached = true);
-    void redrawNotePreview();
+    // Model
+    void updateBooksModel(bool reload = false);
+    void updateNotesModel(bool reload = false);
+    void updatePreviewModel();
+    //
+
     void resetFocus();
 
-    void handleCommand(ftxui::ScreenInteractive& screen);
-    void handleMessage(const std::string& message);
+    void handleCommands(ftxui::ScreenInteractive& screen);
+    void handleNotifications();
 };
 
 }  // namespace linux

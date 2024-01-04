@@ -22,10 +22,13 @@ TUI::TUI(const core::Config& config)
     : _storage{config},
       _bookController{_bookModel, _bookView},
       _noteController{_noteModel, _noteView},
-      _previewPane{&_eventQueue},
-      _bottomLine(&_eventQueue) {
-    _bookController.createComponent(_eventQueue);
-    _noteController.createComponent(_eventQueue);
+      _bottomLine{_communicator} {
+    _bookController.createComponent(_communicator);
+    _noteController.createComponent(_communicator);
+
+    updateBooksModel();
+    updateNotesModel();
+    updatePreviewModel();
 }
 
 bool TUI::run() {
@@ -46,7 +49,7 @@ bool TUI::run() {
             screen.ExitLoopClosure()();
             return true;
         } else if (event == Event::Character('R')) {
-            _eventQueue.push(tui::Event::RefreshAll, "Refreshed books and notes");
+            _communicator.cmdPush(tui::Command::RefreshAll);
             return true;
         } else if (event == Event::Character('/')) {
             _bottomLine.setMode(tui::BottomLine::Mode::Search);
@@ -76,17 +79,16 @@ bool TUI::run() {
 
     auto container = Container::Vertical({panesContainerWithEvents, _bottomLine.getComponent()});
 
-    initComponents();
-
     auto renderer = Renderer(container, [&] {
-        Log::debug("render, events: {}", _eventQueue.size());
+        Log::debug("render, cmds={}, ntfs={}", _communicator.cmdSize(), _communicator.ntfSize());
 
         auto winSize = Terminal::Size();
         if (winSize.dimx < minWinSize.dimx || winSize.dimy < minWinSize.dimy) {
             return paragraph(std::format("too small window: {}x{}", winSize.dimx, winSize.dimy));
         }
 
-        handleCommand(screen);
+        handleCommands(screen);
+        handleNotifications();
         // TODO: updateViews();
         // separate view logic from controllers
 
@@ -107,119 +109,110 @@ bool TUI::run() {
     return true;
 }
 
-void TUI::initComponents() {
-    _bookView.resetIndex();
-    _noteView.resetIndex();
-    _previewPane.reset();
+// Model section
 
+void TUI::updateBooksModel(bool reload) {
+    if (reload) {
+        _storage.loadBooksToCache();
+    }
     _bookController.setItems(_storage.getBooks());
-
-    updateNotesAndPreview();
 }
 
-void TUI::updateNotesAndPreview(bool useCached) {
-    auto bookID = _bookController.getSelectedItemID();
-
-    if (!useCached) {
-        _noteView.resetIndex(bookID);
+void TUI::updateNotesModel(bool reload) {
+    if (const auto& bookID = _bookController.getSelectedItemID(); bookID) {
+        if (reload) {
+            _storage.loadNotesToCache(*bookID);
+        }
+        _noteController.setItems(_storage.getNotesByBookID(*bookID));
     }
-
-    const auto& notes = _storage.getNotesByBookID(*bookID, useCached);
-    _noteController.setItems(notes);
-
-    if (useCached) {
-        _noteView.restoreIndex(bookID);
-    }
-
-    redrawNotePreview();
 }
 
-void TUI::redrawNotePreview() {
+void TUI::updatePreviewModel() {
     if (auto notePtr = _noteController.getSelectedItem(); notePtr) {
         _previewPane.setContent(notePtr->content);
     } else {
-        _previewPane.reset();
+        _previewPane.clearContent();
     }
 }
+
+////////////////
 
 void TUI::resetFocus() { _bookModel.getComponent()->TakeFocus(); }
 
-void TUI::handleMessage(const std::string& message) {
-    // TODO: resolve problem with setting same string in _bottomLine after InputEntered
-    _bottomLine.setMessage(message);
-    _historyPanel.addMessage(std::string(message));
-    Log::info("{}", message);
+void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
+    // FIXME: restore note index during scrolling in book menu
+    while (!_communicator.cmdEmpty()) {
+        auto [command, data] = _communicator.cmdPop();
+
+        switch (command) {
+        case tui::Command::UIEvent: {
+            auto screenEvent{std::any_cast<ftxui::Event>(data)};
+            screen.PostEvent(screenEvent);
+        } break;
+
+        case tui::Command::UpdateBook: {
+            updateNotesModel();
+            updatePreviewModel();
+        } break;
+        case tui::Command::UpdateNote: {
+            updatePreviewModel();
+        } break;
+
+        case tui::Command::RefreshAll: {
+            updateBooksModel(true);
+            updateNotesModel();
+            updatePreviewModel();
+
+            // view
+            _bookView.resetIndex();
+            _noteView.resetIndex();
+        } break;
+        case tui::Command::RefreshBook: {
+            updateNotesModel(true);
+            updatePreviewModel();
+
+            // view
+            _noteView.resetIndex();
+        } break;
+        case tui::Command::RefreshNote: {
+            updatePreviewModel();
+        } break;
+
+        case tui::Command::InputEntered: {
+            // TODO: handle input
+            auto input = _bottomLine.getLastInput();
+
+            // view
+            resetFocus();
+        } break;
+        case tui::Command::InputCanceled: {
+            // view
+            resetFocus();
+        } break;
+
+        case tui::Command::OpenEditor: {
+            // TODO
+        } break;
+
+        default: {
+            // TODO: add map with command names
+            Log::warning("Unhandled command: {}", static_cast<int>(command));
+        } break;
+        }
+    }
 }
 
-void TUI::handleCommand(ftxui::ScreenInteractive& screen) {
-    if (_eventQueue.empty()) {
-        return;
-    }
+void TUI::handleNotifications() {
+    while (!_communicator.ntfEmpty()) {
+        auto message = _communicator.ntfPop();
 
-    auto [event, message, data] = _eventQueue.pop();
-
-    if (!message.empty()) {
-        Log::debug("Event message: {}", message);
-    }
-
-    switch (event) {
-    case tui::Event::BookChanged: {
-        updateNotesAndPreview();
-    } break;
-    case tui::Event::NoteChanged: {
-        if (auto bookID = _bookController.getSelectedItemID(); bookID) {
-            _noteView.cacheIndex(*bookID);
-            redrawNotePreview();
+        if (!message.empty()) {
+            Log::debug("Notification: {}", message);
         }
-    } break;
 
-    case tui::Event::BookListUpdated: {
-        updateNotesAndPreview();
-    } break;
-    case tui::Event::NoteListUpdated: {
-        redrawNotePreview();
-    } break;
-
-    case tui::Event::UpdateStatus: {
-        auto message{std::any_cast<std::string>(data)};
-        handleMessage(message);
-    } break;
-    case tui::Event::PostScreenEvent: {
-        auto screenEvent{std::any_cast<ftxui::Event>(data)};
-        screen.PostEvent(screenEvent);
-    } break;
-    case tui::Event::InputEntered: {
-        // TODO: handle input
-        auto input{std::any_cast<std::string>(data)};
+        Log::info("{}", message);
+        _bottomLine.setMessage(message);
         _historyPanel.addMessage(std::move(message));
-        resetFocus();
-    } break;
-    case tui::Event::InputCanceled: {
-        resetFocus();
-    } break;
-
-    case tui::Event::RefreshAll: {
-        handleMessage(message);
-        _storage.loadStorage();
-        initComponents();
-    } break;
-    case tui::Event::RefreshBook: {
-        handleMessage(message);
-        updateNotesAndPreview(true);
-    } break;
-    case tui::Event::RefreshNote: {
-        handleMessage(message);
-        redrawNotePreview();
-    } break;
-
-    case tui::Event::OpenEditor: {
-        handleMessage(message);
-    } break;
-
-    default: {
-        // TODO: add map with event names
-        Log::warning("Unhandled event: {}", static_cast<int>(event));
-    } break;
     }
 }
 

@@ -34,7 +34,7 @@ public:
     NotePtr getNote(NoteID noteID) const;
 
     void removeBook(BookID bookID);
-    void removeBookNotes(BookID bookID);
+    void removeNotesForBook(BookID bookID);
     void removeNote(NoteID noteID);
 
     const bool isActive;
@@ -48,17 +48,19 @@ private:
 class Storage {
 public:
     explicit Storage(const Config& config);
-    ~Storage();
-
-    void loadStorage();
-
     Storage(const Storage&) = delete;
     Storage& operator=(const Storage&) = delete;
     Storage(Storage&&) = delete;
     Storage& operator=(Storage&&) = delete;
+    ~Storage();
+
+    void load();
+
+    void loadBooksToCache();
+    void loadNotesToCache(BookID bookID);
 
     BooksCache getBooks() const;
-    NotesCache getNotesByBookID(BookID bookID, bool useCached = false) const;
+    NotesCache getNotesByBookID(BookID bookID) const;
 
     std::optional<BookID> createBook(Book&& book);
     BookPtr loadBook(BookID bookID) const;

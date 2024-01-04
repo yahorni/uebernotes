@@ -8,31 +8,49 @@
 
 namespace linux::tui {
 
-BottomLine::BottomLine(EventQueue* eventQueue)
-    : _eventQueue(eventQueue) {
+BottomLine::BottomLine(Communicator& communicator) {
     auto inputOption = ftxui::InputOption();
     inputOption.multiline = false;
     inputOption.on_enter = [&]() {
+        if (_mode == Mode::Status) {
+            Log::error("Input received in Status mode");
+            _inputBuffer.clear();
+            communicator.cmdPush(Command::InputCanceled);
+            return;
+        }
+
         if (!_inputBuffer.empty()) {
-            std::string statusPrefix;
             switch (_mode) {
             case Mode::Search:
-                statusPrefix = "Search: ";
+                _statusBuffer = std::format("Search: {}", _inputBuffer);
                 break;
             case Mode::Command:
-                statusPrefix = "Command: ";
+                _statusBuffer = std::format("Command: {}", _inputBuffer);
                 break;
-            case Mode::Status:
-                Log::error("Input received in Status mode");
-                _inputBuffer.clear();
-                return;
+            default:
+                break;
             }
 
-            _statusBuffer = statusPrefix + _inputBuffer;
-            _eventQueue->push(Event::InputEntered, std::string(_statusBuffer), _inputBuffer);
+            _lastInput = std::move(_inputBuffer);
             _inputBuffer.clear();
+
+            communicator.cmdPush(Command::InputEntered);
+            communicator.ntfPush(std::string(_statusBuffer));
+        } else {
+            switch (_mode) {
+            case Mode::Search:
+                _statusBuffer = "Empty search";
+                break;
+            case Mode::Command:
+                _statusBuffer = "Empty command";
+                break;
+            default:
+                break;
+            }
+            communicator.cmdPush(Command::InputCanceled);
+            communicator.ntfPush(std::string(_statusBuffer));
         }
-        // TODO: add messages if input is empty
+
         _mode = Mode::Status;
     };
 
@@ -40,11 +58,12 @@ BottomLine::BottomLine(EventQueue* eventQueue)
     inputOption.placeholder = &_inputPlaceholder;
 
     _inputLine = ftxui::Input(inputOption);
-    _inputLine |= ftxui::CatchEvent([this](ftxui::Event event) {
+    _inputLine |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Escape) {
             setMode(Mode::Status);
             _inputBuffer.clear();
-            _eventQueue->push(Event::InputCanceled, "Canceled input");
+            communicator.cmdPush(Command::InputCanceled);
+            communicator.ntfPush("Canceled input");
             return true;
         }
         return false;
@@ -54,18 +73,18 @@ BottomLine::BottomLine(EventQueue* eventQueue)
     // TODO: disable cursor during typing
 }
 
-void BottomLine::setMessage(std::string message) {
-    _statusBuffer = std::move(message);
-}
+void BottomLine::setMessage(std::string message) { _statusBuffer = std::move(message); }
 
 bool BottomLine::isInputActive() const { return _mode == Mode::Search || _mode == Mode::Command; }
+
+const std::string& BottomLine::getLastInput() const { return _lastInput; }
 
 void BottomLine::setMode(BottomLine::Mode mode) { _mode = mode; }
 
 const ftxui::Component& BottomLine::getComponent() const { return _inputLine; }
 
 ftxui::Element BottomLine::getElement() const {
-    using namespace ftxui;
+    using namespace ftxui;  // NOLINT
 
     Element line;
     switch (_mode) {

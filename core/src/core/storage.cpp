@@ -59,13 +59,13 @@ NotePtr StorageCache::getNote(NoteID noteID) const {
 }
 
 void StorageCache::removeBook(BookID bookID) {
-    removeBookNotes(bookID);
+    removeNotesForBook(bookID);
 
     auto bookIter = findBookInCache(_booksCache, bookID);
     _booksCache.erase(bookIter);
 }
 
-void StorageCache::removeBookNotes(BookID bookID) {
+void StorageCache::removeNotesForBook(BookID bookID) {
     for (auto it = _notesCache.begin(); it != _notesCache.end();) {
         if ((*it)->bookID == bookID) {
             it = _notesCache.erase(it);
@@ -85,37 +85,37 @@ void StorageCache::removeNote(NoteID noteID) {
 Storage::Storage(const Config& config)
     : _db(new Database{config.database}),
       _cache(config.useCaching) {
-    loadStorage();
+    load();
 }
 
+// need to have definition here for database
 Storage::~Storage() = default;
 
-void Storage::loadStorage() {
+void Storage::load() {
     if (_cache.isActive) {
-        _cache.initialize(_db->loadBooks(), _db->loadAllNotes());
+        loadBooksToCache();
     }
+}
+
+void Storage::loadBooksToCache() { _cache.initialize(_db->loadBooks(), _db->loadAllNotes()); }
+
+void Storage::loadNotesToCache(BookID bookID) {
+    auto notes = _db->loadNotesByBookID(bookID);
+    _cache.removeNotesForBook(bookID);
+    _cache.addNotes(notes);
 }
 
 BooksCache Storage::getBooks() const {
     if (_cache.isActive) {
         return _cache.getBooks();
     }
-
     return _db->loadBooks();
 }
 
-NotesCache Storage::getNotesByBookID(BookID bookID, bool useCached) const {
+NotesCache Storage::getNotesByBookID(BookID bookID) const {
     if (_cache.isActive) {
-        if (useCached) {
-            return _cache.getNotesByBookID(bookID);
-        }
-
-        auto notes = _db->loadNotesByBookID(bookID);
-        _cache.removeBookNotes(bookID);
-        _cache.addNotes(notes);
-        return notes;
+        return _cache.getNotesByBookID(bookID);
     }
-
     return _db->loadNotesByBookID(bookID);
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ftxui/component.hpp"
-#include "linux/tui/event_queue.hpp"
+#include "linux/tui/communicator.hpp"
 
 #include <core/comparator.hpp>
 
@@ -151,6 +151,8 @@ private:
 template<bool UseIndexCache = false, typename CacheKey = int>
 class View {
 public:
+    using CacheKeyType = CacheKey;
+
     View() = default;
     View(const View&) = delete;
     View(View&&) = delete;
@@ -167,11 +169,9 @@ public:
         return ftxui::Menu(&_options, &_selectedIndex, std::move(menuOption));
     }
 
-    // items
+    // options
 
-    void clear() { _options.clear(); }
-
-    void addItem(std::string_view id, std::string_view name) {
+    void addOption(std::string_view id, std::string_view name) {
         if (_showID) {
             _options.emplace_back(std::format("[{}] {}", id, name));
         } else {
@@ -179,7 +179,9 @@ public:
         }
     }
 
-    // index (with cache)
+    void clear() { _options.clear(); }
+
+    // index (optional caching)
 
     using Index = int;
 
@@ -232,16 +234,16 @@ public:
     Controller& operator=(Controller&&) = delete;
     virtual ~Controller() = default;
 
-    virtual void configureComponentOption(ftxui::MenuOption& option, EventQueue& eventQueue) = 0;
-    virtual void configureComponent(ftxui::Component& menu, EventQueue& eventQueue) = 0;
+    virtual void configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) = 0;
+    virtual void configureComponent(ftxui::Component& menu, Communicator& communicator) = 0;
 
-    void createComponent(EventQueue& eventQueue) {
+    void createComponent(Communicator& communicator) {
         // DO NOT move it in constructor, there are virtual functions calls
 
         auto option = ftxui::MenuOption::Vertical();
-        configureComponentOption(option, eventQueue);
+        configureComponentOption(option, communicator);
         auto menu = _view.createComponent(option);
-        configureComponent(menu, eventQueue);
+        configureComponent(menu, communicator);
 
         // make always focusable
         menu |= ftxui::FocusableWrapper();
@@ -252,10 +254,10 @@ public:
         // add g/G command to scroll begin/end
         menu |= ftxui::CatchEvent([&](ftxui::Event event) {
             if (event == ftxui::Event::Character('g')) {
-                eventQueue.push(Event::PostScreenEvent, "", ftxui::Event::Home);
+                communicator.cmdPush(Command::UIEvent, ftxui::Event::Home);
                 return true;
             } else if (event == ftxui::Event::Character('G')) {
-                eventQueue.push(Event::PostScreenEvent, "", ftxui::Event::End);
+                communicator.cmdPush(Command::UIEvent, ftxui::Event::End);
                 return true;
             }
             return false;
@@ -277,6 +279,10 @@ public:
         _view.resetIndex();
         _model.setItems(items);
         updateNames();
+    }
+
+    void cacheKey(View::CacheKeyType cacheKey) {
+        _view.cacheIndex(cacheKey);
     }
 
     bool sortByField(Sorter::Field field) {
@@ -303,7 +309,7 @@ private:
     void updateNames() {
         _view.clear();
         for (const auto& item : _model.getItems()) {
-            _view.addItem(std::to_string(item->id), item->getName());
+            _view.addOption(std::to_string(item->id), item->getName());
         }
     }
 

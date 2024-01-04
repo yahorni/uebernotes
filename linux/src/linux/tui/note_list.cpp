@@ -1,7 +1,7 @@
 #include "linux/tui/note_list.hpp"
 
 #include "ftxui/component.hpp"
-#include "linux/tui/event_queue.hpp"
+#include "linux/logger.hpp"
 
 #include <core/types.hpp>
 
@@ -20,16 +20,26 @@ ftxui::Element View::getElement(ftxui::Component& menu, int paneSize) const {
            borderDecorator(menu->Focused()) | size(WIDTH, EQUAL, paneSize);
 }
 
-void Controller::configureComponentOption(ftxui::MenuOption& option, EventQueue& eventQueue) {
+void Controller::configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) {
     option.elements_postfix = [&] { return getItems().size() ? ftxui::linefiller('-') : ftxui::emptyElement(); };
 
     option.on_change = [&]() {
-        eventQueue.push(Event::NoteChanged, std::format("Selected note: {}", *getSelectedItemID()));
+        cacheKey(getSelectedItem()->bookID);
+        communicator.cmdPush(Command::UpdateNote);
+        Log::debug("Selected note: {}", *getSelectedItemID());
     };
-    option.on_enter = [&]() { eventQueue.push(Event::OpenEditor, "TODO: Open editor", getSelectedItemID()); };
+    option.on_enter = [&]() {
+        // TODO: add the same for Enter on PreviewPane
+        if (getItems().size()) {
+            communicator.cmdPush(Command::OpenEditor);
+            communicator.ntfPush("TODO: Open editor");
+        } else {
+            communicator.ntfPush("No selected note to open");
+        }
+    };
 }
 
-void Controller::configureComponent(ftxui::Component& menu, EventQueue& eventQueue) {
+void Controller::configureComponent(ftxui::Component& menu, Communicator& communicator) {
     menu |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Character('r')) {
             std::string message;
@@ -38,25 +48,30 @@ void Controller::configureComponent(ftxui::Component& menu, EventQueue& eventQue
             } else {
                 message = "No note to refresh";
             }
-            eventQueue.push(Event::RefreshNote, std::move(message));
+            communicator.cmdPush(Command::RefreshNote);
+            communicator.ntfPush(std::move(message));
             return true;
         } else if (event == ftxui::Event::Character('s')) {
             if (sortByField(Sorter::Field::Name)) {
-                eventQueue.push(Event::NoteListUpdated, "Sort notes by name");
+                communicator.cmdPush(Command::UpdateNote);
+                communicator.ntfPush("Sort notes by name");
             }
             return true;
         } else if (event == ftxui::Event::Character('S')) {
             if (sortByField(Sorter::Field::CreationTime)) {
-                eventQueue.push(Event::NoteListUpdated, "Sort notes by date");
+                communicator.cmdPush(Command::UpdateNote);
+                communicator.ntfPush("Sort notes by creation time");
             }
             return true;
         } else if (event == ftxui::Event::Character('o')) {
             bool isAscending = toggleSortOrder();
-            eventQueue.push(Event::NoteListUpdated, std::format("Ascending notes sort order: {}", isAscending));
+            communicator.cmdPush(Command::UpdateNote);
+            communicator.ntfPush(std::format("Ascending notes sort order: {}", isAscending));
             return true;
         } else if (event == ftxui::Event::Character('i')) {
             bool enabled = toggleShowID();
-            eventQueue.push(Event::NoteListUpdated, std::format("Show notes ID: {}", enabled));
+            communicator.cmdPush(Command::UpdateNote);
+            communicator.ntfPush(std::format("Show notes ID: {}", enabled));
             return true;
         }
         return false;

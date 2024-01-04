@@ -24,8 +24,8 @@ class Controller : public ControllerBase {
 public:
     using ControllerBase::Controller;
 
-    void configureComponentOption(ftxui::MenuOption& option, EventQueue& eventQueue) override;
-    void configureComponent(ftxui::Component& menu, EventQueue& eventQueue) override;
+    void configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) override;
+    void configureComponent(ftxui::Component& menu, Communicator& communicator) override;
 };
 
 }  // namespace linux::tui::note
