@@ -20,16 +20,16 @@ ftxui::Element View::getElement(ftxui::Component& menu, int paneSize) const {
            borderDecorator(menu->Focused()) | size(WIDTH, EQUAL, paneSize);
 }
 
-void Controller::configureComponentOption(ftxui::MenuOption& option) {
-    option.elements_postfix = [this] { return getItems().size() ? ftxui::linefiller('-') : ftxui::emptyElement(); };
+void Controller::configureComponentOption(ftxui::MenuOption& option, EventQueue& eventQueue) {
+    option.elements_postfix = [&] { return getItems().size() ? ftxui::linefiller('-') : ftxui::emptyElement(); };
 
-    option.on_change = [this]() {
-        _eventQueue->push(Event::NoteChanged, std::format("Selected note: {}", *getSelectedItemID()));
+    option.on_change = [&]() {
+        eventQueue.push(Event::NoteChanged, std::format("Selected note: {}", *getSelectedItemID()));
     };
-    option.on_enter = [this]() { _eventQueue->push(Event::OpenEditor, "TODO: Open editor", getSelectedItemID()); };
+    option.on_enter = [&]() { eventQueue.push(Event::OpenEditor, "TODO: Open editor", getSelectedItemID()); };
 }
 
-void Controller::configureComponent(ftxui::Component& menu) {
+void Controller::configureComponent(ftxui::Component& menu, EventQueue& eventQueue) {
     menu |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Character('r')) {
             std::string message;
@@ -38,25 +38,25 @@ void Controller::configureComponent(ftxui::Component& menu) {
             } else {
                 message = "No note to refresh";
             }
-            _eventQueue->push(Event::RefreshNote, std::move(message));
+            eventQueue.push(Event::RefreshNote, std::move(message));
             return true;
         } else if (event == ftxui::Event::Character('s')) {
             if (sortByField(Sorter::Field::Name)) {
-                _eventQueue->push(Event::NoteListUpdated, "Sort notes by name");
+                eventQueue.push(Event::NoteListUpdated, "Sort notes by name");
             }
             return true;
         } else if (event == ftxui::Event::Character('S')) {
             if (sortByField(Sorter::Field::CreationTime)) {
-                _eventQueue->push(Event::NoteListUpdated, "Sort notes by date");
+                eventQueue.push(Event::NoteListUpdated, "Sort notes by date");
             }
             return true;
         } else if (event == ftxui::Event::Character('o')) {
             bool isAscending = toggleSortOrder();
-            _eventQueue->push(Event::NoteListUpdated, std::format("Ascending notes sort order: {}", isAscending));
+            eventQueue.push(Event::NoteListUpdated, std::format("Ascending notes sort order: {}", isAscending));
             return true;
         } else if (event == ftxui::Event::Character('i')) {
             bool enabled = toggleShowID();
-            _eventQueue->push(Event::NoteListUpdated, std::format("Show notes ID: {}", enabled));
+            eventQueue.push(Event::NoteListUpdated, std::format("Show notes ID: {}", enabled));
             return true;
         }
         return false;

@@ -20,12 +20,12 @@ namespace linux {
 
 TUI::TUI(const core::Config& config)
     : _storage{config},
-      _bookController{&_eventQueue, _bookModel, _bookView},
-      _noteController{&_eventQueue, _noteModel, _noteView},
+      _bookController{_bookModel, _bookView},
+      _noteController{_noteModel, _noteView},
       _previewPane{&_eventQueue},
       _bottomLine(&_eventQueue) {
-    _bookController.createComponent();
-    _noteController.createComponent();
+    _bookController.createComponent(_eventQueue);
+    _noteController.createComponent(_eventQueue);
 }
 
 bool TUI::run() {
@@ -86,7 +86,9 @@ bool TUI::run() {
             return paragraph(std::format("too small window: {}x{}", winSize.dimx, winSize.dimy));
         }
 
-        handleCommands(screen);
+        handleCommand(screen);
+        // TODO: updateViews();
+        // separate view logic from controllers
 
         int listPaneSize = winSize.dimx / 4;
         int historyPanelSize = winSize.dimy / 4;
@@ -149,7 +151,7 @@ void TUI::handleMessage(const std::string& message) {
     Log::info("{}", message);
 }
 
-void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
+void TUI::handleCommand(ftxui::ScreenInteractive& screen) {
     if (_eventQueue.empty()) {
         return;
     }

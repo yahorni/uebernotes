@@ -7,6 +7,12 @@
 
 namespace linux::tui {
 
+// TODO: separate to 3 categories:
+// Notifications - just to show in status
+//   + update Model for BottomLine
+//   + set View for BottomLine to update
+// Commands - change something through controllers
+// UIEvent - pass UIEvent to screen object
 enum class Event {
     // Notifications
     BookChanged,
@@ -43,6 +49,7 @@ enum class Event {
     OpenEditor,
 };
 
+// TODO: rename it
 class EventQueue {
 public:
     using Value = std::tuple<Event, std::string, std::any>;

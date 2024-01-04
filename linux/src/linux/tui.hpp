@@ -16,6 +16,11 @@
 
 namespace linux {
 
+// TODO: separate:
+// model load/updates with storage
+// controller with handleCommand
+// view with updateViews
+
 class TUI {
 public:
     explicit TUI(const core::Config& config);
@@ -43,7 +48,7 @@ private:
     void redrawNotePreview();
     void resetFocus();
 
-    void handleCommands(ftxui::ScreenInteractive& screen);
+    void handleCommand(ftxui::ScreenInteractive& screen);
     void handleMessage(const std::string& message);
 };
 

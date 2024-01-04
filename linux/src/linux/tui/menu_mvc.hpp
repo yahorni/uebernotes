@@ -222,9 +222,8 @@ private:
 template<typename Model, typename View>
 class Controller {
 public:
-    explicit Controller(EventQueue* eventQueue, Model& model, View& view)
-        : _eventQueue(eventQueue),
-          _model(model),
+    explicit Controller(Model& model, View& view)
+        : _model(model),
           _view(view) {}
 
     Controller(const Controller&) = delete;
@@ -233,16 +232,16 @@ public:
     Controller& operator=(Controller&&) = delete;
     virtual ~Controller() = default;
 
-    virtual void configureComponentOption(ftxui::MenuOption& option) = 0;
-    virtual void configureComponent(ftxui::Component& menu) = 0;
+    virtual void configureComponentOption(ftxui::MenuOption& option, EventQueue& eventQueue) = 0;
+    virtual void configureComponent(ftxui::Component& menu, EventQueue& eventQueue) = 0;
 
-    void createComponent() {
+    void createComponent(EventQueue& eventQueue) {
         // DO NOT move it in constructor, there are virtual functions calls
 
         auto option = ftxui::MenuOption::Vertical();
-        configureComponentOption(option);
+        configureComponentOption(option, eventQueue);
         auto menu = _view.createComponent(option);
-        configureComponent(menu);
+        configureComponent(menu, eventQueue);
 
         // make always focusable
         menu |= ftxui::FocusableWrapper();
@@ -251,12 +250,12 @@ public:
         menu |= ftxui::IgnoreEvents({ftxui::Event::Tab, ftxui::Event::TabReverse});
 
         // add g/G command to scroll begin/end
-        menu |= ftxui::CatchEvent([this](ftxui::Event event) {
+        menu |= ftxui::CatchEvent([&](ftxui::Event event) {
             if (event == ftxui::Event::Character('g')) {
-                _eventQueue->push(Event::PostScreenEvent, "", ftxui::Event::Home);
+                eventQueue.push(Event::PostScreenEvent, "", ftxui::Event::Home);
                 return true;
             } else if (event == ftxui::Event::Character('G')) {
-                _eventQueue->push(Event::PostScreenEvent, "", ftxui::Event::End);
+                eventQueue.push(Event::PostScreenEvent, "", ftxui::Event::End);
                 return true;
             }
             return false;
@@ -299,9 +298,6 @@ public:
         updateNames();
         return enabled;
     }
-
-protected:
-    EventQueue* _eventQueue{nullptr};
 
 private:
     void updateNames() {
