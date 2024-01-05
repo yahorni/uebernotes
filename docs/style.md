@@ -5,6 +5,7 @@
 | class               | CamelCase               |
 | method              | pascalCase              |
 | argument            | pascalCase              |
+| class field         | pascalCase              |
 | private class field | underscore + pascalCase |
 
 in cpp file header is put on the first line, then one blank line followed by other includes

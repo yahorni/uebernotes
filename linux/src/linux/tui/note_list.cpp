@@ -24,7 +24,6 @@ void Controller::configureComponentOption(ftxui::MenuOption& option, Communicato
     option.elements_postfix = [&] { return getItems().size() ? ftxui::linefiller('-') : ftxui::emptyElement(); };
 
     option.on_change = [&]() {
-        cacheKey(getSelectedItem()->bookID);
         communicator.cmdPush(Command::UpdateNote);
         Log::debug("Selected note: {}", *getSelectedItemID());
     };

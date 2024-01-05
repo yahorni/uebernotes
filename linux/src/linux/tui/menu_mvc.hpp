@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ftxui/component.hpp"
+#include "linux/logger.hpp"
 #include "linux/tui/communicator.hpp"
 
 #include <core/comparator.hpp>
@@ -12,7 +13,6 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -148,12 +148,40 @@ private:
     ftxui::Component _menu;
 };
 
-template<bool UseIndexCache = false, typename CacheKey = int>
+class IndexCache {
+public:
+    explicit IndexCache(int& selected)
+        : _selected(selected) {}
+
+    void add(int key) { _cache[key] = _selected; }
+
+    void restore(int key) { _selected = _cache.count(key) ? _cache.at(key) : 0; }
+
+    void reset(std::optional<int> keyToReset = std::nullopt) {
+        if (keyToReset) {
+            _cache.erase(*keyToReset);
+        } else {
+            _cache.clear();
+        }
+    }
+
+private:
+    int& _selected;
+    std::unordered_map<int, int> _cache;
+};
+
+template<bool UseIndexCache = false>
 class View {
 public:
-    using CacheKeyType = CacheKey;
+    // index cache
+    std::optional<IndexCache> cache;
 
-    View() = default;
+    View() {
+        if constexpr (UseIndexCache) {
+            cache.emplace(_selectedIndex);
+        }
+    }
+
     View(const View&) = delete;
     View(View&&) = delete;
     View& operator=(const View&) = delete;
@@ -170,7 +198,6 @@ public:
     }
 
     // options
-
     void addOption(std::string_view id, std::string_view name) {
         if (_showID) {
             _options.emplace_back(std::format("[{}] {}", id, name));
@@ -178,46 +205,22 @@ public:
             _options.emplace_back(name);
         }
     }
+    void clearOptions() { _options.clear(); }
+    std::size_t getOptionsSize() { return _options.size(); }
 
-    void clear() { _options.clear(); }
-
-    // index (optional caching)
-
-    using Index = int;
-
+    // index
     int getSelectedIndex() const { return _selectedIndex; }
+    void resetIndex() { _selectedIndex = 0; }
 
-    void cacheIndex(CacheKey key) { _indecesCache[key] = _selectedIndex; }
-
-    void restoreIndex(std::optional<CacheKey> key) {
-        _selectedIndex = (key && _indecesCache.count(*key)) ? _indecesCache.at(*key) : 0;
-    }
-
-    void resetIndex(std::optional<CacheKey> keyToReset = std::nullopt) {
-        _selectedIndex = 0;
-        if constexpr (UseIndexCache) {
-            if (keyToReset) {
-                _indecesCache.erase(*keyToReset);
-            } else {
-                _indecesCache.clear();
-            }
-        }
-    }
-
-    // other view options
-
+    // view options
     bool toggleShowID() {
         _showID = !_showID;
         return _showID;
     }
 
 private:
+    int _selectedIndex = 0;
     bool _showID = false;
-
-    Index _selectedIndex = 0;
-
-    std::unordered_map<CacheKey, Index> _indecesCache;
-
     std::vector<std::string> _options;
 };
 
@@ -275,14 +278,9 @@ public:
 
     const Model::ItemsType& getItems() const { return _model.getItems(); }
 
-    void setItems(const Model::ContainerType& items) {
+    void resetView() {
         _view.resetIndex();
-        _model.setItems(items);
         updateNames();
-    }
-
-    void cacheKey(View::CacheKeyType cacheKey) {
-        _view.cacheIndex(cacheKey);
     }
 
     bool sortByField(Sorter::Field field) {
@@ -307,7 +305,7 @@ public:
 
 private:
     void updateNames() {
-        _view.clear();
+        _view.clearOptions();
         for (const auto& item : _model.getItems()) {
             _view.addOption(std::to_string(item->id), item->getName());
         }

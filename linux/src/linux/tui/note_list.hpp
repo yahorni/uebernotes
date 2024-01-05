@@ -9,7 +9,7 @@
 namespace linux::tui::note {
 
 using Model = menu::Model<core::Note, core::NotesCache>;
-using ViewBase = menu::View<true, core::BookID>;
+using ViewBase = menu::View<true>;
 
 class View : public ViewBase {
 public:

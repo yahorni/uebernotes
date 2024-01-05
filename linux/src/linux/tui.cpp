@@ -23,12 +23,18 @@ TUI::TUI(const core::Config& config)
       _bookController{_bookModel, _bookView},
       _noteController{_noteModel, _noteView},
       _bottomLine{_communicator} {
+    // create components
     _bookController.createComponent(_communicator);
     _noteController.createComponent(_communicator);
 
+    // update component models
     updateBooksModel();
     updateNotesModel();
     updatePreviewModel();
+
+    // update component views
+    _bookController.resetView();
+    _noteController.resetView();
 }
 
 bool TUI::run() {
@@ -115,7 +121,7 @@ void TUI::updateBooksModel(bool reload) {
     if (reload) {
         _storage.loadBooksToCache();
     }
-    _bookController.setItems(_storage.getBooks());
+    _bookModel.setItems(_storage.getBooks());
 }
 
 void TUI::updateNotesModel(bool reload) {
@@ -123,7 +129,7 @@ void TUI::updateNotesModel(bool reload) {
         if (reload) {
             _storage.loadNotesToCache(*bookID);
         }
-        _noteController.setItems(_storage.getNotesByBookID(*bookID));
+        _noteModel.setItems(_storage.getNotesByBookID(*bookID));
     }
 }
 
@@ -151,30 +157,46 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         } break;
 
         case tui::Command::UpdateBook: {
+            // notes
             updateNotesModel();
+            _noteController.resetView();
+            _noteView.cache->restore(_bookView.getSelectedIndex());
+
+            // preview
             updatePreviewModel();
         } break;
         case tui::Command::UpdateNote: {
+            // notes
+            _noteView.cache->add(_bookView.getSelectedIndex());
+
+            // preview
             updatePreviewModel();
         } break;
 
         case tui::Command::RefreshAll: {
+            // books
             updateBooksModel(true);
-            updateNotesModel();
-            updatePreviewModel();
+            _bookController.resetView();
 
-            // view
-            _bookView.resetIndex();
-            _noteView.resetIndex();
+            // notes
+            updateNotesModel();
+            _noteController.resetView();
+            _noteView.cache->reset();
+
+            // preview
+            updatePreviewModel();
         } break;
         case tui::Command::RefreshBook: {
+            // notes
             updateNotesModel(true);
-            updatePreviewModel();
+            _noteController.resetView();
+            _noteView.cache->reset(*_bookController.getSelectedItemID());
 
-            // view
-            _noteView.resetIndex();
+            // preview
+            updatePreviewModel();
         } break;
         case tui::Command::RefreshNote: {
+            // preview
             updatePreviewModel();
         } break;
 
@@ -182,11 +204,11 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
             // TODO: handle input
             auto input = _bottomLine.getLastInput();
 
-            // view
+            // main
             resetFocus();
         } break;
         case tui::Command::InputCanceled: {
-            // view
+            // main
             resetFocus();
         } break;
 
@@ -207,10 +229,10 @@ void TUI::handleNotifications() {
         auto message = _communicator.ntfPop();
 
         if (!message.empty()) {
-            Log::debug("Notification: {}", message);
+            return;
         }
 
-        Log::info("{}", message);
+        Log::info("Notification: {}", message);
         _bottomLine.setMessage(message);
         _historyPanel.addMessage(std::move(message));
     }

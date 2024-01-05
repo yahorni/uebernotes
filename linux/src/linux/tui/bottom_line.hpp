@@ -10,11 +10,7 @@ namespace linux::tui {
 
 class BottomLine {
 public:
-    enum class Mode {
-        Status,
-        Search,
-        Command
-    };
+    enum class Mode { Status, Search, Command };
 
     explicit BottomLine(Communicator& eventQueue);
 
