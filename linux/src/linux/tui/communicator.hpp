@@ -36,7 +36,7 @@ public:
     std::queue<CommandData> _commands;
     //
     // TODO: replace with std::variant
-    void cmdPush(Command cmd, std::any data = std::any{});
+    void cmdPush(Command cmd, std::any&& data = std::any{});
     CommandData cmdPop();
     bool cmdEmpty();
     std::size_t cmdSize();

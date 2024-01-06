@@ -151,6 +151,7 @@
     + rewrite Event system, it's confusing on who and when should process events
     + separate UI logic from controllers logic
     + get rid of plain usage of IDs
+    + optional creation of database on startup. configurable
 + common:
   + project level cmake to build lib and linux client
 

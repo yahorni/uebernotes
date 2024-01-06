@@ -176,7 +176,8 @@ private:
         }
         return false;
     }
-    bool Focusable() const { return true; }
+
+    bool Focusable() const override { return true; }
 
     int& _shift;
     bool& _wrap;

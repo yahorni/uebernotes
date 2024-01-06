@@ -6,7 +6,7 @@ namespace linux::tui {
 
 // commands
 
-void Communicator::cmdPush(Command cmd, std::any data) {
+void Communicator::cmdPush(Command cmd, std::any&& data) {
     _commands.push(std::make_tuple(cmd, std::move(data)));
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "linux/tui/menu_mvc.hpp"
+#include "linux/tui/menu/mvc.hpp"
 
 #include <core/note.hpp>
 

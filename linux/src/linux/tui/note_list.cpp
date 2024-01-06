@@ -51,15 +51,16 @@ void Controller::configureComponent(ftxui::Component& component, Communicator& c
             communicator.ntfPush(std::move(message));
             return true;
         } else if (event == ftxui::Event::Character('s')) {
-            if (sortByField(Sorter::Field::Name)) {
-                communicator.cmdPush(Command::UpdateNote);
-                communicator.ntfPush("Sort notes by name");
-            }
-            return true;
-        } else if (event == ftxui::Event::Character('S')) {
-            if (sortByField(Sorter::Field::CreationTime)) {
-                communicator.cmdPush(Command::UpdateNote);
+            auto field = toggleSortField();
+            communicator.cmdPush(Command::UpdateNote);
+            switch (field) {
+            case menu::Sorter::Field::CreationTime:
+            case menu::Sorter::Field::UpdateTime:
                 communicator.ntfPush("Sort notes by creation time");
+                break;
+            case menu::Sorter::Field::Name:
+                communicator.ntfPush("Sort notes by name");
+                break;
             }
             return true;
         } else if (event == ftxui::Event::Character('o')) {

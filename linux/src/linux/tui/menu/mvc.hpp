@@ -1,90 +1,29 @@
 #pragma once
 
+#include "linux/tui/menu/index_cache.hpp"
+#include "linux/tui/menu/sorter.hpp"
+
 #include "ftxui/component.hpp"
 #include "linux/logger.hpp"
 #include "linux/tui/communicator.hpp"
 
-#include <core/comparator.hpp>
-
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_options.hpp>
 
-#include <algorithm>
-#include <functional>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
 // view <-> controller <-> model
+//              |
+//          user (tui)
 
 // TODO
 // rename file, maybe move
 // use detail namespace?
 
-namespace linux::tui {
-
-class Sorter {
-public:
-    enum class Field {
-        CreationTime,  // TODO: make it sort by time, not ID
-        UpdateTime,    // TODO: implement
-        Name,
-    };
-
-    Field getField() const { return _field; }
-
-    bool setField(Field field) {
-        if (_field == field) {
-            return false;
-        }
-        _field = field;
-        return true;
-    }
-
-    bool getOrder() const { return _isAscending; }
-
-    bool setOrder(bool isAscending) {
-        if (_isAscending == isAscending) {
-            return false;
-        }
-        _isAscending = isAscending;
-        return true;
-    }
-
-    void toggleOrder() { _isAscending = !_isAscending; }
-
-    template<class EntityPtr>
-    bool sort(std::vector<EntityPtr>& items) {
-        switch (_field) {
-        case Sorter::Field::CreationTime:
-        case Sorter::Field::UpdateTime: {
-            if (_isAscending) {
-                std::sort(items.begin(), items.end(), core::SharedPtrExtension::CompareID<>());
-            } else {
-                std::sort(items.begin(), items.end(), core::SharedPtrExtension::CompareID<std::greater<void>>());
-            }
-        } break;
-        case Sorter::Field::Name:
-        default: {
-            if (_isAscending) {
-                std::sort(items.begin(), items.end(), core::SharedPtrExtension::CompareName<>());
-            } else {
-                std::sort(items.begin(), items.end(), core::SharedPtrExtension::CompareName<std::greater<void>>());
-            }
-        } break;
-        }
-
-        return true;
-    }
-
-private:
-    Field _field = Field::CreationTime;
-    bool _isAscending = true;
-};
-
-namespace menu {
+namespace linux::tui::menu {
 
 template<typename Entity, typename Container>
 class Model {
@@ -124,11 +63,14 @@ public:
     void setItems(const Container& items) {
         _items.clear();
         _items = std::vector<EntityPtr>{items.begin(), items.end()};
+        // TODO: move sort to controller
         _sorter.sort<EntityPtr>(_items);
         Log::debug("set model items: {}", _items.size());
     }
 
     // sorting
+    menu::Sorter::Field getSortField() const { return _sorter.getField(); }
+
     bool sortByField(Sorter::Field field) {
         if (!_sorter.setField(field)) {
             return false;
@@ -138,6 +80,7 @@ public:
     }
 
     bool toggleSortOrder() {
+        // TODO: move toggle to controller, leave here only getSortOrder() or similar
         _sorter.toggleOrder();
         _sorter.sort<EntityPtr>(_items);
         return _sorter.getOrder();
@@ -147,28 +90,6 @@ private:
     ItemsType _items;
     Sorter _sorter;
     ftxui::Component _menu;
-};
-
-class IndexCache {
-public:
-    explicit IndexCache(int& selected)
-        : _selected(selected) {}
-
-    void add(int key) { _cache[key] = _selected; }
-
-    void restore(int key) { _selected = _cache.count(key) ? _cache.at(key) : 0; }
-
-    void remove(int keyToReset) {
-        _cache.erase(keyToReset);
-    }
-
-    void clear() {
-        _cache.clear();
-    }
-
-private:
-    int& _selected;
-    std::unordered_map<int, int> _cache;
 };
 
 template<bool UseIndexCache = false>
@@ -191,11 +112,19 @@ public:
     virtual ftxui::Element getElement(ftxui::Component& menu, int paneSize) const = 0;
 
     // UI component
-    ftxui::Component createComponent(ftxui::MenuOption menuOption) {
-        // FIXME: allow select without focusing
-        // now it sets focused item immediately to selected one
-        menuOption.focused_entry = &_selectedIndex;
-        return ftxui::Menu(&_options, &_selectedIndex, std::move(menuOption));
+    ftxui::Component createComponent(ftxui::MenuOption option) {
+        option.entries_option.transform = [](const ftxui::EntryState& state) {
+            ftxui::Element e = ftxui::text((state.active ? "> " : "  ") + state.label);
+            if (state.focused) {
+                e |= ftxui::inverted;
+            }
+            if (state.active) {
+                e |= ftxui::bold;
+            }
+            return e;
+        };
+
+        return ftxui::Menu(&_options, &_selectedIndex, std::move(option));
     }
 
     // options
@@ -294,6 +223,21 @@ public:
         return false;
     }
 
+    menu::Sorter::Field toggleSortField() {
+        menu::Sorter::Field field{};
+        switch (_model.getSortField()) {
+        case menu::Sorter::Field::CreationTime:
+        case menu::Sorter::Field::UpdateTime:
+            field = Sorter::Field::Name;
+            break;
+        case menu::Sorter::Field::Name:
+            field = Sorter::Field::CreationTime;
+            break;
+        }
+        sortByField(field);
+        return field;
+    }
+
     bool toggleSortOrder() {
         bool isAscending = _model.toggleSortOrder();
         updateNames();
@@ -319,5 +263,4 @@ private:
     View& _view;
 };
 
-}  // namespace menu
-}  // namespace linux::tui
+}  // namespace linux::tui::menu

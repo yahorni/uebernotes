@@ -39,15 +39,16 @@ void Controller::configureComponent(ftxui::Component& component, Communicator& c
             communicator.ntfPush(std::move(message));
             return true;
         } else if (event == ftxui::Event::Character('s')) {
-            if (sortByField(Sorter::Field::Name)) {
-                communicator.cmdPush(Command::UpdateBookWhenOrderChanged);
-                communicator.ntfPush("Sort books by name");
-            }
-            return true;
-        } else if (event == ftxui::Event::Character('S')) {
-            if (sortByField(Sorter::Field::CreationTime)) {
-                communicator.cmdPush(Command::UpdateBookWhenOrderChanged);
+            auto field = toggleSortField();
+            communicator.cmdPush(Command::UpdateBookWhenOrderChanged);
+            switch (field) {
+            case menu::Sorter::Field::CreationTime:
+            case menu::Sorter::Field::UpdateTime:
                 communicator.ntfPush("Sort books by creation time");
+                break;
+            case menu::Sorter::Field::Name:
+                communicator.ntfPush("Sort books by name");
+                break;
             }
             return true;
         } else if (event == ftxui::Event::Character('o')) {
