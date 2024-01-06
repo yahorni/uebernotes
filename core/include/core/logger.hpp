@@ -30,6 +30,8 @@ public:                                                                         
     LOG_CALLBACK(Warning, warning)
     LOG_CALLBACK(Error, error)
     LOG_CALLBACK(Fatal, fatal)
+
+#undef LOG_CALLBACK
 };
 
 }  // namespace core

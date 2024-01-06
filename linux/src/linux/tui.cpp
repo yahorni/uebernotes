@@ -26,15 +26,18 @@ TUI::TUI(const core::Config& config)
     // create components
     _bookController.createComponent(_communicator);
     _noteController.createComponent(_communicator);
+    _previewController.createComponent(_communicator);
 
-    // update component models
+    // books
     updateBooksModel();
-    updateNotesModel();
-    updatePreviewModel();
-
-    // update component views
     _bookController.resetView();
+
+    // notes
+    updateNotesModel();
     _noteController.resetView();
+
+    // preview
+    updatePreview();
 }
 
 bool TUI::run() {
@@ -46,7 +49,7 @@ bool TUI::run() {
     auto panesContainer = Container::Vertical({Container::Horizontal({
                                                    _bookModel.getComponent(),
                                                    _noteModel.getComponent(),
-                                                   _previewPane.getComponent(),
+                                                   _previewController.component(),
                                                }),
                                                _historyPanel.getComponent()});
 
@@ -104,7 +107,7 @@ bool TUI::run() {
             hbox({
                 _bookView.getElement(_bookModel.getComponent(), listPaneSize),  //
                 _noteView.getElement(_noteModel.getComponent(), listPaneSize),  //
-                _previewPane.getElement(),                                      //
+                _previewController.element(),                                   //
             }) | yflex,
             _historyPanel.getElement(historyPanelSize),
             _bottomLine.getElement(),
@@ -133,12 +136,9 @@ void TUI::updateNotesModel(bool reload) {
     }
 }
 
-void TUI::updatePreviewModel() {
-    if (auto notePtr = _noteController.getSelectedItem(); notePtr) {
-        _previewPane.setContent(notePtr->content);
-    } else {
-        _previewPane.clearContent();
-    }
+void TUI::updatePreview() {
+    auto notePtr = _noteController.getSelectedItem();
+    _previewController.setNote(notePtr);
 }
 
 ////////////////
@@ -149,6 +149,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
     // FIXME: restore note index during scrolling in book menu
     while (!_communicator.cmdEmpty()) {
         auto [command, data] = _communicator.cmdPop();
+        Log::debug("handling command: {}", command);
 
         switch (command) {
         case tui::Command::UIEvent: {
@@ -156,21 +157,30 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
             screen.PostEvent(screenEvent);
         } break;
 
-        case tui::Command::UpdateBook: {
+        case tui::Command::UpdateBookWhenOrderKept: {
             // notes
             updateNotesModel();
             _noteController.resetView();
             _noteView.cache->restore(_bookView.getSelectedIndex());
 
             // preview
-            updatePreviewModel();
+            updatePreview();
+        } break;
+        case tui::Command::UpdateBookWhenOrderChanged: {
+            // notes
+            updateNotesModel();
+            _noteController.resetView();
+            _noteView.cache->clear();
+
+            // preview
+            updatePreview();
         } break;
         case tui::Command::UpdateNote: {
             // notes
             _noteView.cache->add(_bookView.getSelectedIndex());
 
             // preview
-            updatePreviewModel();
+            updatePreview();
         } break;
 
         case tui::Command::RefreshAll: {
@@ -181,23 +191,23 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
             // notes
             updateNotesModel();
             _noteController.resetView();
-            _noteView.cache->reset();
+            _noteView.cache->clear();
 
             // preview
-            updatePreviewModel();
+            updatePreview();
         } break;
         case tui::Command::RefreshBook: {
             // notes
             updateNotesModel(true);
             _noteController.resetView();
-            _noteView.cache->reset(*_bookController.getSelectedItemID());
+            _noteView.cache->remove(_bookView.getSelectedIndex());
 
             // preview
-            updatePreviewModel();
+            updatePreview();
         } break;
         case tui::Command::RefreshNote: {
             // preview
-            updatePreviewModel();
+            updatePreview();
         } break;
 
         case tui::Command::InputEntered: {

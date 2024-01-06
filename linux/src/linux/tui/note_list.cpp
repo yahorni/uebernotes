@@ -10,14 +10,14 @@
 
 namespace linux::tui::note {
 
-ftxui::Element View::getElement(ftxui::Component& menu, int paneSize) const {
+ftxui::Element View::getElement(ftxui::Component& component, int paneSize) const {
     using namespace ftxui;  // NOLINT
     return vbox({
                hcenter(bold(text("Notes"))),  // consider using "window"
                separator(),                   //
-               menu->Render(),                //
+               component->Render(),           //
            }) |
-           borderDecorator(menu->Focused()) | size(WIDTH, EQUAL, paneSize);
+           borderDecorator(component->Focused()) | size(WIDTH, EQUAL, paneSize);
 }
 
 void Controller::configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) {
@@ -38,8 +38,8 @@ void Controller::configureComponentOption(ftxui::MenuOption& option, Communicato
     };
 }
 
-void Controller::configureComponent(ftxui::Component& menu, Communicator& communicator) {
-    menu |= ftxui::CatchEvent([&](ftxui::Event event) {
+void Controller::configureComponent(ftxui::Component& component, Communicator& communicator) {
+    component |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Character('r')) {
             std::string message;
             if (auto noteID = getSelectedItemID(); noteID) {

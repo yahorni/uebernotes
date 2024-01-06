@@ -35,6 +35,8 @@ public:
     LOG_LINUX(error, ERROR)
     LOG_LINUX(fatal, FATAL)
 
+#undef LOG_LINUX
+
     static void coreTrace(const char* msg);
     static void coreDebug(const char* msg);
     static void coreInfo(const char* msg);

@@ -14,6 +14,8 @@ LOG_CORE(Warning, WARNING)
 LOG_CORE(Error, ERROR)
 LOG_CORE(Fatal, FATAL)
 
+#undef LOG_CORE
+
 // TODO: setup options parsing and showing in help message
 // Options:
 // -v/--verbose

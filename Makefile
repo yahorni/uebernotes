@@ -50,13 +50,6 @@ tests: core-tests linux-tests
 run: pkg/uebernotes
 	@pkg/uebernotes
 
-run-nodb: pkg/uebernotes
-	rm -rf non-existant-database.sqlite
-	@pkg/uebernotes -d non-existant-database.sqlite
-
-run-help:
-	@pkg/uebernotes --help
-
 clean-core:
 	rm -rf core/build
 	rm -f pkg/libuebernotes-core.so

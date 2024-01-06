@@ -125,6 +125,7 @@ public:
         _items.clear();
         _items = std::vector<EntityPtr>{items.begin(), items.end()};
         _sorter.sort<EntityPtr>(_items);
+        Log::debug("set model items: {}", _items.size());
     }
 
     // sorting
@@ -157,12 +158,12 @@ public:
 
     void restore(int key) { _selected = _cache.count(key) ? _cache.at(key) : 0; }
 
-    void reset(std::optional<int> keyToReset = std::nullopt) {
-        if (keyToReset) {
-            _cache.erase(*keyToReset);
-        } else {
-            _cache.clear();
-        }
+    void remove(int keyToReset) {
+        _cache.erase(keyToReset);
+    }
+
+    void clear() {
+        _cache.clear();
     }
 
 private:
@@ -238,7 +239,7 @@ public:
     virtual ~Controller() = default;
 
     virtual void configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) = 0;
-    virtual void configureComponent(ftxui::Component& menu, Communicator& communicator) = 0;
+    virtual void configureComponent(ftxui::Component& component, Communicator& communicator) = 0;
 
     void createComponent(Communicator& communicator) {
         // DO NOT move it in constructor, there are virtual functions calls
@@ -274,6 +275,8 @@ public:
         return _model.getItemID(_view.getSelectedIndex());
     }
 
+    // TODO: error prone while no data integrity between Model and View
+    // Probably worth add size check
     Model::EntityPtr getSelectedItem() const { return _model.getItem(_view.getSelectedIndex()); }
 
     const Model::ItemsType& getItems() const { return _model.getItems(); }
@@ -309,6 +312,7 @@ private:
         for (const auto& item : _model.getItems()) {
             _view.addOption(std::to_string(item->id), item->getName());
         }
+        Log::debug("update view names, size: {}", _view.getOptionsSize());
     }
 
     Model& _model;

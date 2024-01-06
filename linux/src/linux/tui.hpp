@@ -37,15 +37,17 @@ private:
     tui::note::View _noteView;
     tui::note::Controller _noteController;
 
-    tui::PreviewPane _previewPane;
+    // tui::PreviewPane _previewPane;
+    tui::preview::Controller _previewController;
+
     tui::HistoryPanel _historyPanel;
     tui::BottomLine _bottomLine;
 
     // Model
     void updateBooksModel(bool reload = false);
     void updateNotesModel(bool reload = false);
-    void updatePreviewModel();
-    //
+
+    void updatePreview();
 
     void resetFocus();
 
