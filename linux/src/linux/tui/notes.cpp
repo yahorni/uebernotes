@@ -21,7 +21,7 @@ ftxui::Element View::getElement(ftxui::Component& component, int paneSize) const
 }
 
 void Controller::configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) {
-    option.elements_postfix = [&] { return getItems().size() ? ftxui::linefiller('-') : ftxui::emptyElement(); };
+    option.elements_postfix = [&] { return getItemsAmount() ? ftxui::linefiller('-') : ftxui::emptyElement(); };
 
     option.on_change = [&]() {
         communicator.cmdPush(Command::UpdateNote);
@@ -29,7 +29,7 @@ void Controller::configureComponentOption(ftxui::MenuOption& option, Communicato
     };
     option.on_enter = [&]() {
         // TODO: add the same for Enter on PreviewPane
-        if (getItems().size()) {
+        if (getItemsAmount()) {
             communicator.cmdPush(Command::OpenEditor);
             communicator.ntfPush("TODO: Open editor");
         } else {

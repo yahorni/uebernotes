@@ -4,6 +4,7 @@
 #include "linux/tui/bottom_line.hpp"
 #include "linux/tui/communicator.hpp"
 #include "linux/tui/history_panel.hpp"
+#include "linux/tui/menu/index_cache.hpp"
 #include "linux/tui/notes.hpp"
 #include "linux/tui/preview.hpp"
 
@@ -29,23 +30,17 @@ private:
 
     tui::Communicator _communicator;
 
-    tui::books::Model _bookModel;
-    tui::books::View _bookView;
     tui::books::Controller _bookController;
-
-    tui::notes::Model _noteModel;
-    tui::notes::View _noteView;
     tui::notes::Controller _noteController;
-
     tui::preview::Controller _previewController;
 
     tui::HistoryPanel _historyPanel;
     tui::BottomLine _bottomLine;
 
-    // Model
+    tui::menu::IndexCache<core::BookID> _noteIndexCache;
+
     void updateBooksModel(bool reload = false);
     void updateNotesModel(bool reload = false);
-
     void updatePreview();
 
     void resetFocus();

@@ -20,23 +20,15 @@ namespace linux {
 
 TUI::TUI(const core::Config& config)
     : _storage{config},
-      _bookController{_bookModel, _bookView},
-      _noteController{_noteModel, _noteView},
-      _bottomLine{_communicator} {
+      _bottomLine{_communicator},
+      _noteIndexCache(_noteController.createIndexCache<core::BookID>()) {
     // create components
     _bookController.createComponent(_communicator);
     _noteController.createComponent(_communicator);
     _previewController.createComponent(_communicator);
 
-    // books
     updateBooksModel();
-    _bookController.resetView();
-
-    // notes
     updateNotesModel();
-    _noteController.resetView();
-
-    // preview
     updatePreview();
 }
 
@@ -47,8 +39,8 @@ bool TUI::run() {
     ftxui::Dimensions minWinSize{80, 20};
 
     auto panesContainer = Container::Vertical({Container::Horizontal({
-                                                   _bookModel.getComponent(),
-                                                   _noteModel.getComponent(),
+                                                   _bookController.component(),
+                                                   _noteController.component(),
                                                    _previewController.component(),
                                                }),
                                                _historyPanel.getComponent()});
@@ -98,16 +90,14 @@ bool TUI::run() {
 
         handleCommands(screen);
         handleNotifications();
-        // TODO: updateViews();
-        // separate view logic from controllers
 
         int listPaneSize = winSize.dimx / 4;
         int historyPanelSize = winSize.dimy / 4;
         return vbox({
             hbox({
-                _bookView.getElement(_bookModel.getComponent(), listPaneSize),  //
-                _noteView.getElement(_noteModel.getComponent(), listPaneSize),  //
-                _previewController.element(),                                   //
+                _bookController.element(listPaneSize),  //
+                _noteController.element(listPaneSize),  //
+                _previewController.element(),           //
             }) | yflex,
             _historyPanel.getElement(historyPanelSize),
             _bottomLine.getElement(),
@@ -118,13 +108,11 @@ bool TUI::run() {
     return true;
 }
 
-// Model section
-
 void TUI::updateBooksModel(bool reload) {
     if (reload) {
         _storage.loadBooksToCache();
     }
-    _bookModel.setItems(_storage.getBooks());
+    _bookController.setItems(_storage.getBooks());
 }
 
 void TUI::updateNotesModel(bool reload) {
@@ -132,7 +120,7 @@ void TUI::updateNotesModel(bool reload) {
         if (reload) {
             _storage.loadNotesToCache(*bookID);
         }
-        _noteModel.setItems(_storage.getNotesByBookID(*bookID));
+        _noteController.setItems(_storage.getNotesByBookID(*bookID));
     }
 }
 
@@ -141,9 +129,7 @@ void TUI::updatePreview() {
     _previewController.setNote(notePtr);
 }
 
-////////////////
-
-void TUI::resetFocus() { _bookModel.getComponent()->TakeFocus(); }
+void TUI::resetFocus() { _bookController.component()->TakeFocus(); }
 
 void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
     // FIXME: restore note index during scrolling in book menu
@@ -160,8 +146,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         case tui::Command::UpdateBookWhenOrderKept: {
             // notes
             updateNotesModel();
-            _noteController.resetView();
-            _noteView.cache->restore(_bookView.getSelectedIndex());
+            _noteIndexCache.restore(_bookController.getSelectedIndex());
 
             // preview
             updatePreview();
@@ -169,15 +154,14 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         case tui::Command::UpdateBookWhenOrderChanged: {
             // notes
             updateNotesModel();
-            _noteController.resetView();
-            _noteView.cache->clear();
+            _noteIndexCache.clear();
 
             // preview
             updatePreview();
         } break;
         case tui::Command::UpdateNote: {
             // notes
-            _noteView.cache->add(_bookView.getSelectedIndex());
+            _noteIndexCache.add(_bookController.getSelectedIndex());
 
             // preview
             updatePreview();
@@ -186,12 +170,10 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         case tui::Command::RefreshAll: {
             // books
             updateBooksModel(true);
-            _bookController.resetView();
 
             // notes
             updateNotesModel();
-            _noteController.resetView();
-            _noteView.cache->clear();
+            _noteIndexCache.clear();
 
             // preview
             updatePreview();
@@ -199,8 +181,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         case tui::Command::RefreshBook: {
             // notes
             updateNotesModel(true);
-            _noteController.resetView();
-            _noteView.cache->remove(_bookView.getSelectedIndex());
+            _noteIndexCache.remove(_bookController.getSelectedIndex());
 
             // preview
             updatePreview();

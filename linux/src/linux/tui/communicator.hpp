@@ -29,6 +29,7 @@ enum class Command {
 };
 
 // TODO: rename it
+// add separate push/pop for UIEvent to get rid of std::any
 class Communicator {
 public:
     // Commands

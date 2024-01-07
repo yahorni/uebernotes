@@ -11,10 +11,9 @@ namespace linux::tui::menu {
 class Sorter {
 public:
     enum class Field {
-        CreationTime,  // TODO: make it sort by time, not ID
+        CreationTime,  // TODO: make it sort by actual time, not ID
         UpdateTime,    // TODO: implement
         Name,
-        // TODO: add unsorted by default
     };
 
     Field getField() const { return _field; }
@@ -27,7 +26,7 @@ public:
         return true;
     }
 
-    bool getOrder() const { return _isAscending; }
+    bool isAscending() const { return _isAscending; }
 
     bool setOrder(bool isAscending) {
         if (_isAscending == isAscending) {
@@ -36,8 +35,6 @@ public:
         _isAscending = isAscending;
         return true;
     }
-
-    void toggleOrder() { _isAscending = !_isAscending; }
 
     template<class EntityPtr>
     bool sort(std::vector<EntityPtr>& items) {

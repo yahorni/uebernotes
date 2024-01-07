@@ -1,6 +1,8 @@
 #pragma once
 
-#include "linux/tui/menu/mvc.hpp"
+#include "linux/tui/menu/model.hpp"
+#include "linux/tui/menu/view.hpp"
+#include "linux/tui/menu/controller.hpp"
 
 #include <core/note.hpp>
 
@@ -9,11 +11,11 @@
 namespace linux::tui::notes {
 
 using Model = menu::Model<core::Note, core::NotesCache>;
-using ViewBase = menu::View<true>;
 
-class View : public ViewBase {
+// TODO: try CRTP instead of inheritance
+class View : public menu::View {
 public:
-    using ViewBase::View;
+    using menu::View::View;
 
     ftxui::Element getElement(ftxui::Component& menu, int paneSize) const override;
 };
