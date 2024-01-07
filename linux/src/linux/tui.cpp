@@ -20,12 +20,12 @@ namespace linux {
 
 TUI::TUI(const core::Config& config)
     : _storage{config},
-      _bottomLine{_communicator},
       _noteIndexCache(_noteController.createIndexCache<core::BookID>()) {
     // create components
     _bookController.createComponent(_communicator);
     _noteController.createComponent(_communicator);
     _previewController.createComponent(_communicator);
+    _statusController.createComponent(_communicator);
 
     updateBooksModel();
     updateNotesModel();
@@ -53,12 +53,12 @@ bool TUI::run() {
             _communicator.cmdPush(tui::Command::RefreshAll);
             return true;
         } else if (event == Event::Character('/')) {
-            _bottomLine.setMode(tui::BottomLine::Mode::Search);
-            _bottomLine.getComponent()->TakeFocus();
+            _statusController.setMode(tui::status::Mode::Search);
+            _statusController.component()->TakeFocus();
             return true;
         } else if (event == Event::Character(':')) {
-            _bottomLine.setMode(tui::BottomLine::Mode::Command);
-            _bottomLine.getComponent()->TakeFocus();
+            _statusController.setMode(tui::status::Mode::Command);
+            _statusController.component()->TakeFocus();
             return true;
         } else if (event == Event::Character('t')) {
             if (!_historyPanel.toggle()) {
@@ -78,10 +78,10 @@ bool TUI::run() {
         return false;
     });
 
-    auto container = Container::Vertical({panesContainerWithEvents, _bottomLine.getComponent()});
+    auto container = Container::Vertical({panesContainerWithEvents, _statusController.component()});
 
     auto renderer = Renderer(container, [&] {
-        Log::debug("render, cmds={}, ntfs={}", _communicator.cmdSize(), _communicator.ntfSize());
+        Log::debug("Render, cmds={}, ntfs={}", _communicator.cmdSize(), _communicator.ntfSize());
 
         auto winSize = Terminal::Size();
         if (winSize.dimx < minWinSize.dimx || winSize.dimy < minWinSize.dimy) {
@@ -100,7 +100,7 @@ bool TUI::run() {
                 _previewController.element(),           //
             }) | yflex,
             _historyPanel.getElement(historyPanelSize),
-            _bottomLine.getElement(),
+            _statusController.element(),
         });
     });
 
@@ -135,7 +135,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
     // FIXME: restore note index during scrolling in book menu
     while (!_communicator.cmdEmpty()) {
         auto [command, data] = _communicator.cmdPop();
-        Log::debug("handling command: {}", command);
+        Log::debug("Handling command: {}", command);
 
         switch (command) {
         case tui::Command::UIEvent: {
@@ -193,7 +193,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
 
         case tui::Command::InputEntered: {
             // TODO: handle input
-            auto input = _bottomLine.getLastInput();
+            auto input = _statusController.getLastInput();
 
             // main
             resetFocus();
@@ -217,15 +217,15 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
 
 void TUI::handleNotifications() {
     while (!_communicator.ntfEmpty()) {
-        auto message = _communicator.ntfPop();
+        auto notification = _communicator.ntfPop();
+        Log::info("Handling notification: '{}'", notification);
 
-        if (!message.empty()) {
+        if (notification.empty()) {
             return;
         }
 
-        Log::info("Notification: {}", message);
-        _bottomLine.setMessage(message);
-        _historyPanel.addMessage(std::move(message));
+        _statusController.setMessage(notification);
+        _historyPanel.addMessage(std::move(notification));
     }
 }
 

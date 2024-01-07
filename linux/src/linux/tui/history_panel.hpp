@@ -2,8 +2,8 @@
 
 #include <ftxui/component/component.hpp>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace linux::tui {
 

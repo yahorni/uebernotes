@@ -49,7 +49,7 @@ public:
         _items.clear();
         _items = std::vector<EntityPtr>{items.begin(), items.end()};
         _sorter.sort<EntityPtr>(_items);
-        Log::debug("set model items: {}", _items.size());
+        Log::debug("Set menu model items: {}", _items.size());
     }
 
     // sorting

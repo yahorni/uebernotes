@@ -1,12 +1,12 @@
 #pragma once
 
 #include "linux/tui/books.hpp"
-#include "linux/tui/bottom_line.hpp"
 #include "linux/tui/communicator.hpp"
 #include "linux/tui/history_panel.hpp"
 #include "linux/tui/menu/index_cache.hpp"
 #include "linux/tui/notes.hpp"
 #include "linux/tui/preview.hpp"
+#include "linux/tui/status.hpp"
 
 #include <core/config.hpp>
 #include <core/storage.hpp>
@@ -35,7 +35,7 @@ private:
     tui::preview::Controller _previewController;
 
     tui::HistoryPanel _historyPanel;
-    tui::BottomLine _bottomLine;
+    tui::status::Controller _statusController;
 
     tui::menu::IndexCache<core::BookID> _noteIndexCache;
 

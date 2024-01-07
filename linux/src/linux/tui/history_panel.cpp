@@ -17,12 +17,17 @@ HistoryPanel::HistoryPanel() {
 void HistoryPanel::addMessage(std::string&& message) {
     if (_messageHistory.size() == _maxHistorySize) {
         _messageHistory.erase(_messageHistory.begin());
+        Log::debug("Pop message from history");
     }
 
     _messageHistory.push_back(std::move(message));
+    Log::debug("Push message to history");
 }
 
-bool HistoryPanel::toggle() { _enabled = !_enabled; return _enabled; }
+bool HistoryPanel::toggle() {
+    _enabled = !_enabled;
+    return _enabled;
+}
 
 const ftxui::Component& HistoryPanel::getComponent() const { return _historyPager; }
 

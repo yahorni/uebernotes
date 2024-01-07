@@ -26,9 +26,11 @@ public:
     Controller& operator=(Controller&&) = delete;
     virtual ~Controller() = default;
 
+protected:
     virtual void configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) = 0;
     virtual void configureComponent(ftxui::Component& component, Communicator& communicator) = 0;
 
+public:
     void createComponent(Communicator& communicator) {
         // DO NOT move it in constructor, there are virtual functions calls
 
@@ -128,7 +130,7 @@ private:
         for (const auto& item : _model->getItems()) {
             _view->addOption(std::to_string(item->id), item->getName());
         }
-        Log::debug("update view names, size: {}", _view->getOptionsSize());
+        Log::debug("Update view names, size: {}", _view->getOptionsSize());
     }
 
     std::unique_ptr<Model> _model;
