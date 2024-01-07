@@ -1,11 +1,11 @@
 #pragma once
 
-#include "linux/tui/book_list.hpp"
+#include "linux/tui/books.hpp"
 #include "linux/tui/bottom_line.hpp"
 #include "linux/tui/communicator.hpp"
 #include "linux/tui/history_panel.hpp"
-#include "linux/tui/note_list.hpp"
-#include "linux/tui/preview_pane.hpp"
+#include "linux/tui/notes.hpp"
+#include "linux/tui/preview.hpp"
 
 #include <core/config.hpp>
 #include <core/storage.hpp>
@@ -29,15 +29,14 @@ private:
 
     tui::Communicator _communicator;
 
-    tui::book::Model _bookModel;
-    tui::book::View _bookView;
-    tui::book::Controller _bookController;
+    tui::books::Model _bookModel;
+    tui::books::View _bookView;
+    tui::books::Controller _bookController;
 
-    tui::note::Model _noteModel;
-    tui::note::View _noteView;
-    tui::note::Controller _noteController;
+    tui::notes::Model _noteModel;
+    tui::notes::View _noteView;
+    tui::notes::Controller _noteController;
 
-    // tui::PreviewPane _previewPane;
     tui::preview::Controller _previewController;
 
     tui::HistoryPanel _historyPanel;

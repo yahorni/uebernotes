@@ -2,14 +2,14 @@
 
 #include "linux/tui/menu/mvc.hpp"
 
-#include <core/note.hpp>
+#include <core/book.hpp>
 
 #include <ftxui/component/component.hpp>
 
-namespace linux::tui::note {
+namespace linux::tui::books {
 
-using Model = menu::Model<core::Note, core::NotesCache>;
-using ViewBase = menu::View<true>;
+using Model = menu::Model<core::Book, core::BooksCache>;
+using ViewBase = menu::View<>;
 
 class View : public ViewBase {
 public:
@@ -28,4 +28,4 @@ public:
     void configureComponent(ftxui::Component& menu, Communicator& communicator) override;
 };
 
-}  // namespace linux::tui::note
+}  // namespace linux::tui::books
