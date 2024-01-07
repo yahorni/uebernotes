@@ -2,6 +2,7 @@
 
 #include "linux/logger.hpp"
 #include "linux/tui/menu/sorter.hpp"
+#include "linux/utils/noncopyable.hpp"
 
 #include <ftxui/component/component.hpp>
 
@@ -11,18 +12,12 @@
 namespace linux::tui::menu {
 
 template<typename Entity, typename Container>
-class Model {
+class Model : private utils::NonCopyable {
 public:
     using EntityID = decltype(Entity::id);
     using EntityPtr = std::shared_ptr<Entity>;
     using ContainerType = Container;
     using ItemsType = std::vector<EntityPtr>;
-
-    Model() = default;
-    Model(const Model&) = delete;
-    Model(Model&&) = delete;
-    Model& operator=(const Model&) = delete;
-    Model& operator=(Model&&) = delete;
 
     // UI Component
     ftxui::Component& getComponent() { return _menu; }
@@ -66,7 +61,7 @@ public:
     }
 
     bool sortByOrder(bool isAscending) {
-        if (_sorter.setOrder(isAscending)) {
+        if (!_sorter.setOrder(isAscending)) {
             return false;
         }
         _sorter.sort<EntityPtr>(_items);

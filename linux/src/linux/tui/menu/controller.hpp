@@ -4,6 +4,7 @@
 #include "linux/logger.hpp"
 #include "linux/tui/communicator.hpp"
 #include "linux/tui/menu/sorter.hpp"
+#include "linux/utils/noncopyable.hpp"
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_options.hpp>
@@ -14,16 +15,12 @@
 namespace linux::tui::menu {
 
 template<typename Model, typename View>
-class Controller {
+class Controller : private utils::NonCopyable {
 public:
     Controller()
         : _model(std::make_unique<Model>()),
           _view(std::make_unique<View>()) {}
 
-    Controller(const Controller&) = delete;
-    Controller(Controller&&) = delete;
-    Controller& operator=(const Controller&) = delete;
-    Controller& operator=(Controller&&) = delete;
     virtual ~Controller() = default;
 
 protected:

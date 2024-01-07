@@ -12,7 +12,6 @@ namespace linux::tui::books {
 
 using Model = menu::Model<core::Book, core::BooksCache>;
 
-// TODO: try CRTP instead of inheritance
 class View : public menu::View {
 public:
     using menu::View::View;

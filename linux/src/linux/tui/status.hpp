@@ -1,6 +1,7 @@
 #pragma once
 
 #include "linux/tui/communicator.hpp"
+#include "linux/utils/noncopyable.hpp"
 
 #include <ftxui/component/component.hpp>
 
@@ -14,13 +15,9 @@ enum class Mode { Status, Search, Command };
 class Model;
 class View;
 
-class Controller {
+class Controller : private utils::NonCopyable {
 public:
     Controller();
-    Controller(const Controller&) = delete;
-    Controller(Controller&&) = delete;
-    Controller& operator=(const Controller&) = delete;
-    Controller& operator=(Controller&&) = delete;
     ~Controller();
 
     void createComponent(Communicator& communicator);

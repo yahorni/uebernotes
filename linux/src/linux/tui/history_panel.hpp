@@ -7,6 +7,7 @@
 
 namespace linux::tui {
 
+// TODO: make it scroll to the end automatically
 class HistoryPanel {
 public:
     HistoryPanel();

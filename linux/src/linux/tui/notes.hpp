@@ -12,7 +12,6 @@ namespace linux::tui::notes {
 
 using Model = menu::Model<core::Note, core::NotesCache>;
 
-// TODO: try CRTP instead of inheritance
 class View : public menu::View {
 public:
     using menu::View::View;

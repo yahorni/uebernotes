@@ -1,6 +1,7 @@
 #pragma once
 
 #include "linux/tui/menu/index_cache.hpp"
+#include "linux/utils/noncopyable.hpp"
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_options.hpp>
@@ -11,14 +12,8 @@
 
 namespace linux::tui::menu {
 
-class View {
+class View : private utils::NonCopyable {
 public:
-    View() = default;
-    View(const View&) = delete;
-    View(View&&) = delete;
-    View& operator=(const View&) = delete;
-    View& operator=(View&&) = delete;
-
     virtual ftxui::Element getElement(ftxui::Component& menu, int paneSize) const = 0;
 
     // UI component

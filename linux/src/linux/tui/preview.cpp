@@ -1,20 +1,15 @@
 #include "linux/tui/preview.hpp"
 
 #include "ftxui/component.hpp"
+#include "linux/utils/noncopyable.hpp"
 
 #include <string>
 #include <utility>
 
 namespace linux::tui::preview {
 
-class Model {
+class Model : private utils::NonCopyable {
 public:
-    Model() = default;
-    Model(const Model&) = delete;
-    Model(Model&&) = delete;
-    Model& operator=(const Model&) = delete;
-    Model& operator=(Model&&) = delete;
-
     // UI Component
     const ftxui::Component& getComponent() const { return _pager; }
     void setComponent(ftxui::Component pager) { _pager = pager; }
@@ -27,14 +22,8 @@ private:
     ftxui::Component _pager;
 };
 
-class View {
+class View : private utils::NonCopyable {
 public:
-    View() = default;
-    View(const View&) = delete;
-    View(View&&) = delete;
-    View& operator=(const View&) = delete;
-    View& operator=(View&&) = delete;
-
     ftxui::Component createComponent() { return ftxui::Pager(_noteContent, _previewShift, _wrapLines); }
 
     void resetShift() { _previewShift = 0; }

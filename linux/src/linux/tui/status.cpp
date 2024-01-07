@@ -1,6 +1,7 @@
 #include "linux/tui/status.hpp"
 
 #include "linux/logger.hpp"
+#include "linux/utils/noncopyable.hpp"
 
 #include <ftxui/component/component.hpp>
 
@@ -9,14 +10,8 @@
 namespace linux::tui::status {
 
 // TODO: think about removing getters/setters, just make Controller friend class
-class Model {
+class Model : private utils::NonCopyable {
 public:
-    Model() = default;
-    Model(const Model&) = delete;
-    Model(Model&&) = delete;
-    Model& operator=(const Model&) = delete;
-    Model& operator=(Model&&) = delete;
-
     Mode getMode() const { return _mode; }
     void setMode(Mode mode) { _mode = mode; }
     const std::string& getLastInput() const { return _lastInput; }
@@ -33,14 +28,8 @@ private:
     ftxui::Component _input;
 };
 
-class View {
+class View : private utils::NonCopyable {
 public:
-    View() = default;
-    View(const View&) = delete;
-    View(View&&) = delete;
-    View& operator=(const View&) = delete;
-    View& operator=(View&&) = delete;
-
     const std::string& getStatusBuffer() const { return _statusBuffer; }
     void setStatusBuffer(std::string message) { _statusBuffer = std::move(message); }
 
