@@ -95,8 +95,8 @@
       + bind: help message with '?' (mock floating window, implement later) [TODO]
     + add mouse support for choosing book/note [TODO]
     + add book sizes in book list [TODO]
-    + status-line modes [...]
-      + search (should know call source to differentiate search)
+    + status-line modes [ok]
+      + search (should know call source to differentiate search) [ok]
       + status (commons stats for all books/notes) [TODO]
       + panel (show last logs and commands) [ok]
       + help [TODO]
@@ -152,6 +152,7 @@
     + separate UI logic from controllers logic
     + get rid of plain usage of IDs
     + optional creation of database on startup. configurable
+    + add indeces for UI components to send them in notifications/commands as source
 + common:
   + project level cmake to build lib and linux client
 

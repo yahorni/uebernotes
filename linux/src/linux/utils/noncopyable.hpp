@@ -2,7 +2,7 @@
 
 // https://stackoverflow.com/questions/31357515/how-constructor-works-in-private-inheritance
 
-namespace linux::tui::utils {
+namespace utils {
 
 struct NonCopyable {
     NonCopyable() = default;
@@ -15,4 +15,4 @@ struct NonCopyable {
     NonCopyable& operator=(NonCopyable&&) = delete;
 };
 
-}  // namespace linux::tui::utils
+}  // namespace utils

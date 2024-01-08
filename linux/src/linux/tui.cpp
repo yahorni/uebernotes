@@ -62,7 +62,6 @@ bool TUI::run() {
             _status.component()->TakeFocus();
             return true;
         } else if (event == Event::Character('t')) {
-            // TODO: move to history component
             if (!_history.toggleView()) {
                 // TODO: autoreset focus without manual
                 resetFocus();

@@ -136,3 +136,4 @@ Android app will take some significant time to develop. To start using notes ear
 + json: <https://github.com/stephenberry/glaze>
 + python tests: <https://tox.wiki/en/4.11.4/>
 + SQLiteCpp: <https://github.com/SRombauts/SQLiteCpp>
++ possible backend: <https://pocketbase.io>

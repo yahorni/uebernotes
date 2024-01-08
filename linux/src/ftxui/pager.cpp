@@ -1,9 +1,10 @@
 #include "ftxui/component.hpp"
 
+#include "ftxui/utils/optional_ref.hpp"
+
 #include <ftxui/component/component.hpp>
 
 #include <functional>
-#include <optional>
 
 // Feature request: Support multi-paragraph text layout #247
 // https://github.com/ArthurSonzogni/FTXUI/issues/247
@@ -20,14 +21,16 @@ namespace ftxui {
 // and use it without creating a new instance on each Render()
 class PagerArea : public Node {
 public:
-    PagerArea(const std::string& content, int& shift, bool& wrap)
+    PagerArea(const utils::OptionalCRef<std::string>& content, int& shift, bool& wrap)
         : PagerArea(shift, wrap) {
+        // copies ref wrapper
         _stringContent = content;
     }
 
     PagerArea(const std::vector<std::string>& content, int& shift, bool& wrap)
         : PagerArea(shift, wrap) {
-        _vectorContent = content;
+        // creates optional with ref wrapper
+        _vectorContent = std::cref(content);
     }
 
     void ComputeRequirement() override {
@@ -128,16 +131,13 @@ private:
     int& _shift;
     bool& _wrap;
 
-    template<typename T>
-    using OptionalRef = std::optional<std::reference_wrapper<const T>>;
-
-    OptionalRef<std::string> _stringContent;
-    OptionalRef<std::vector<std::string>> _vectorContent;
+    utils::OptionalCRef<std::string> _stringContent;
+    utils::OptionalCRef<std::vector<std::string>> _vectorContent;
 
     std::vector<std::string_view> _lines;
 };
 
-Element pagerarea(const std::string& content, int& shift, bool& wrap) {
+Element pagerarea(const utils::OptionalCRef<std::string>& content, int& shift, bool& wrap) {
     return std::make_shared<PagerArea>(content, shift, wrap);
 }
 
@@ -185,12 +185,12 @@ private:
     const T& _content;
 };
 
-Component Pager(const std::vector<std::string>& content, int& shift, bool& wrap) {
-    return Make<PagerBase<std::vector<std::string>>>(content, shift, wrap);
+Component Pager(const utils::OptionalCRef<std::string>& content, int& shift, bool& wrap) {
+    return Make<PagerBase<utils::OptionalCRef<std::string>>>(content, shift, wrap);
 }
 
-Component Pager(const std::string& content, int& shift, bool& wrap) {
-    return Make<PagerBase<std::string>>(content, shift, wrap);
+Component Pager(const std::vector<std::string>& content, int& shift, bool& wrap) {
+    return Make<PagerBase<std::vector<std::string>>>(content, shift, wrap);
 }
 
 }  // namespace ftxui

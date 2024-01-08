@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ftxui/utils/optional_ref.hpp"
+
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 
@@ -14,7 +16,7 @@ namespace ftxui {
  */
 Element pagerarea(const std::string& content, int& shift, bool& wrap);
 Element pagerarea(const std::vector<std::string>& content, int& shift, bool& wrap);
-Component Pager(const std::string& content, int& shift, bool& wrap);
+Component Pager(const utils::OptionalCRef<std::string>& content, int& shift, bool& wrap);
 Component Pager(const std::vector<std::string>& lines, int& shift, bool& wrap);
 
 /* Based on CatchEvent but the logic is reversed

@@ -8,6 +8,8 @@
 
 namespace linux::tui::preview {
 
+using ftxui::utils::OptionalRef;
+
 class Model : private utils::NonCopyable {
 public:
     // UI Component
@@ -15,20 +17,30 @@ public:
     void setComponent(ftxui::Component pager) { _pager = pager; }
 
     // data
-    void setNote(const core::NotePtr& notePtr) { _notePtr = notePtr; }
+    void setNote(const core::NotePtr& notePtr) {
+        _notePtr = notePtr;
+        if (_notePtr) {
+            _noteContent = std::make_optional(std::cref(_notePtr->getContent()));
+        } else {
+            _noteContent = std::nullopt;
+        }
+    }
+
+    const OptionalCRef<std::string>& getContent() const { return _noteContent; }
 
 private:
     core::NotePtr _notePtr;
+    OptionalCRef<std::string> _noteContent;
     ftxui::Component _pager;
 };
 
 class View : private utils::NonCopyable {
 public:
-    ftxui::Component createComponent() { return ftxui::Pager(_noteContent, _previewShift, _wrapLines); }
+    ftxui::Component createComponent(const OptionalCRef<std::string>& noteContent) {
+        return ftxui::Pager(noteContent, _previewShift, _wrapLines);
+    }
 
     void resetShift() { _previewShift = 0; }
-    void clearContent() { _noteContent.clear(); }
-    void setContent(const std::string& content) { _noteContent = content; }
 
     ftxui::Element getElement(const ftxui::Component& component) const {
         using namespace ftxui;  // NOLINT
@@ -41,7 +53,6 @@ public:
     }
 
 private:
-    std::string _noteContent;  // TODO: get rid of it
     int _previewShift = 0;
     bool _wrapLines = true;
 };
@@ -56,7 +67,7 @@ Controller::Controller()
 Controller::~Controller() = default;
 
 void Controller::createComponent(Communicator& communicator) {
-    auto pager = _view->createComponent();
+    auto pager = _view->createComponent(_model->getContent());
     configureComponent(pager, communicator);
     _model->setComponent(std::move(pager));
 }
@@ -75,11 +86,6 @@ void Controller::configureComponent(ftxui::Component& component, Communicator& c
 void Controller::setNote(const core::NotePtr& notePtr) {
     _model->setNote(notePtr);
     _view->resetShift();
-    if (notePtr) {
-        _view->setContent(notePtr->getContent());
-    } else {
-        _view->clearContent();
-    }
 }
 
 const ftxui::Component& Controller::component() const { return _model->getComponent(); }
