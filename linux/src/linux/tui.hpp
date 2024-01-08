@@ -2,7 +2,7 @@
 
 #include "linux/tui/books.hpp"
 #include "linux/tui/communicator.hpp"
-#include "linux/tui/history_panel.hpp"
+#include "linux/tui/history.hpp"
 #include "linux/tui/menu/index_cache.hpp"
 #include "linux/tui/notes.hpp"
 #include "linux/tui/preview.hpp"
@@ -30,12 +30,12 @@ private:
 
     tui::Communicator _communicator;
 
-    tui::books::Controller _bookController;
-    tui::notes::Controller _noteController;
-    tui::preview::Controller _previewController;
+    tui::books::Controller _books;
+    tui::notes::Controller _notes;
+    tui::preview::Controller _preview;
 
-    tui::HistoryPanel _historyPanel;
-    tui::status::Controller _statusController;
+    tui::history::Controller _history;
+    tui::status::Controller _status;
 
     tui::menu::IndexCache<core::BookID> _noteIndexCache;
 

@@ -16,7 +16,7 @@ class View : public menu::View {
 public:
     using menu::View::View;
 
-    ftxui::Element getElement(ftxui::Component& menu, int paneSize) const override;
+    ftxui::Element getElement(ftxui::Component& menu, int width) const override;
 };
 
 using ControllerBase = menu::Controller<Model, View>;

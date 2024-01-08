@@ -43,7 +43,7 @@ public:
         return ftxui::Input(option);
     }
 
-    ftxui::Element getElement(Mode mode, const ftxui::Component& component) const {
+    ftxui::Element getElement(const ftxui::Component& component, Mode mode) const {
         using namespace ftxui;  // NOLINT
 
         Element line;
@@ -154,6 +154,6 @@ void Controller::setMessage(std::string message) { _view->setStatusBuffer(std::m
 void Controller::setMode(Mode mode) { _model->setMode(mode); }
 
 const ftxui::Component& Controller::component() const { return _model->getComponent(); }
-ftxui::Element Controller::element() const { return _view->getElement(_model->getMode(), _model->getComponent()); }
+ftxui::Element Controller::element() const { return _view->getElement(_model->getComponent(), _model->getMode()); }
 
 }  // namespace linux::tui::status

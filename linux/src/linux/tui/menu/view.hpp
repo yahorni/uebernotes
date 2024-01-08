@@ -14,7 +14,7 @@ namespace linux::tui::menu {
 
 class View : private utils::NonCopyable {
 public:
-    virtual ftxui::Element getElement(ftxui::Component& menu, int paneSize) const = 0;
+    virtual ftxui::Element getElement(ftxui::Component& menu, int width) const = 0;
 
     // UI component
     ftxui::Component createComponent(ftxui::MenuOption option) {

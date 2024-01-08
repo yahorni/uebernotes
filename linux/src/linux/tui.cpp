@@ -20,12 +20,13 @@ namespace linux {
 
 TUI::TUI(const core::Config& config)
     : _storage{config},
-      _noteIndexCache(_noteController.createIndexCache<core::BookID>()) {
+      _noteIndexCache(_notes.createIndexCache<core::BookID>()) {
     // create components
-    _bookController.createComponent(_communicator);
-    _noteController.createComponent(_communicator);
-    _previewController.createComponent(_communicator);
-    _statusController.createComponent(_communicator);
+    _books.createComponent(_communicator);
+    _notes.createComponent(_communicator);
+    _preview.createComponent(_communicator);
+    _history.createComponent(_communicator);
+    _status.createComponent(_communicator);
 
     updateBooksModel();
     updateNotesModel();
@@ -39,11 +40,11 @@ bool TUI::run() {
     ftxui::Dimensions minWinSize{80, 20};
 
     auto panesContainer = Container::Vertical({Container::Horizontal({
-                                                   _bookController.component(),
-                                                   _noteController.component(),
-                                                   _previewController.component(),
+                                                   _books.component(),
+                                                   _notes.component(),
+                                                   _preview.component(),
                                                }),
-                                               _historyPanel.getComponent()});
+                                               _history.component()});
 
     auto panesContainerWithEvents = CatchEvent(panesContainer, [&](Event event) {
         if (event == Event::Character('q')) {
@@ -53,21 +54,22 @@ bool TUI::run() {
             _communicator.cmdPush(tui::Command::RefreshAll);
             return true;
         } else if (event == Event::Character('/')) {
-            _statusController.setMode(tui::status::Mode::Search);
-            _statusController.component()->TakeFocus();
+            _status.setMode(tui::status::Mode::Search);
+            _status.component()->TakeFocus();
             return true;
         } else if (event == Event::Character(':')) {
-            _statusController.setMode(tui::status::Mode::Command);
-            _statusController.component()->TakeFocus();
+            _status.setMode(tui::status::Mode::Command);
+            _status.component()->TakeFocus();
             return true;
         } else if (event == Event::Character('t')) {
-            if (!_historyPanel.toggle()) {
+            // TODO: move to history component
+            if (!_history.toggleView()) {
                 // TODO: autoreset focus without manual
                 resetFocus();
             }
             return true;
         } else if (event == Event::Character('T')) {
-            auto& historyComponent = *_historyPanel.getComponent();
+            auto& historyComponent = *_history.component();
             if (historyComponent.Focused()) {
                 resetFocus();
             } else if (historyComponent.Focusable()) {
@@ -78,7 +80,7 @@ bool TUI::run() {
         return false;
     });
 
-    auto container = Container::Vertical({panesContainerWithEvents, _statusController.component()});
+    auto container = Container::Vertical({panesContainerWithEvents, _status.component()});
 
     auto renderer = Renderer(container, [&] {
         Log::debug("Render, cmds={}, ntfs={}", _communicator.cmdSize(), _communicator.ntfSize());
@@ -91,16 +93,16 @@ bool TUI::run() {
         handleCommands(screen);
         handleNotifications();
 
-        int listPaneSize = winSize.dimx / 4;
-        int historyPanelSize = winSize.dimy / 4;
+        int listWidth = winSize.dimx / 4;
+        int historyHeight = winSize.dimy / 4;
         return vbox({
             hbox({
-                _bookController.element(listPaneSize),  //
-                _noteController.element(listPaneSize),  //
-                _previewController.element(),           //
+                _books.element(listWidth),  //
+                _notes.element(listWidth),  //
+                _preview.element(),           //
             }) | yflex,
-            _historyPanel.getElement(historyPanelSize),
-            _statusController.element(),
+            _history.element(historyHeight),
+            _status.element(),
         });
     });
 
@@ -112,24 +114,24 @@ void TUI::updateBooksModel(bool reload) {
     if (reload) {
         _storage.loadBooksToCache();
     }
-    _bookController.setItems(_storage.getBooks());
+    _books.setItems(_storage.getBooks());
 }
 
 void TUI::updateNotesModel(bool reload) {
-    if (const auto& bookID = _bookController.getSelectedItemID(); bookID) {
+    if (const auto& bookID = _books.getSelectedItemID(); bookID) {
         if (reload) {
             _storage.loadNotesToCache(*bookID);
         }
-        _noteController.setItems(_storage.getNotesByBookID(*bookID));
+        _notes.setItems(_storage.getNotesByBookID(*bookID));
     }
 }
 
 void TUI::updatePreview() {
-    auto notePtr = _noteController.getSelectedItem();
-    _previewController.setNote(notePtr);
+    auto notePtr = _notes.getSelectedItem();
+    _preview.setNote(notePtr);
 }
 
-void TUI::resetFocus() { _bookController.component()->TakeFocus(); }
+void TUI::resetFocus() { _books.component()->TakeFocus(); }
 
 void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
     // FIXME: restore note index during scrolling in book menu
@@ -146,7 +148,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         case tui::Command::UpdateBookWhenOrderKept: {
             // notes
             updateNotesModel();
-            _noteIndexCache.restore(_bookController.getSelectedIndex());
+            _noteIndexCache.restore(_books.getSelectedIndex());
 
             // preview
             updatePreview();
@@ -161,7 +163,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         } break;
         case tui::Command::UpdateNote: {
             // notes
-            _noteIndexCache.add(_bookController.getSelectedIndex());
+            _noteIndexCache.add(_books.getSelectedIndex());
 
             // preview
             updatePreview();
@@ -181,7 +183,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         case tui::Command::RefreshBook: {
             // notes
             updateNotesModel(true);
-            _noteIndexCache.remove(_bookController.getSelectedIndex());
+            _noteIndexCache.remove(_books.getSelectedIndex());
 
             // preview
             updatePreview();
@@ -193,7 +195,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
 
         case tui::Command::InputEntered: {
             // TODO: handle input
-            auto input = _statusController.getLastInput();
+            auto input = _status.getLastInput();
 
             // main
             resetFocus();
@@ -224,8 +226,8 @@ void TUI::handleNotifications() {
             return;
         }
 
-        _statusController.setMessage(notification);
-        _historyPanel.addMessage(std::move(notification));
+        _status.setMessage(notification);
+        _history.addMessage(std::move(notification));
     }
 }
 

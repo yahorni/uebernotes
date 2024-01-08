@@ -88,7 +88,7 @@ public:
     }
 
     const ftxui::Component& component() const { return _model->getComponent(); }
-    ftxui::Element element(int paneSize) const { return _view->getElement(_model->getComponent(), paneSize); }
+    ftxui::Element element(int width) const { return _view->getElement(_model->getComponent(), width); }
 
     // sorting
 

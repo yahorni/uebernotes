@@ -8,14 +8,14 @@
 
 namespace linux::tui::books {
 
-ftxui::Element View::getElement(ftxui::Component& component, int paneSize) const {
+ftxui::Element View::getElement(ftxui::Component& component, int width) const {
     using namespace ftxui;  // NOLINT
     return vbox({
                hcenter(bold(text("Books"))),  // consider using "window"
                separator(),                   //
                component->Render(),           //
            }) |
-           borderDecorator(component->Focused()) | size(WIDTH, EQUAL, paneSize);
+           borderDecorator(component->Focused()) | size(WIDTH, EQUAL, width);
 }
 
 void Controller::configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) {
