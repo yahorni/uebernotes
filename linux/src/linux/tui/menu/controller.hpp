@@ -5,7 +5,6 @@
 #include "linux/tui/communicator.hpp"
 #include "linux/tui/menu/sorter.hpp"
 #include "linux/tui/mvc.hpp"
-#include "linux/utils/noncopyable.hpp"
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_options.hpp>
@@ -17,7 +16,7 @@
 namespace linux::tui::menu {
 
 template<typename Model, typename View>
-class Controller : public mvc::Controller, private utils::NonCopyable {
+class Controller : public mvc::Controller {
 public:
     explicit Controller(std::string name)
         : mvc::Controller(std::move(name)),
@@ -63,7 +62,6 @@ public:
         });
 
         menu |= ftxui::EventHandler({ftxui::Event::Character('j')});
-        _model->setComponent(std::move(menu));
     }
 
     std::optional<typename Model::EntityID> getSelectedItemID() const {
@@ -95,8 +93,8 @@ public:
         return _view->template createIndexCache<Key>();
     }
 
-    const ftxui::Component& component() const { return _model->getComponent(); }
-    ftxui::Element element(int width) const { return _view->getElement(_model->getComponent(), name(), width); }
+    const ftxui::Component& component() const { return _view->component(); }
+    ftxui::Element element(int width) const { return _view->element(name(), width); }
 
     // sorting
 
@@ -177,7 +175,6 @@ private:
             return false;
         });
     }
-
 
     std::unique_ptr<Model> _model;
     std::unique_ptr<View> _view;

@@ -2,7 +2,7 @@
 
 #include "linux/logger.hpp"
 #include "linux/tui/menu/sorter.hpp"
-#include "linux/utils/noncopyable.hpp"
+#include "linux/tui/mvc.hpp"
 
 #include <ftxui/component/component.hpp>
 
@@ -11,16 +11,12 @@
 namespace linux::tui::menu {
 
 template<typename EntityPtrT, typename ContainerT>
-class Model : private utils::NonCopyable {
+class Model : public mvc::Model {
 public:
     using EntityID = decltype(EntityPtrT()->id);
     using EntityPtr = EntityPtrT;
     using Container = ContainerT;
     using ItemsType = std::vector<EntityPtrT>;
-
-    // UI Component
-    ftxui::Component& getComponent() { return _menu; }
-    void setComponent(ftxui::Component menu) { _menu = menu; }
 
     // items
     std::optional<EntityID> getItemID(int index) const {
@@ -70,7 +66,6 @@ public:
 private:
     ItemsType _items;
     Sorter _sorter;
-    ftxui::Component _menu;
 };
 
 }  // namespace linux::tui::menu

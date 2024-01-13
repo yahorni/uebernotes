@@ -1,7 +1,7 @@
 #pragma once
 
 #include "linux/tui/communicator.hpp"
-#include "linux/utils/noncopyable.hpp"
+#include "linux/tui/mvc.hpp"
 
 #include <ftxui/component/component.hpp>
 
@@ -15,7 +15,7 @@ namespace linux::tui::history {
 class Model;
 class View;
 
-class Controller : private utils::NonCopyable {
+class Controller : public mvc::Controller {
 public:
     Controller();
     ~Controller();

@@ -9,15 +9,10 @@
 
 namespace linux::tui::history {
 
-class Model : private utils::NonCopyable {
+class Model : public mvc::Model {
 public:
     Model() { _messages.reserve(_maxHistorySize); }
 
-    // UI Component
-    const ftxui::Component& getComponent() const { return _pager; }
-    void setComponent(ftxui::Component pager) { _pager = pager; }
-
-    // data
     const std::vector<std::string>& getMessages() const { return _messages; }
     void addMessage(std::string&& message) {
         if (_messages.size() == _maxHistorySize) {
@@ -32,14 +27,13 @@ public:
 private:
     const std::size_t _maxHistorySize = 50;
     std::vector<std::string> _messages;
-
-    ftxui::Component _pager;
 };
 
-class View : private utils::NonCopyable {
+class View : public mvc::View {
 public:
-    ftxui::Component createComponent(const std::vector<std::string>& messages) {
-        return ftxui::Pager(messages, _previewShift, _wrapLines);
+    ftxui::Component& createComponent(const std::vector<std::string>& messages) {
+        _component = ftxui::Pager(messages, _previewShift, _wrapLines);
+        return _component;
     }
 
     bool toggle() {
@@ -49,9 +43,10 @@ public:
 
     bool isEnabled() const { return _enabled; }
 
-    ftxui::Element getElement(const ftxui::Component& component, int height) const {
+    // UI element
+    ftxui::Element element(int height) const {
         if (_enabled) {
-            return component->Render() | ftxui::borderDecorator(component->Focused()) |
+            return _component->Render() | ftxui::borderDecorator(_component->Focused()) |
                    ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, height);
         } else {
             return ftxui::emptyElement();
@@ -68,16 +63,16 @@ private:
 // Controller
 
 Controller::Controller()
-    : _model(std::make_unique<Model>()),
+    : mvc::Controller("History"),
+      _model(std::make_unique<Model>()),
       _view(std::make_unique<View>()) {}
 
 // needed here for unique_ptr destruction
 Controller::~Controller() = default;
 
 void Controller::createComponent(Communicator& communicator) {
-    auto pager = _view->createComponent(_model->getMessages());
+    auto& pager = _view->createComponent(_model->getMessages());
     configureComponent(pager, communicator);
-    _model->setComponent(std::move(pager));
 }
 
 void Controller::configureComponent(ftxui::Component& component, Communicator&) {
@@ -88,7 +83,7 @@ bool Controller::toggleView() { return _view->toggle(); }
 
 void Controller::addMessage(std::string message) { _model->addMessage(std::move(message)); }
 
-const ftxui::Component& Controller::component() const { return _model->getComponent(); }
-ftxui::Element Controller::element(int height) const { return _view->getElement(_model->getComponent(), height); }
+const ftxui::Component& Controller::component() const { return _view->component(); }
+ftxui::Element Controller::element(int height) const { return _view->element(height); }
 
 }  // namespace linux::tui::history

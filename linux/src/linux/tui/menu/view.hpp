@@ -2,7 +2,7 @@
 
 #include "ftxui/component.hpp"
 #include "linux/tui/menu/index_cache.hpp"
-#include "linux/utils/noncopyable.hpp"
+#include "linux/tui/mvc.hpp"
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_options.hpp>
@@ -13,20 +13,20 @@
 
 namespace linux::tui::menu {
 
-class View : private utils::NonCopyable {
+class View : public mvc::View {
 public:
-    ftxui::Element getElement(ftxui::Component& component, const std::string& name, int width) const {
+    ftxui::Element element(const std::string& name, int width) const {
         using namespace ftxui;  // NOLINT
         return vbox({
                    hcenter(bold(text(name))),  // consider using "window"
                    separator(),                //
-                   component->Render(),        //
+                   _component->Render(),       //
                }) |
-               borderDecorator(component->Focused()) | size(WIDTH, EQUAL, width);
+               borderDecorator(_component->Focused()) | size(WIDTH, EQUAL, width);
     }
 
     // UI component
-    ftxui::Component createComponent(ftxui::MenuOption option) {
+    ftxui::Component& createComponent(ftxui::MenuOption option) {
         option.focused_entry = &_focusedIndex;
         option.entries_option.transform = [](const ftxui::EntryState& state) {
             ftxui::Element e = ftxui::text((state.active ? "> " : "  ") + state.label);
@@ -39,7 +39,8 @@ public:
             return e;
         };
 
-        return ftxui::Menu(&_options, &_selectedIndex, std::move(option));
+        _component = ftxui::Menu(&_options, &_selectedIndex, std::move(option));
+        return _component;
     }
 
     // options
