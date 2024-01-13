@@ -13,12 +13,15 @@
 
 #include <ftxui/screen/screen.hpp>
 
+#include <string>
+
 namespace linux {
 
 // TODO: separate:
 // model load/updates with storage
 // controller with handleCommand
 // view with updateViews
+// move TUI to tui namespace
 
 class TUI {
 public:
@@ -28,6 +31,7 @@ public:
 private:
     core::Storage _storage;
 
+    // TODO: move it out to restrict usage in handle*()
     tui::Communicator _communicator;
 
     tui::books::Controller _books;
@@ -45,8 +49,14 @@ private:
 
     void resetFocus();
 
-    void handleCommands(ftxui::ScreenInteractive& screen);
-    void handleNotifications();
+    using EventQueue = tui::Communicator::Queue<ftxui::Event>;
+    void handleUIEvents(EventQueue& queue, ftxui::ScreenInteractive& screen);
+
+    using CommandQueue = tui::Communicator::Queue<tui::Command>;
+    void handleCommands(CommandQueue& queue);
+
+    using NotificationQueue = tui::Communicator::Queue<std::string>;
+    void handleNotifications(NotificationQueue& queue);
 };
 
 }  // namespace linux

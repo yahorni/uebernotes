@@ -93,7 +93,7 @@ void Controller::configureComponentOption(ftxui::InputOption& option, Communicat
         if (_model->getMode() == Mode::Status) {
             Log::error("Input received in Status mode");
             _view->clearInputBuffer();
-            communicator.cmdPush(Command::InputCanceled);
+            communicator.cmd.push(Command::InputCanceled);
             return;
         }
 
@@ -112,7 +112,7 @@ void Controller::configureComponentOption(ftxui::InputOption& option, Communicat
 
             _model->setLastInput(input);
             _view->clearInputBuffer();
-            communicator.cmdPush(Command::InputEntered);
+            communicator.cmd.push(Command::InputEntered);
 
         } else {
             switch (_model->getMode()) {
@@ -125,10 +125,10 @@ void Controller::configureComponentOption(ftxui::InputOption& option, Communicat
             default:
                 break;
             }
-            communicator.cmdPush(Command::InputCanceled);
+            communicator.cmd.push(Command::InputCanceled);
         }
 
-        communicator.ntfPush(std::string(_view->getStatusBuffer()));
+        communicator.ntf.push(std::string(_view->getStatusBuffer()));
         _model->setMode(Mode::Status);
     };
 }
@@ -138,8 +138,8 @@ void Controller::configureComponent(ftxui::Component& component, Communicator& c
         if (event == ftxui::Event::Escape) {
             setMode(Mode::Status);
             _view->clearInputBuffer();
-            communicator.cmdPush(Command::InputCanceled);
-            communicator.ntfPush("Canceled input");
+            communicator.cmd.push(Command::InputCanceled);
+            communicator.ntf.push("Canceled input");
             return true;
         }
         return false;

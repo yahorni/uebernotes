@@ -1,11 +1,13 @@
 #pragma once
 
+#include "linux/utils/noncopyable.hpp"
+
 #include <unordered_map>
 
 namespace linux::tui::menu {
 
 template<typename Key>
-class IndexCache {
+class IndexCache : private utils::NonCopyable {
 public:
     explicit IndexCache(int& selected, int& focused)
         : _selected(selected),

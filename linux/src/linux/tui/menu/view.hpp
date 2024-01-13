@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ftxui/component.hpp"
 #include "linux/tui/menu/index_cache.hpp"
 #include "linux/utils/noncopyable.hpp"
 
@@ -14,7 +15,15 @@ namespace linux::tui::menu {
 
 class View : private utils::NonCopyable {
 public:
-    virtual ftxui::Element getElement(ftxui::Component& menu, int width) const = 0;
+    ftxui::Element getElement(ftxui::Component& component, const std::string& name, int width) const {
+        using namespace ftxui;  // NOLINT
+        return vbox({
+                   hcenter(bold(text(name))),  // consider using "window"
+                   separator(),                //
+                   component->Render(),        //
+               }) |
+               borderDecorator(component->Focused()) | size(WIDTH, EQUAL, width);
+    }
 
     // UI component
     ftxui::Component createComponent(ftxui::MenuOption option) {

@@ -1,10 +1,11 @@
 #pragma once
 
-#include <any>
+#include <ftxui/component/event.hpp>
+
 #include <format>
 #include <queue>
 #include <string>
-#include <tuple>
+#include <utility>
 
 namespace linux::tui {
 
@@ -16,7 +17,6 @@ namespace linux::tui {
 // UIEvent - pass UIEvent to screen object
 
 enum class Command {
-    UIEvent,
     UpdateBookWhenOrderKept,
     UpdateBookWhenOrderChanged,
     UpdateNote,
@@ -29,26 +29,36 @@ enum class Command {
 };
 
 // TODO: rename it
-// add separate push/pop for UIEvent to get rid of std::any
+// TODO: test how Commands behave when mainthread is paused/sleeping
 class Communicator {
 public:
-    // Commands
-    using CommandData = std::tuple<Command, std::any>;
-    std::queue<CommandData> _commands;
-    //
-    // TODO: replace with std::variant
-    void cmdPush(Command cmd, std::any&& data = std::any{});
-    CommandData cmdPop();
-    bool cmdEmpty();
-    std::size_t cmdSize();
+    template<typename Data>
+    class Queue {
+    public:
+        void push(Data data) {
+            if constexpr (std::is_integral_v<Data>) {
+                _queue.push(data);
+            } else {
+                _queue.push(std::move(data));
+            }
+        }
 
-    // Notifications
-    std::queue<std::string> _notifications;
-    //
-    void ntfPush(std::string&& message);
-    std::string ntfPop();
-    bool ntfEmpty();
-    std::size_t ntfSize();
+        Data pop() {
+            auto value = _queue.front();
+            _queue.pop();
+            return value;
+        }
+
+        bool size() const { return _queue.size(); }
+        bool empty() const { return _queue.empty(); }
+
+    private:
+        std::queue<Data> _queue;
+    };
+
+    Queue<ftxui::Event> ui;
+    Queue<Command> cmd;
+    Queue<std::string> ntf;
 };
 
 }  // namespace linux::tui
@@ -61,7 +71,6 @@ struct std::formatter<linux::tui::Command> : std::formatter<const char*> {
         return std::formatter<const char*>::format(#NAME, ctx);
 
         switch (obj) {
-            CMD_CASE(UIEvent);
             CMD_CASE(UpdateBookWhenOrderKept);
             CMD_CASE(UpdateBookWhenOrderChanged);
             CMD_CASE(UpdateNote);

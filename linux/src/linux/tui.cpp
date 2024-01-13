@@ -51,7 +51,7 @@ bool TUI::run() {
             screen.ExitLoopClosure()();
             return true;
         } else if (event == Event::Character('R')) {
-            _communicator.cmdPush(tui::Command::RefreshAll);
+            _communicator.cmd.push(tui::Command::RefreshAll);
             return true;
         } else if (event == Event::Character('/')) {
             _status.setMode(tui::status::Mode::Search);
@@ -82,15 +82,16 @@ bool TUI::run() {
     auto container = Container::Vertical({panesContainerWithEvents, _status.component()});
 
     auto renderer = Renderer(container, [&] {
-        Log::debug("Render, cmds={}, ntfs={}", _communicator.cmdSize(), _communicator.ntfSize());
+        Log::debug("Render, cmds={}, ntfs={}", _communicator.cmd.size(), _communicator.ntf.size());
 
         auto winSize = Terminal::Size();
         if (winSize.dimx < minWinSize.dimx || winSize.dimy < minWinSize.dimy) {
             return paragraph(std::format("too small window: {}x{}", winSize.dimx, winSize.dimy));
         }
 
-        handleCommands(screen);
-        handleNotifications();
+        handleUIEvents(_communicator.ui, screen);
+        handleCommands(_communicator.cmd);
+        handleNotifications(_communicator.ntf);
 
         int listWidth = winSize.dimx / 4;
         int historyHeight = winSize.dimy / 4;
@@ -98,7 +99,7 @@ bool TUI::run() {
             hbox({
                 _books.element(listWidth),  //
                 _notes.element(listWidth),  //
-                _preview.element(),           //
+                _preview.element(),         //
             }) | yflex,
             _history.element(historyHeight),
             _status.element(),
@@ -132,18 +133,20 @@ void TUI::updatePreview() {
 
 void TUI::resetFocus() { _books.component()->TakeFocus(); }
 
-void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
-    // FIXME: restore note index during scrolling in book menu
-    while (!_communicator.cmdEmpty()) {
-        auto [command, data] = _communicator.cmdPop();
+void TUI::handleUIEvents(TUI::EventQueue& queue, ftxui::ScreenInteractive& screen) {
+    // TODO: test behaviour
+    while (!queue.empty()) {
+        auto event = queue.pop();
+        screen.PostEvent(event);
+    }
+}
+
+void TUI::handleCommands(TUI::CommandQueue& queue) {
+    while (!queue.empty()) {
+        auto command = queue.pop();
         Log::debug("Handling command: {}", command);
 
         switch (command) {
-        case tui::Command::UIEvent: {
-            auto screenEvent{std::any_cast<ftxui::Event>(data)};
-            screen.PostEvent(screenEvent);
-        } break;
-
         case tui::Command::UpdateBookWhenOrderKept: {
             // notes
             updateNotesModel();
@@ -195,6 +198,7 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         case tui::Command::InputEntered: {
             // TODO: handle input
             auto input = _status.getLastInput();
+            _communicator.ntf.push("TODO: Handle status input");
 
             // main
             resetFocus();
@@ -205,7 +209,11 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
         } break;
 
         case tui::Command::OpenEditor: {
-            // TODO
+            if (_notes.getItemsAmount()) {
+                _communicator.ntf.push("TODO: Open editor");
+            } else {
+                _communicator.ntf.push("No selected note to open");
+            }
         } break;
 
         default: {
@@ -216,9 +224,9 @@ void TUI::handleCommands(ftxui::ScreenInteractive& screen) {
     }
 }
 
-void TUI::handleNotifications() {
-    while (!_communicator.ntfEmpty()) {
-        auto notification = _communicator.ntfPop();
+void TUI::handleNotifications(TUI::NotificationQueue& queue) {
+    while (!queue.empty()) {
+        auto notification = queue.pop();
         Log::info("Handling notification: '{}'", notification);
 
         if (notification.empty()) {

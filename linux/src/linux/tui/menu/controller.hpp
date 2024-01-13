@@ -4,28 +4,30 @@
 #include "linux/logger.hpp"
 #include "linux/tui/communicator.hpp"
 #include "linux/tui/menu/sorter.hpp"
+#include "linux/tui/mvc.hpp"
 #include "linux/utils/noncopyable.hpp"
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_options.hpp>
 
 #include <memory>
+#include <string>
 #include <utility>
 
 namespace linux::tui::menu {
 
 template<typename Model, typename View>
-class Controller : private utils::NonCopyable {
+class Controller : public mvc::Controller, private utils::NonCopyable {
 public:
-    Controller()
-        : _model(std::make_unique<Model>()),
+    explicit Controller(std::string name)
+        : mvc::Controller(std::move(name)),
+          _model(std::make_unique<Model>()),
           _view(std::make_unique<View>()) {}
 
     virtual ~Controller() = default;
 
 protected:
     virtual void configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) = 0;
-    virtual void configureComponent(ftxui::Component& component, Communicator& communicator) = 0;
 
 public:
     void createComponent(Communicator& communicator) {
@@ -33,6 +35,12 @@ public:
 
         auto option = ftxui::MenuOption::Vertical();
         configureComponentOption(option, communicator);
+
+        option.on_change = [&]() {
+            communicator.cmd.push(_viewCMD);
+            Log::debug("[{}] Selected ID: {}", name(), *getSelectedItemID());
+        };
+
         auto menu = _view->createComponent(option);
         configureComponent(menu, communicator);
 
@@ -45,10 +53,10 @@ public:
         // add g/G command to scroll begin/end
         menu |= ftxui::CatchEvent([&](ftxui::Event event) {
             if (event == ftxui::Event::Character('g')) {
-                communicator.cmdPush(Command::UIEvent, ftxui::Event::Home);
+                communicator.ui.push(ftxui::Event::Home);
                 return true;
             } else if (event == ftxui::Event::Character('G')) {
-                communicator.cmdPush(Command::UIEvent, ftxui::Event::End);
+                communicator.ui.push(ftxui::Event::End);
                 return true;
             }
             return false;
@@ -70,7 +78,7 @@ public:
 
     int getSelectedIndex() const { return _view->getSelectedIndex(); }
 
-    void setItems(const Model::ContainerType& items) {
+    void setItems(const Model::Container& items) {
         _model->setItems(items);
         _view->resetIndex();
         updateNames();
@@ -88,7 +96,7 @@ public:
     }
 
     const ftxui::Component& component() const { return _model->getComponent(); }
-    ftxui::Element element(int width) const { return _view->getElement(_model->getComponent(), width); }
+    ftxui::Element element(int width) const { return _view->getElement(_model->getComponent(), name(), width); }
 
     // sorting
 
@@ -130,8 +138,54 @@ private:
         Log::debug("Update view names, size: {}", _view->getOptionsSize());
     }
 
+    void configureComponent(ftxui::Component& component, Communicator& communicator) {
+        component |= ftxui::CatchEvent([&](ftxui::Event event) {
+            if (event == ftxui::Event::Character('r')) {
+                std::string message;
+                if (auto itemID = getSelectedItemID(); itemID) {
+                    message = std::format("[{}] Refreshed ID: {}", name(), *itemID);
+                } else {
+                    message = std::format("[{}] Nothing to refresh", name());
+                }
+                communicator.cmd.push(_refreshCMD);
+                communicator.ntf.push(std::move(message));
+                return true;
+            } else if (event == ftxui::Event::Character('s')) {
+                auto field = toggleSortField();
+                communicator.cmd.push(_sortCMD);
+                switch (field) {
+                case menu::Sorter::Field::CreationTime:
+                case menu::Sorter::Field::UpdateTime:
+                    communicator.ntf.push(std::format("[{}] Sort by creation time", name()));
+                    break;
+                case menu::Sorter::Field::Name:
+                    communicator.ntf.push(std::format("[{}] Sort by name", name()));
+                    break;
+                }
+                return true;
+            } else if (event == ftxui::Event::Character('o')) {
+                bool isAscending = toggleSortOrder();
+                communicator.cmd.push(_sortCMD);
+                communicator.ntf.push(std::format("[{}] Ascending sort order: {}", name(), isAscending));
+                return true;
+            } else if (event == ftxui::Event::Character('i')) {
+                bool enabled = toggleShowID();
+                communicator.cmd.push(_viewCMD);
+                communicator.ntf.push(std::format("[{}] Show ID: {}", name(), enabled));
+                return true;
+            }
+            return false;
+        });
+    }
+
+
     std::unique_ptr<Model> _model;
     std::unique_ptr<View> _view;
+
+protected:
+    Command _refreshCMD;
+    Command _sortCMD;
+    Command _viewCMD;
 };
 
 }  // namespace linux::tui::menu

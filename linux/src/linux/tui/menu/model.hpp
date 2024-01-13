@@ -6,18 +6,17 @@
 
 #include <ftxui/component/component.hpp>
 
-#include <memory>
 #include <vector>
 
 namespace linux::tui::menu {
 
-template<typename Entity, typename Container>
+template<typename EntityPtrT, typename ContainerT>
 class Model : private utils::NonCopyable {
 public:
-    using EntityID = decltype(Entity::id);
-    using EntityPtr = std::shared_ptr<Entity>;
-    using ContainerType = Container;
-    using ItemsType = std::vector<EntityPtr>;
+    using EntityID = decltype(EntityPtrT()->id);
+    using EntityPtr = EntityPtrT;
+    using Container = ContainerT;
+    using ItemsType = std::vector<EntityPtrT>;
 
     // UI Component
     ftxui::Component& getComponent() { return _menu; }

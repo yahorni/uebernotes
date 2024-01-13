@@ -1,8 +1,8 @@
 #pragma once
 
+#include "linux/tui/menu/controller.hpp"
 #include "linux/tui/menu/model.hpp"
 #include "linux/tui/menu/view.hpp"
-#include "linux/tui/menu/controller.hpp"
 
 #include <core/book.hpp>
 
@@ -10,23 +10,14 @@
 
 namespace linux::tui::books {
 
-using Model = menu::Model<core::Book, core::BooksCache>;
-
-class View : public menu::View {
-public:
-    using menu::View::View;
-
-    ftxui::Element getElement(ftxui::Component& menu, int width) const override;
-};
-
-using ControllerBase = menu::Controller<Model, View>;
+using Model = menu::Model<core::BookPtr, core::BooksCache>;
+using ControllerBase = menu::Controller<Model, menu::View>;
 
 class Controller : public ControllerBase {
 public:
-    using ControllerBase::Controller;
+    Controller();
 
     void configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) override;
-    void configureComponent(ftxui::Component& menu, Communicator& communicator) override;
 };
 
 }  // namespace linux::tui::books

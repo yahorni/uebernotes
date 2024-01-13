@@ -8,7 +8,7 @@
 
 namespace linux::tui::preview {
 
-using ftxui::utils::OptionalRef;
+using ftxui::utils::OptionalCRef;
 
 class Model : private utils::NonCopyable {
 public:
@@ -60,7 +60,8 @@ private:
 // Controller
 
 Controller::Controller()
-    : _model(std::make_unique<Model>()),
+    : mvc::Controller("Preview"),
+      _model(std::make_unique<Model>()),
       _view(std::make_unique<View>()) {}
 
 // needed here for unique_ptr destruction
@@ -75,8 +76,8 @@ void Controller::createComponent(Communicator& communicator) {
 void Controller::configureComponent(ftxui::Component& component, Communicator& communicator) {
     component |= ftxui::CatchEvent([&](ftxui::Event event) {
         if (event == ftxui::Event::Return) {
-            communicator.cmdPush(Command::OpenEditor);
-            communicator.ntfPush("TODO: Open editor");
+            communicator.cmd.push(Command::OpenEditor);
+            communicator.ntf.push("TODO: Open editor");
             return true;
         }
         return false;

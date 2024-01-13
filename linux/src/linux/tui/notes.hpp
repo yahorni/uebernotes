@@ -1,8 +1,8 @@
 #pragma once
 
+#include "linux/tui/menu/controller.hpp"
 #include "linux/tui/menu/model.hpp"
 #include "linux/tui/menu/view.hpp"
-#include "linux/tui/menu/controller.hpp"
 
 #include <core/note.hpp>
 
@@ -10,23 +10,14 @@
 
 namespace linux::tui::notes {
 
-using Model = menu::Model<core::Note, core::NotesCache>;
-
-class View : public menu::View {
-public:
-    using menu::View::View;
-
-    ftxui::Element getElement(ftxui::Component& menu, int width) const override;
-};
-
-using ControllerBase = menu::Controller<Model, View>;
+using Model = menu::Model<core::NotePtr, core::NotesCache>;
+using ControllerBase = menu::Controller<Model, menu::View>;
 
 class Controller : public ControllerBase {
 public:
-    using ControllerBase::Controller;
+    Controller();
 
     void configureComponentOption(ftxui::MenuOption& option, Communicator& communicator) override;
-    void configureComponent(ftxui::Component& menu, Communicator& communicator) override;
 };
 
 }  // namespace linux::tui::notes
