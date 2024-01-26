@@ -39,14 +39,7 @@ bool TUI::run() {
     auto screen{ScreenInteractive::Fullscreen()};
     ftxui::Dimensions minWinSize{80, 20};
 
-    auto panesContainer = Container::Vertical({Container::Horizontal({
-                                                   _books.component(),
-                                                   _notes.component(),
-                                                   _preview.component(),
-                                               }),
-                                               _history.component()});
-
-    auto panesContainerWithEvents = CatchEvent(panesContainer, [&](Event event) {
+    auto commonEvents = CatchEvent([&](Event event) {
         if (event == Event::Character('q')) {
             screen.ExitLoopClosure()();
             return true;
@@ -62,12 +55,16 @@ bool TUI::run() {
             _status.component()->TakeFocus();
             return true;
         } else if (event == Event::Character('t')) {
+            // toggle history view
+            //
             if (!_history.toggleView()) {
                 // TODO: autoreset focus without manual
                 resetFocus();
             }
             return true;
         } else if (event == Event::Character('T')) {
+            // focus on history view if enabled
+            //
             auto& historyComponent = *_history.component();
             if (historyComponent.Focused()) {
                 resetFocus();
@@ -79,7 +76,14 @@ bool TUI::run() {
         return false;
     });
 
-    auto container = Container::Vertical({panesContainerWithEvents, _status.component()});
+    auto dataPanes = Container::Horizontal({
+        _books.component(),
+        _notes.component(),
+        _preview.component(),
+    }) | ftxui::EventHandler({ftxui::Event::Character('j')});
+
+    auto panesContainer = Container::Vertical({dataPanes, _history.component()}) | commonEvents;
+    auto container = Container::Vertical({panesContainer, _status.component()});
 
     auto renderer = Renderer(container, [&] {
         Log::debug("Render, cmds={}, ntfs={}", _communicator.cmd.size(), _communicator.ntf.size());

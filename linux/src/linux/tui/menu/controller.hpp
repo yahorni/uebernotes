@@ -40,17 +40,17 @@ public:
             Log::debug("[{}] Selected ID: {}", name(), *getSelectedItemID());
         };
 
-        auto menu = _view->createComponent(option);
-        configureComponent(menu, communicator);
+        auto& component{_view->createComponent(option)};
+        configureComponent(component, communicator);
 
         // make always focusable
-        menu |= ftxui::FocusableWrapper();
+        component |= ftxui::FocusableWrapper();
 
         // set keys
-        menu |= ftxui::IgnoreEvents({ftxui::Event::Tab, ftxui::Event::TabReverse});
+        component |= ftxui::IgnoreEvents({ftxui::Event::Tab, ftxui::Event::TabReverse});
 
         // add g/G command to scroll begin/end
-        menu |= ftxui::CatchEvent([&](ftxui::Event event) {
+        component |= ftxui::CatchEvent([&](ftxui::Event event) {
             if (event == ftxui::Event::Character('g')) {
                 communicator.ui.push(ftxui::Event::Home);
                 return true;
@@ -60,8 +60,6 @@ public:
             }
             return false;
         });
-
-        menu |= ftxui::EventHandler({ftxui::Event::Character('j')});
     }
 
     std::optional<typename Model::EntityID> getSelectedItemID() const {

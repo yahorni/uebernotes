@@ -29,6 +29,10 @@ linux: build-linux-deps
 	cmake -S . -B linux/build
 	cd linux/build && make -j uebernotes
 
+linux-debug:
+	cmake -DCMAKE_BUILD_TYPE=Debug -S . -B linux/build
+	cd linux/build && make VERBOSE=1 -j uebernotes
+
 build-linux-tests: build-linux-deps build-test-deps
 	cmake -S . -B linux/build
 	cd linux/build && make -j uebernotes-tests

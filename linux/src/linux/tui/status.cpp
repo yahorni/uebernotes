@@ -78,9 +78,8 @@ Controller::~Controller() = default;
 void Controller::createComponent(Communicator& communicator) {
     auto option = ftxui::InputOption();
     configureComponentOption(option, communicator);
-    auto input = _view->createComponent(option);
-    configureComponent(input, communicator);
-    // _model->setComponent(std::move(input));
+    auto& component{_view->createComponent(option)};
+    configureComponent(component, communicator);
 }
 
 void Controller::configureComponentOption(ftxui::InputOption& option, Communicator& communicator) {

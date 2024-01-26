@@ -62,8 +62,8 @@ Controller::Controller()
 Controller::~Controller() = default;
 
 void Controller::createComponent(Communicator& communicator) {
-    auto& pager = _view->createComponent(_model->getContent());
-    configureComponent(pager, communicator);
+    auto& component{_view->createComponent(_model->getContent())};
+    configureComponent(component, communicator);
 }
 
 void Controller::configureComponent(ftxui::Component& component, Communicator& communicator) {
